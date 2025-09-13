@@ -1,0 +1,28 @@
+format: jb-book
+root: intro
+
+parts:
+- caption: Working with files and folders
+  chapters:
+  - file: files_folders_filesystems.ipynb
+  - file: path_handling_portable_io_pathlib.ipynb
+  - file: sidecar_metadata_data_dictionaries.ipynb
+  - file: fsspec_cloud_storage_streaming_io.ipynb
+- caption: File formats
+  chapters:
+  - file: integrity_checks_hashing_file_strategies.ipynb
+  - file: data_io_csv_ndjson_pandas_polars_dtypes_missing.ipynb
+  - file: pandera_schemas_validation_coercion_constraints.ipynb
+
+- caption: Wrangling data
+  chapters:
+  - file: joins-grouping-windowing-duckdb-sql.ipynb
+  - file: export_patterns_subsets_snapshots_reproducible_filters.ipynb
+  - file: numpy-xarray-fundamentals-shapes-dtypes-chunking.ipynb
+
+- caption: Data conversion  
+  chapters:
+  - file: csv-excel-ndjson-to-parquet-arrow-batch-vs-streaming.ipynb
+  - file: longitudinal_data_preprocessing.ipynb
+  - file: dask-out-of-core-parallel-conversion-progress-retries-idempotency.ipynb
+

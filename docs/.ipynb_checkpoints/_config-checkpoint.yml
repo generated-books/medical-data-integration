@@ -1,0 +1,53 @@
+```yaml
+# Book settings
+title: Foundations of Medical Data Integration
+author: AI Generated Content
+logo: ../icon.png
+copyright: "2025"
+
+# Force re-execution of notebooks on each build
+execute:
+  execute_notebooks: force
+
+# Repository settings
+repository:
+  url: https://github.com/generated-books/medical-data-integration
+  branch: main
+
+# HTML-specific options
+html:
+  use_edit_page_button: true
+  use_repository_button: true
+  use_issues_button: true
+  home_page_in_navbar: false
+
+# Launch buttons
+launch_buttons:
+  notebook_interface: jupyterlab
+  binderhub_url: https://mybinder.org
+
+# Information about where the book exists on the web
+description: >-
+  A comprehensive guide to medical data integration using Python.
+  This AI-generated book covers everything from basic file handling 
+  to advanced clinical data processing workflows.
+
+# Parse and render settings
+parse:
+  myst_enable_extensions:
+    - colon_fence
+    - deflist
+    - dollarmath
+    - html_image
+    - html_admonition
+    - linkify
+    - replacements
+    - smartquotes
+    - substitution
+
+# Sphinx settings
+sphinx:
+  config:
+    html_show_copyright: false
+    html_last_updated_fmt: "%b %d, %Y"
+```
