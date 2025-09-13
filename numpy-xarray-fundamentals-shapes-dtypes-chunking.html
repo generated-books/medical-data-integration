@@ -1,0 +1,1156 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="./" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>NumPy/xarray Fundamentals: Shapes, Dtypes, and Chunking &#8212; Foundations of Medical Data Integration</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="_static/styles/theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="_static/styles/bootstrap.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="_static/styles/pydata-sphinx-theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+
+  
+  <link href="_static/vendor/fontawesome/6.5.2/css/all.min.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.5.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.5.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.5.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="_static/styles/sphinx-book-theme.css?v=eba8b062" />
+    <link rel="stylesheet" type="text/css" href="_static/togglebutton.css?v=13237357" />
+    <link rel="stylesheet" type="text/css" href="_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="_static/mystnb.8ecb98da25f57f5357bf6f572d296f466b2cfe2517ffebfabe82451661e28f02.css" />
+    <link rel="stylesheet" type="text/css" href="_static/sphinx-thebe.css?v=4fa983c6" />
+    <link rel="stylesheet" type="text/css" href="_static/sphinx-design.min.css?v=95c83b7e" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b" />
+<link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
+  <script src="_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+    <script src="_static/documentation_options.js?v=9eb32ce0"></script>
+    <script src="_static/doctools.js?v=9a2dae69"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="_static/copybutton.js?v=f281be69"></script>
+    <script src="_static/scripts/sphinx-book-theme.js?v=887ef09a"></script>
+    <script>let toggleHintShow = 'Click to show';</script>
+    <script>let toggleHintHide = 'Click to hide';</script>
+    <script>let toggleOpenOnPrint = 'true';</script>
+    <script src="_static/togglebutton.js?v=4a39c7ea"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script src="_static/design-tabs.js?v=f930bc37"></script>
+    <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"; const thebe_selector = ".thebe,.cell"; const thebe_selector_input = "pre"; const thebe_selector_output = ".output, .cell_output"</script>
+    <script async="async" src="_static/sphinx-thebe.js?v=c100c467"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"; const thebe_selector = ".thebe,.cell"; const thebe_selector_input = "pre"; const thebe_selector_output = ".output, .cell_output"</script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'numpy-xarray-fundamentals-shapes-dtypes-chunking';</script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="CSV/Excel/NDJSON → Parquet/Arrow: Batch vs Streaming" href="csv-excel-ndjson-to-parquet-arrow-batch-vs-streaming.html" />
+    <link rel="prev" title="Export Patterns: Subsets, Snapshots, Reproducible Filters" href="export_patterns_subsets_snapshots_reproducible_filters.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+    <meta name="docbuild:last-update" content="Sep 13, 2025"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-primary-sidebar-checkbox"/>
+  <label class="overlay overlay-primary" for="pst-primary-sidebar-checkbox"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-secondary-sidebar-checkbox"/>
+  <label class="overlay overlay-secondary" for="pst-secondary-sidebar-checkbox"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search this book..."
+         aria-label="Search this book..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="intro.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="_static/logo.png" class="logo__image only-light" alt="Foundations of Medical Data Integration - Home"/>
+    <script>document.write(`<img src="_static/logo.png" class="logo__image only-dark" alt="Foundations of Medical Data Integration - Home"/>`);</script>
+  
+  
+</a></div>
+        <div class="sidebar-primary-item">
+
+ <script>
+ document.write(`
+   <button class="btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script></div>
+        <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        <p aria-level="2" class="caption" role="heading"><span class="caption-text">Working with files and folders</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="files_folders_filesystems.html">Files, Folders, and Filesystems in Medical Data Integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="path_handling_portable_io_pathlib.html">Path Handling and Portable I/O with pathlib</a></li>
+<li class="toctree-l1"><a class="reference internal" href="sidecar_metadata_data_dictionaries.html">Sidecar Metadata (JSON/YAML) and Data Dictionaries</a></li>
+<li class="toctree-l1"><a class="reference internal" href="fsspec_cloud_storage_streaming_io.html">Local and Cloud Storage with fsspec (s3fs/gcsfs/adlfs), Streaming I/O</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">File formats</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="integrity_checks_hashing_file_strategies.html">Integrity Checks (Hashing) and Small-to-Large File Strategies</a></li>
+<li class="toctree-l1"><a class="reference internal" href="data_io_csv_ndjson_pandas_polars_dtypes_missing.html">Reading and Writing Medical Data: CSV and NDJSON with Pandas and Polars</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pandera_schemas_validation_coercion_constraints.html">Schemas and Validation with Pandera</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Wrangling data</span></p>
+<ul class="current nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="joins-grouping-windowing-duckdb-sql.html">Joins/Merges, Grouping, and Windowing with DuckDB</a></li>
+<li class="toctree-l1"><a class="reference internal" href="export_patterns_subsets_snapshots_reproducible_filters.html">Export Patterns: Subsets, Snapshots, Reproducible Filters</a></li>
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">NumPy/xarray Fundamentals: Shapes, Dtypes, and Chunking</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Data conversion</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="csv-excel-ndjson-to-parquet-arrow-batch-vs-streaming.html">CSV/Excel/NDJSON → Parquet/Arrow: Batch vs Streaming</a></li>
+<li class="toctree-l1"><a class="reference internal" href="longitudinal_data_preprocessing.html">Unit Normalization, Time Alignment, Resampling, and Windowing for Longitudinal Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dask-out-of-core-parallel-conversion-progress-retries-idempotency.html">Out-of-core/Parallel Conversion with Dask: Progress, Retries, and Idempotency</a></li>
+</ul>
+
+    </div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><button class="sidebar-toggle primary-toggle btn btn-sm" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</button></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<div class="article-header-buttons">
+
+
+
+
+
+<div class="dropdown dropdown-launch-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Launch interactive content">
+    <i class="fas fa-rocket"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="https://mybinder.org/v2/gh/generated-books/medical-data-integration/main?urlpath=lab/tree/numpy-xarray-fundamentals-shapes-dtypes-chunking.ipynb" target="_blank"
+   class="btn btn-sm dropdown-item"
+   title="Launch on Binder"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  
+    <img alt="Binder logo" src="_static/images/logo_binder.svg">
+  </span>
+<span class="btn__text-container">Binder</span>
+</a>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+
+
+<div class="dropdown dropdown-source-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Source repositories">
+    <i class="fab fa-github"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="https://github.com/generated-books/medical-data-integration" target="_blank"
+   class="btn btn-sm btn-source-repository-button dropdown-item"
+   title="Source repository"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fab fa-github"></i>
+  </span>
+<span class="btn__text-container">Repository</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li><a href="https://github.com/generated-books/medical-data-integration/edit/main/numpy-xarray-fundamentals-shapes-dtypes-chunking.ipynb" target="_blank"
+   class="btn btn-sm btn-source-edit-button dropdown-item"
+   title="Suggest edit"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-pencil-alt"></i>
+  </span>
+<span class="btn__text-container">Suggest edit</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li><a href="https://github.com/generated-books/medical-data-integration/issues/new?title=Issue%20on%20page%20%2Fnumpy-xarray-fundamentals-shapes-dtypes-chunking.html&body=Your%20issue%20content%20here." target="_blank"
+   class="btn btn-sm btn-source-issues-button dropdown-item"
+   title="Open an issue"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-lightbulb"></i>
+  </span>
+<span class="btn__text-container">Open issue</span>
+</a>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+
+
+<div class="dropdown dropdown-download-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Download this page">
+    <i class="fas fa-download"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="_sources/numpy-xarray-fundamentals-shapes-dtypes-chunking.ipynb" target="_blank"
+   class="btn btn-sm btn-download-source-button dropdown-item"
+   title="Download source file"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file"></i>
+  </span>
+<span class="btn__text-container">.ipynb</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li>
+<button onclick="window.print()"
+  class="btn btn-sm btn-download-pdf-button dropdown-item"
+  title="Print to PDF"
+  data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file-pdf"></i>
+  </span>
+<span class="btn__text-container">.pdf</span>
+</button>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+<button onclick="toggleFullScreen()"
+  class="btn btn-sm btn-fullscreen-button"
+  title="Fullscreen mode"
+  data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-expand"></i>
+  </span>
+
+</button>
+
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"></i>
+  </button>
+`);
+</script>
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm pst-navbar-icon search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+  </button>
+`);
+</script>
+<button class="sidebar-toggle secondary-toggle btn btn-sm" title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="fa-solid fa-list"></span>
+</button>
+</div></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1>NumPy/xarray Fundamentals: Shapes, Dtypes, and Chunking</h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+            <div>
+                <h2> Contents </h2>
+            </div>
+            <nav aria-label="Page">
+                <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#understanding-array-shapes-in-medical-data">Understanding Array Shapes in Medical Data</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#data-types-dtypes-and-memory-efficiency">Data Types (dtypes) and Memory Efficiency</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#introduction-to-xarray">Introduction to xarray</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#understanding-chunking-with-dask">Understanding Chunking with Dask</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#practical-example-medical-image-analysis">Practical Example: Medical Image Analysis</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#exercise">Exercise</a></li>
+</ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section class="tex2jax_ignore mathjax_ignore" id="numpy-xarray-fundamentals-shapes-dtypes-and-chunking">
+<h1>NumPy/xarray Fundamentals: Shapes, Dtypes, and Chunking<a class="headerlink" href="#numpy-xarray-fundamentals-shapes-dtypes-and-chunking" title="Link to this heading">#</a></h1>
+<p>In medical data integration, we often work with multi-dimensional datasets such as medical images, time series from monitoring devices, or genomic data. Understanding how to efficiently handle array shapes, data types, and memory management through chunking is crucial for processing large medical datasets.</p>
+<p>This notebook will cover:</p>
+<ul class="simple">
+<li><p>Array shapes and dimensions in medical contexts</p></li>
+<li><p>Data types and their impact on memory usage</p></li>
+<li><p>Chunking strategies for large datasets</p></li>
+<li><p>Practical examples with medical data scenarios</p></li>
+</ul>
+<p>Let’s start by importing the necessary libraries and setting up our environment.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">xarray</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">xr</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">datetime</span><span class="w"> </span><span class="kn">import</span> <span class="n">datetime</span><span class="p">,</span> <span class="n">timedelta</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;NumPy version: </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">__version__</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;xarray version: </span><span class="si">{</span><span class="n">xr</span><span class="o">.</span><span class="n">__version__</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>NumPy version: 2.3.3
+xarray version: 2025.9.0
+</pre></div>
+</div>
+</div>
+</div>
+<section id="understanding-array-shapes-in-medical-data">
+<h2>Understanding Array Shapes in Medical Data<a class="headerlink" href="#understanding-array-shapes-in-medical-data" title="Link to this heading">#</a></h2>
+<p>Medical data comes in various shapes and dimensions. Let’s create some example datasets that represent common medical data structures.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># 1D: Patient vital signs over time (e.g., heart rate measurements)</span>
+<span class="n">heart_rate_1d</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mi">75</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">100</span><span class="p">)</span>  <span class="c1"># 100 measurements</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Heart rate data shape: </span><span class="si">{</span><span class="n">heart_rate_1d</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Dimensions: </span><span class="si">{</span><span class="n">heart_rate_1d</span><span class="o">.</span><span class="n">ndim</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Heart rate data shape: (100,)
+Dimensions: 1
+</pre></div>
+</div>
+</div>
+</div>
+<p>Now let’s create a 2D array representing multiple patients’ vital signs measurements.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># 2D: Multiple patients, multiple time points</span>
+<span class="n">vital_signs_2d</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mi">75</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="p">(</span><span class="mi">50</span><span class="p">,</span> <span class="mi">100</span><span class="p">))</span>  <span class="c1"># 50 patients, 100 time points</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Multiple patients vital signs shape: </span><span class="si">{</span><span class="n">vital_signs_2d</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Number of patients: </span><span class="si">{</span><span class="n">vital_signs_2d</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Time points per patient: </span><span class="si">{</span><span class="n">vital_signs_2d</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Multiple patients vital signs shape: (50, 100)
+Number of patients: 50
+Time points per patient: 100
+</pre></div>
+</div>
+</div>
+</div>
+<p>Medical imaging data typically comes in 3D (single image with depth) or 4D (time series of 3D images). Let’s simulate a simple medical image.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># 3D: Medical image (e.g., CT scan slice stack)</span>
+<span class="n">ct_scan_3d</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">255</span><span class="p">,</span> <span class="p">(</span><span class="mi">64</span><span class="p">,</span> <span class="mi">64</span><span class="p">,</span> <span class="mi">30</span><span class="p">))</span>  <span class="c1"># 64x64 pixels, 30 slices</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;CT scan shape: </span><span class="si">{</span><span class="n">ct_scan_3d</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Image dimensions (width x height): </span><span class="si">{</span><span class="n">ct_scan_3d</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2"> x </span><span class="si">{</span><span class="n">ct_scan_3d</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Number of slices: </span><span class="si">{</span><span class="n">ct_scan_3d</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>CT scan shape: (64, 64, 30)
+Image dimensions (width x height): 64 x 64
+Number of slices: 30
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="data-types-dtypes-and-memory-efficiency">
+<h2>Data Types (dtypes) and Memory Efficiency<a class="headerlink" href="#data-types-dtypes-and-memory-efficiency" title="Link to this heading">#</a></h2>
+<p>Choosing the right data type is crucial for memory efficiency, especially with large medical datasets. Let’s explore how different dtypes affect memory usage.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Create the same data with different dtypes</span>
+<span class="n">data_size</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1000</span><span class="p">,</span> <span class="mi">1000</span><span class="p">)</span>
+<span class="n">image_float64</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="o">*</span><span class="n">data_size</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+<span class="n">image_float32</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="o">*</span><span class="n">data_size</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+<span class="n">image_uint8</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="o">*</span><span class="n">data_size</span><span class="p">)</span> <span class="o">*</span> <span class="mi">255</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">uint8</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;float64 memory usage: </span><span class="si">{</span><span class="n">image_float64</span><span class="o">.</span><span class="n">nbytes</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mi">1024</span><span class="o">**</span><span class="mi">2</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2"> MB&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;float32 memory usage: </span><span class="si">{</span><span class="n">image_float32</span><span class="o">.</span><span class="n">nbytes</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mi">1024</span><span class="o">**</span><span class="mi">2</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2"> MB&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;uint8 memory usage: </span><span class="si">{</span><span class="n">image_uint8</span><span class="o">.</span><span class="n">nbytes</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mi">1024</span><span class="o">**</span><span class="mi">2</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2"> MB&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>float64 memory usage: 7.63 MB
+float32 memory usage: 3.81 MB
+uint8 memory usage: 0.95 MB
+</pre></div>
+</div>
+</div>
+</div>
+<p>Let’s examine the precision and range differences between these data types.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Examine dtype properties</span>
+<span class="n">dtypes_info</span> <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">uint8</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">int16</span><span class="p">]</span>
+
+<span class="k">for</span> <span class="n">dtype</span> <span class="ow">in</span> <span class="n">dtypes_info</span><span class="p">:</span>
+    <span class="n">info</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">iinfo</span><span class="p">(</span><span class="n">dtype</span><span class="p">)</span> <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">issubdtype</span><span class="p">(</span><span class="n">dtype</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">integer</span><span class="p">)</span> <span class="k">else</span> <span class="n">np</span><span class="o">.</span><span class="n">finfo</span><span class="p">(</span><span class="n">dtype</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">dtype</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">:&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">info</span><span class="p">,</span> <span class="s1">&#39;min&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">info</span><span class="p">,</span> <span class="s1">&#39;max&#39;</span><span class="p">):</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  Range: </span><span class="si">{</span><span class="n">info</span><span class="o">.</span><span class="n">min</span><span class="si">}</span><span class="s2"> to </span><span class="si">{</span><span class="n">info</span><span class="o">.</span><span class="n">max</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">info</span><span class="p">,</span> <span class="s1">&#39;eps&#39;</span><span class="p">):</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  Machine epsilon: </span><span class="si">{</span><span class="n">info</span><span class="o">.</span><span class="n">eps</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>float64:
+  Range: -1.7976931348623157e+308 to 1.7976931348623157e+308
+  Machine epsilon: 2.220446049250313e-16
+
+float32:
+  Range: -3.4028234663852886e+38 to 3.4028234663852886e+38
+  Machine epsilon: 1.1920928955078125e-07
+
+uint8:
+  Range: 0 to 255
+
+int16:
+  Range: -32768 to 32767
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="introduction-to-xarray">
+<h2>Introduction to xarray<a class="headerlink" href="#introduction-to-xarray" title="Link to this heading">#</a></h2>
+<p>xarray provides labeled, multi-dimensional arrays that are perfect for medical data with meaningful dimension names and coordinates.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Create time coordinates for patient monitoring data</span>
+<span class="n">time_coords</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">date_range</span><span class="p">(</span><span class="s1">&#39;2024-01-01 08:00&#39;</span><span class="p">,</span> <span class="n">periods</span><span class="o">=</span><span class="mi">24</span><span class="p">,</span> <span class="n">freq</span><span class="o">=</span><span class="s1">&#39;H&#39;</span><span class="p">)</span>
+<span class="n">patient_ids</span> <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s1">&#39;P</span><span class="si">{</span><span class="n">i</span><span class="si">:</span><span class="s1">03d</span><span class="si">}</span><span class="s1">&#39;</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">11</span><span class="p">)]</span>  <span class="c1"># 10 patients</span>
+<span class="n">vital_types</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;heart_rate&#39;</span><span class="p">,</span> <span class="s1">&#39;blood_pressure_sys&#39;</span><span class="p">,</span> <span class="s1">&#39;blood_pressure_dia&#39;</span><span class="p">,</span> <span class="s1">&#39;temperature&#39;</span><span class="p">]</span>
+
+<span class="c1"># Create sample vital signs data</span>
+<span class="n">data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="p">[</span><span class="mi">75</span><span class="p">,</span> <span class="mi">120</span><span class="p">,</span> <span class="mi">80</span><span class="p">,</span> <span class="mf">98.6</span><span class="p">],</span> <span class="n">scale</span><span class="o">=</span><span class="p">[</span><span class="mi">10</span><span class="p">,</span> <span class="mi">15</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> 
+                       <span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">patient_ids</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">time_coords</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">vital_types</span><span class="p">)))</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Data shape: </span><span class="si">{</span><span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Data shape: (10, 24, 4)
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>/tmp/ipykernel_2495/2789027682.py:2: FutureWarning: &#39;H&#39; is deprecated and will be removed in a future version, please use &#39;h&#39; instead.
+  time_coords = pd.date_range(&#39;2024-01-01 08:00&#39;, periods=24, freq=&#39;H&#39;)
+</pre></div>
+</div>
+</div>
+</div>
+<p>Now let’s create an xarray DataArray with meaningful dimension names and coordinates.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Create xarray DataArray</span>
+<span class="n">vital_signs_xr</span> <span class="o">=</span> <span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span><span class="p">(</span>
+    <span class="n">data</span><span class="p">,</span>
+    <span class="n">dims</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;patient&#39;</span><span class="p">,</span> <span class="s1">&#39;time&#39;</span><span class="p">,</span> <span class="s1">&#39;vital_type&#39;</span><span class="p">],</span>
+    <span class="n">coords</span><span class="o">=</span><span class="p">{</span>
+        <span class="s1">&#39;patient&#39;</span><span class="p">:</span> <span class="n">patient_ids</span><span class="p">,</span>
+        <span class="s1">&#39;time&#39;</span><span class="p">:</span> <span class="n">time_coords</span><span class="p">,</span>
+        <span class="s1">&#39;vital_type&#39;</span><span class="p">:</span> <span class="n">vital_types</span>
+    <span class="p">},</span>
+    <span class="n">name</span><span class="o">=</span><span class="s1">&#39;vital_signs&#39;</span>
+<span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="n">vital_signs_xr</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>&lt;xarray.DataArray &#39;vital_signs&#39; (patient: 10, time: 24, vital_type: 4)&gt; Size: 8kB
+array([[[ 70.99655413, 148.63942446,  75.38039171,  98.01250337],
+        [ 59.6538277 , 100.17751028,  86.0500371 ,  98.67139474],
+        [ 82.91030514, 138.31082401,  90.20867445,  99.79143618],
+        [ 61.36536066, 117.25979565,  96.74716419,  98.06507061],
+        [ 56.59883977, 126.45738956,  84.80377506,  99.5553512 ],
+        [ 74.09127054, 133.27693341,  81.18096576,  96.30917072],
+        [ 73.89093919, 108.68283774,  71.08368586,  97.13430029],
+        [ 83.30455627, 131.71350922,  88.22172946,  99.18523896],
+        [ 92.86194538, 115.49396663,  83.79301809,  98.38627065],
+        [ 73.71067118, 111.31841378,  61.90642787, 100.28663844],
+        [ 76.83787951, 126.62927731,  92.70448253,  98.4408665 ],
+        [ 57.72542619, 141.14348341,  58.30361499,  98.50064027],
+        [ 98.64317004, 121.20296032,  94.63164693,  98.58943069],
+        [ 73.61481018,  93.41432605,  77.28437164,  99.58201331],
+        [ 72.05332238, 111.26907543,  99.18567698,  98.94455373],
+        [ 68.96849617, 137.56500173,  72.81066368,  98.64064567],
+        [ 73.95901573, 133.01692432,  91.49841818, 100.09041999],
+        [ 60.82654257,  82.27246333,  80.26695715,  97.40344505],
+        [ 72.69270949, 107.91545725,  94.60837952,  97.58461892],
+        [ 86.32320331, 126.78811637,  81.19770231,  97.6692966 ],
+...
+        [ 73.20721517, 112.12767004,  92.77729278,  99.10009884],
+        [ 61.01539977, 129.31322842,  80.44609625,  99.1337611 ],
+        [ 65.12247408, 106.83194507,  75.76601721,  97.84544948],
+        [ 78.39532858, 126.37854753,  95.67960382,  97.44565914],
+        [ 81.02909241, 122.19333612,  82.24957179,  98.49237092],
+        [ 83.83112959, 141.46578793,  86.81050875,  98.05530426],
+        [ 71.3622506 ,  92.9168228 ,  78.77179754,  97.646236  ],
+        [ 79.67164704, 118.6963031 ,  80.41798645,  97.84970918],
+        [ 83.23350019, 116.66679077,  79.10845066,  96.49960747],
+        [ 74.51711041, 126.91704318,  77.92496194,  99.2457177 ],
+        [ 62.98187433, 139.61400936,  94.40940621,  97.26455345],
+        [ 77.63165788, 105.95600345, 101.62911302,  99.70250024],
+        [ 83.3178863 , 131.01388546,  82.30344482,  98.70733531],
+        [ 95.95208215, 126.03462796,  81.00542903, 100.61532696],
+        [ 66.28722187, 105.92722175,  66.07415691,  97.80905275],
+        [ 65.83221097, 124.17990991,  86.39669036,  98.45032564],
+        [ 75.87389532, 128.46021248,  89.07181486,  98.92492204],
+        [ 96.61485552, 121.18141455,  77.81990486,  98.02905705],
+        [ 58.90294205, 124.82357468,  79.63281528,  98.9016695 ],
+        [ 71.45715718, 111.10301359,  84.43715722,  98.24240987]]])
+Coordinates:
+  * patient     (patient) &lt;U4 160B &#39;P001&#39; &#39;P002&#39; &#39;P003&#39; ... &#39;P008&#39; &#39;P009&#39; &#39;P010&#39;
+  * time        (time) datetime64[ns] 192B 2024-01-01T08:00:00 ... 2024-01-02...
+  * vital_type  (vital_type) &lt;U18 288B &#39;heart_rate&#39; ... &#39;temperature&#39;
+</pre></div>
+</div>
+</div>
+</div>
+<p>Let’s explore the powerful indexing capabilities of xarray using labels instead of numerical indices.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Select specific patient&#39;s heart rate data</span>
+<span class="n">patient_001_hr</span> <span class="o">=</span> <span class="n">vital_signs_xr</span><span class="o">.</span><span class="n">sel</span><span class="p">(</span><span class="n">patient</span><span class="o">=</span><span class="s1">&#39;P001&#39;</span><span class="p">,</span> <span class="n">vital_type</span><span class="o">=</span><span class="s1">&#39;heart_rate&#39;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Patient P001 heart rate over time:&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">patient_001_hr</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Shape: </span><span class="si">{</span><span class="n">patient_001_hr</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Patient P001 heart rate over time:
+&lt;xarray.DataArray &#39;vital_signs&#39; (time: 24)&gt; Size: 192B
+array([70.99655413, 59.6538277 , 82.91030514, 61.36536066, 56.59883977,
+       74.09127054, 73.89093919, 83.30455627, 92.86194538, 73.71067118,
+       76.83787951, 57.72542619, 98.64317004, 73.61481018, 72.05332238,
+       68.96849617, 73.95901573, 60.82654257, 72.69270949, 86.32320331,
+       77.66205625, 62.16618241, 80.95621184, 73.13828298])
+Coordinates:
+    patient     &lt;U4 16B &#39;P001&#39;
+  * time        (time) datetime64[ns] 192B 2024-01-01T08:00:00 ... 2024-01-02...
+    vital_type  &lt;U18 72B &#39;heart_rate&#39;
+Shape: (24,)
+</pre></div>
+</div>
+</div>
+</div>
+<p>We can also select data for specific time ranges, which is very useful for medical data analysis.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Select data for a specific time range (morning hours)</span>
+<span class="n">morning_data</span> <span class="o">=</span> <span class="n">vital_signs_xr</span><span class="o">.</span><span class="n">sel</span><span class="p">(</span><span class="n">time</span><span class="o">=</span><span class="nb">slice</span><span class="p">(</span><span class="s1">&#39;2024-01-01 08:00&#39;</span><span class="p">,</span> <span class="s1">&#39;2024-01-01 12:00&#39;</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Morning vital signs data:&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Time range: </span><span class="si">{</span><span class="n">morning_data</span><span class="o">.</span><span class="n">time</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2"> to </span><span class="si">{</span><span class="n">morning_data</span><span class="o">.</span><span class="n">time</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Shape: </span><span class="si">{</span><span class="n">morning_data</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Morning vital signs data:
+Time range: 2024-01-01T08:00:00.000000000 to 2024-01-01T12:00:00.000000000
+Shape: (10, 5, 4)
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="understanding-chunking-with-dask">
+<h2>Understanding Chunking with Dask<a class="headerlink" href="#understanding-chunking-with-dask" title="Link to this heading">#</a></h2>
+<p>For large medical datasets that don’t fit in memory, we can use chunking. Let’s create a larger dataset and demonstrate chunking strategies.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Create a large simulated dataset (e.g., high-frequency ECG data)</span>
+<span class="c1"># Simulate 100 patients, 24 hours of data, sampled at 1000 Hz</span>
+<span class="n">n_patients</span> <span class="o">=</span> <span class="mi">100</span>
+<span class="n">n_hours</span> <span class="o">=</span> <span class="mi">24</span>
+<span class="n">sampling_rate</span> <span class="o">=</span> <span class="mi">1000</span>  <span class="c1"># Hz</span>
+<span class="n">n_timepoints</span> <span class="o">=</span> <span class="n">n_hours</span> <span class="o">*</span> <span class="mi">3600</span> <span class="o">*</span> <span class="n">sampling_rate</span>  <span class="c1"># Total samples</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Dataset dimensions: </span><span class="si">{</span><span class="n">n_patients</span><span class="si">}</span><span class="s2"> patients × </span><span class="si">{</span><span class="n">n_timepoints</span><span class="si">:</span><span class="s2">,</span><span class="si">}</span><span class="s2"> timepoints&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Estimated memory usage (float32): </span><span class="si">{</span><span class="p">(</span><span class="n">n_patients</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">n_timepoints</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">4</span><span class="p">)</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mi">1024</span><span class="o">**</span><span class="mi">3</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2"> GB&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Dataset dimensions: 100 patients × 86,400,000 timepoints
+Estimated memory usage (float32): 32.19 GB
+</pre></div>
+</div>
+</div>
+</div>
+<p>Instead of creating this large array in memory, let’s use dask to create a chunked array that can be processed efficiently.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">dask.array</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">da</span>
+
+<span class="c1"># Create chunked array - each chunk represents 1 patient, 1 hour of data</span>
+<span class="n">chunk_size</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3600</span> <span class="o">*</span> <span class="n">sampling_rate</span><span class="p">)</span>  <span class="c1"># 1 patient, 1 hour of data per chunk</span>
+<span class="n">large_ecg_data</span> <span class="o">=</span> <span class="n">da</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="n">n_patients</span><span class="p">,</span> <span class="n">n_timepoints</span><span class="p">),</span> 
+                                 <span class="n">chunks</span><span class="o">=</span><span class="n">chunk_size</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Chunked array shape: </span><span class="si">{</span><span class="n">large_ecg_data</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Chunk size: </span><span class="si">{</span><span class="n">large_ecg_data</span><span class="o">.</span><span class="n">chunks</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Number of chunks: </span><span class="si">{</span><span class="n">large_ecg_data</span><span class="o">.</span><span class="n">npartitions</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Chunked array shape: (100, 86400000)
+Chunk size: ((1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1), (3600000, 3600000, 3600000, 3600000, 3600000, 3600000, 3600000, 3600000, 3600000, 3600000, 3600000, 3600000, 3600000, 3600000, 3600000, 3600000, 3600000, 3600000, 3600000, 3600000, 3600000, 3600000, 3600000, 3600000))
+Number of chunks: 2400
+</pre></div>
+</div>
+</div>
+</div>
+<p>Let’s create an xarray Dataset with chunked data and see how it handles large datasets efficiently.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Create time coordinates (this would be huge, so let&#39;s use a smaller example)</span>
+<span class="c1"># For demonstration, let&#39;s use a smaller dataset</span>
+<span class="n">small_n_timepoints</span> <span class="o">=</span> <span class="mi">3600</span> <span class="o">*</span> <span class="mi">2</span>  <span class="c1"># 2 hours instead of 24</span>
+<span class="n">small_ecg_data</span> <span class="o">=</span> <span class="n">da</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="n">small_n_timepoints</span><span class="p">),</span> 
+                                 <span class="n">chunks</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3600</span><span class="p">))</span>
+
+<span class="c1"># Create xarray with chunked data</span>
+<span class="n">time_coords_small</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">date_range</span><span class="p">(</span><span class="s1">&#39;2024-01-01&#39;</span><span class="p">,</span> <span class="n">periods</span><span class="o">=</span><span class="n">small_n_timepoints</span><span class="p">,</span> <span class="n">freq</span><span class="o">=</span><span class="s1">&#39;S&#39;</span><span class="p">)</span>
+<span class="n">patient_coords</span> <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s1">&#39;P</span><span class="si">{</span><span class="n">i</span><span class="si">:</span><span class="s1">03d</span><span class="si">}</span><span class="s1">&#39;</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">11</span><span class="p">)]</span>
+
+<span class="n">ecg_xr</span> <span class="o">=</span> <span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span><span class="p">(</span>
+    <span class="n">small_ecg_data</span><span class="p">,</span>
+    <span class="n">dims</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;patient&#39;</span><span class="p">,</span> <span class="s1">&#39;time&#39;</span><span class="p">],</span>
+    <span class="n">coords</span><span class="o">=</span><span class="p">{</span>
+        <span class="s1">&#39;patient&#39;</span><span class="p">:</span> <span class="n">patient_coords</span><span class="p">,</span>
+        <span class="s1">&#39;time&#39;</span><span class="p">:</span> <span class="n">time_coords_small</span>
+    <span class="p">},</span>
+    <span class="n">name</span><span class="o">=</span><span class="s1">&#39;ecg_signal&#39;</span>
+<span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="n">ecg_xr</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>&lt;xarray.DataArray &#39;ecg_signal&#39; (patient: 10, time: 7200)&gt; Size: 576kB
+dask.array&lt;normal, shape=(10, 7200), dtype=float64, chunksize=(1, 3600), chunktype=numpy.ndarray&gt;
+Coordinates:
+  * patient  (patient) &lt;U4 160B &#39;P001&#39; &#39;P002&#39; &#39;P003&#39; ... &#39;P008&#39; &#39;P009&#39; &#39;P010&#39;
+  * time     (time) datetime64[ns] 58kB 2024-01-01 ... 2024-01-01T01:59:59
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>/tmp/ipykernel_2495/976265983.py:8: FutureWarning: &#39;S&#39; is deprecated and will be removed in a future version, please use &#39;s&#39; instead.
+  time_coords_small = pd.date_range(&#39;2024-01-01&#39;, periods=small_n_timepoints, freq=&#39;S&#39;)
+</pre></div>
+</div>
+</div>
+</div>
+<p>Let’s perform some operations on the chunked data to see how xarray handles computation lazily.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Compute statistics - these operations are lazy until we call .compute()</span>
+<span class="n">mean_ecg</span> <span class="o">=</span> <span class="n">ecg_xr</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="s1">&#39;time&#39;</span><span class="p">)</span>
+<span class="n">std_ecg</span> <span class="o">=</span> <span class="n">ecg_xr</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="s1">&#39;time&#39;</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Mean ECG per patient (lazy computation):&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">mean_ecg</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Actual computed values:&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">mean_ecg</span><span class="o">.</span><span class="n">compute</span><span class="p">())</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Mean ECG per patient (lazy computation):
+&lt;xarray.DataArray &#39;ecg_signal&#39; (patient: 10)&gt; Size: 80B
+dask.array&lt;mean_agg-aggregate, shape=(10,), dtype=float64, chunksize=(1,), chunktype=numpy.ndarray&gt;
+Coordinates:
+  * patient  (patient) &lt;U4 160B &#39;P001&#39; &#39;P002&#39; &#39;P003&#39; ... &#39;P008&#39; &#39;P009&#39; &#39;P010&#39;
+
+Actual computed values:
+&lt;xarray.DataArray &#39;ecg_signal&#39; (patient: 10)&gt; Size: 80B
+array([-0.00244976, -0.00503097, -0.0067271 ,  0.0064087 ,  0.00870167,
+       -0.00323181, -0.00102624, -0.02664976, -0.00116144,  0.00477296])
+Coordinates:
+  * patient  (patient) &lt;U4 160B &#39;P001&#39; &#39;P002&#39; &#39;P003&#39; ... &#39;P008&#39; &#39;P009&#39; &#39;P010&#39;
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="practical-example-medical-image-analysis">
+<h2>Practical Example: Medical Image Analysis<a class="headerlink" href="#practical-example-medical-image-analysis" title="Link to this heading">#</a></h2>
+<p>Let’s create a more realistic example with simulated medical imaging data.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Simulate a 4D medical dataset: (patients, time_points, x, y)</span>
+<span class="c1"># Example: fMRI data with multiple patients, time series, and 2D brain slices</span>
+<span class="n">n_subjects</span> <span class="o">=</span> <span class="mi">5</span>
+<span class="n">n_timepoints</span> <span class="o">=</span> <span class="mi">100</span>
+<span class="n">img_width</span><span class="p">,</span> <span class="n">img_height</span> <span class="o">=</span> <span class="mi">64</span><span class="p">,</span> <span class="mi">64</span>
+
+<span class="c1"># Create chunked fMRI-like data</span>
+<span class="n">fmri_data</span> <span class="o">=</span> <span class="n">da</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mi">1000</span><span class="p">,</span> <span class="mi">100</span><span class="p">,</span> 
+                           <span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="n">n_subjects</span><span class="p">,</span> <span class="n">n_timepoints</span><span class="p">,</span> <span class="n">img_width</span><span class="p">,</span> <span class="n">img_height</span><span class="p">),</span>
+                           <span class="n">chunks</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">50</span><span class="p">,</span> <span class="mi">32</span><span class="p">,</span> <span class="mi">32</span><span class="p">))</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;fMRI data shape: </span><span class="si">{</span><span class="n">fmri_data</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Chunks: </span><span class="si">{</span><span class="n">fmri_data</span><span class="o">.</span><span class="n">chunks</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>fMRI data shape: (5, 100, 64, 64)
+Chunks: ((1, 1, 1, 1, 1), (50, 50), (32, 32), (32, 32))
+</pre></div>
+</div>
+</div>
+</div>
+<p>Now let’s create a proper xarray Dataset with meaningful coordinates and multiple variables.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Create coordinates</span>
+<span class="n">subjects</span> <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s1">&#39;S</span><span class="si">{</span><span class="n">i</span><span class="si">:</span><span class="s1">02d</span><span class="si">}</span><span class="s1">&#39;</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">n_subjects</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)]</span>
+<span class="n">timepoints</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">n_timepoints</span> <span class="o">*</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>  <span class="c1"># TR = 2 seconds</span>
+<span class="n">x_coords</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">img_width</span><span class="p">)</span>
+<span class="n">y_coords</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">img_height</span><span class="p">)</span>
+
+<span class="c1"># Create xarray Dataset</span>
+<span class="n">fmri_dataset</span> <span class="o">=</span> <span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span><span class="p">({</span>
+    <span class="s1">&#39;bold_signal&#39;</span><span class="p">:</span> <span class="p">([</span><span class="s1">&#39;subject&#39;</span><span class="p">,</span> <span class="s1">&#39;time&#39;</span><span class="p">,</span> <span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="s1">&#39;y&#39;</span><span class="p">],</span> <span class="n">fmri_data</span><span class="p">),</span>
+    <span class="s1">&#39;subject_age&#39;</span><span class="p">:</span> <span class="p">([</span><span class="s1">&#39;subject&#39;</span><span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">20</span><span class="p">,</span> <span class="mi">65</span><span class="p">,</span> <span class="n">n_subjects</span><span class="p">)),</span>
+    <span class="s1">&#39;subject_group&#39;</span><span class="p">:</span> <span class="p">([</span><span class="s1">&#39;subject&#39;</span><span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">([</span><span class="s1">&#39;control&#39;</span><span class="p">,</span> <span class="s1">&#39;patient&#39;</span><span class="p">],</span> <span class="n">n_subjects</span><span class="p">))</span>
+<span class="p">},</span> <span class="n">coords</span><span class="o">=</span><span class="p">{</span>
+    <span class="s1">&#39;subject&#39;</span><span class="p">:</span> <span class="n">subjects</span><span class="p">,</span>
+    <span class="s1">&#39;time&#39;</span><span class="p">:</span> <span class="n">timepoints</span><span class="p">,</span>
+    <span class="s1">&#39;x&#39;</span><span class="p">:</span> <span class="n">x_coords</span><span class="p">,</span>
+    <span class="s1">&#39;y&#39;</span><span class="p">:</span> <span class="n">y_coords</span>
+<span class="p">})</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="n">fmri_dataset</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>&lt;xarray.Dataset&gt; Size: 16MB
+Dimensions:        (subject: 5, time: 100, x: 64, y: 64)
+Coordinates:
+  * subject        (subject) &lt;U3 60B &#39;S01&#39; &#39;S02&#39; &#39;S03&#39; &#39;S04&#39; &#39;S05&#39;
+  * time           (time) int64 800B 0 2 4 6 8 10 12 ... 188 190 192 194 196 198
+  * x              (x) int64 512B 0 1 2 3 4 5 6 7 8 ... 56 57 58 59 60 61 62 63
+  * y              (y) int64 512B 0 1 2 3 4 5 6 7 8 ... 56 57 58 59 60 61 62 63
+Data variables:
+    bold_signal    (subject, time, x, y) float64 16MB dask.array&lt;chunksize=(1, 50, 32, 32), meta=np.ndarray&gt;
+    subject_age    (subject) int64 40B 57 55 62 28 31
+    subject_group  (subject) &lt;U7 140B &#39;patient&#39; &#39;control&#39; ... &#39;control&#39;
+</pre></div>
+</div>
+</div>
+</div>
+<p>Let’s perform some typical medical imaging analysis operations on this dataset.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Calculate temporal mean for each voxel</span>
+<span class="n">temporal_mean</span> <span class="o">=</span> <span class="n">fmri_dataset</span><span class="p">[</span><span class="s1">&#39;bold_signal&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="s1">&#39;time&#39;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Temporal mean shape:&quot;</span><span class="p">,</span> <span class="n">temporal_mean</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+
+<span class="c1"># Calculate group averages</span>
+<span class="n">control_subjects</span> <span class="o">=</span> <span class="n">fmri_dataset</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">fmri_dataset</span><span class="o">.</span><span class="n">subject_group</span> <span class="o">==</span> <span class="s1">&#39;control&#39;</span><span class="p">,</span> <span class="n">drop</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">patient_subjects</span> <span class="o">=</span> <span class="n">fmri_dataset</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">fmri_dataset</span><span class="o">.</span><span class="n">subject_group</span> <span class="o">==</span> <span class="s1">&#39;patient&#39;</span><span class="p">,</span> <span class="n">drop</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Control subjects: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">control_subjects</span><span class="o">.</span><span class="n">subject</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Patient subjects: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">patient_subjects</span><span class="o">.</span><span class="n">subject</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Temporal mean shape: (5, 64, 64)
+Control subjects: 3
+Patient subjects: 2
+</pre></div>
+</div>
+</div>
+</div>
+<p>Finally, let’s visualize some of our data to ensure everything looks reasonable.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Create a simple visualization</span>
+<span class="n">fig</span><span class="p">,</span> <span class="n">axes</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">12</span><span class="p">,</span> <span class="mi">4</span><span class="p">))</span>
+
+<span class="c1"># Plot 1: Time series for a single voxel</span>
+<span class="n">single_voxel_ts</span> <span class="o">=</span> <span class="n">fmri_dataset</span><span class="p">[</span><span class="s1">&#39;bold_signal&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">isel</span><span class="p">(</span><span class="n">subject</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="mi">32</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="mi">32</span><span class="p">)</span><span class="o">.</span><span class="n">compute</span><span class="p">()</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">single_voxel_ts</span><span class="o">.</span><span class="n">time</span><span class="p">,</span> <span class="n">single_voxel_ts</span><span class="o">.</span><span class="n">values</span><span class="p">)</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s1">&#39;BOLD Signal Time Series</span><span class="se">\n</span><span class="s1">(Subject 1, Voxel 32,32)&#39;</span><span class="p">)</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s1">&#39;Time (seconds)&#39;</span><span class="p">)</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s1">&#39;BOLD Signal&#39;</span><span class="p">)</span>
+
+<span class="c1"># Plot 2: Spatial map (average over time)</span>
+<span class="n">spatial_avg</span> <span class="o">=</span> <span class="n">temporal_mean</span><span class="o">.</span><span class="n">isel</span><span class="p">(</span><span class="n">subject</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">compute</span><span class="p">()</span>
+<span class="n">im</span> <span class="o">=</span> <span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">spatial_avg</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="s1">&#39;viridis&#39;</span><span class="p">)</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s1">&#39;Average BOLD Signal</span><span class="se">\n</span><span class="s1">(Subject 1, Time Average)&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">colorbar</span><span class="p">(</span><span class="n">im</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="_images/5cfc9ee541f05c1f77d0858d4fb7b6b758a7653bd8dcb5f3185ba237e531034d.png" src="_images/5cfc9ee541f05c1f77d0858d4fb7b6b758a7653bd8dcb5f3185ba237e531034d.png" />
+</div>
+</div>
+</section>
+<section id="exercise">
+<h2>Exercise<a class="headerlink" href="#exercise" title="Link to this heading">#</a></h2>
+<p>Now it’s time to apply what you’ve learned! Create a medical dataset analysis workflow using the concepts from this notebook.</p>
+<p><strong>Task:</strong> Create a simulated longitudinal patient monitoring dataset with the following specifications:</p>
+<ol class="arabic simple">
+<li><p><strong>Dataset structure:</strong></p>
+<ul class="simple">
+<li><p>20 patients (use patient IDs like ‘PAT001’, ‘PAT002’, etc.)</p></li>
+<li><p>7 days of monitoring data</p></li>
+<li><p>4 vital signs: heart rate, blood pressure (systolic), respiratory rate, oxygen saturation</p></li>
+<li><p>Measurements taken every 15 minutes</p></li>
+</ul>
+</li>
+<li><p><strong>Data generation:</strong></p>
+<ul class="simple">
+<li><p>Use appropriate realistic mean values and standard deviations for each vital sign</p></li>
+<li><p>Choose an appropriate dtype to balance precision and memory usage</p></li>
+<li><p>Add some random patient metadata (age, gender, diagnosis)</p></li>
+</ul>
+</li>
+<li><p><strong>Analysis tasks:</strong></p>
+<ul class="simple">
+<li><p>Calculate daily averages for each patient and vital sign</p></li>
+<li><p>Find patients with heart rate values outside the normal range (60-100 bpm)</p></li>
+<li><p>Create a chunked version of your dataset with appropriate chunk sizes</p></li>
+<li><p>Compare memory usage between different dtype choices</p></li>
+</ul>
+</li>
+<li><p><strong>Bonus:</strong></p>
+<ul class="simple">
+<li><p>Create a simple visualization showing the trend of one vital sign over the week for 3 different patients</p></li>
+<li><p>Calculate correlation between different vital signs</p></li>
+</ul>
+</li>
+</ol>
+<p>Use both NumPy and xarray in your solution, and demonstrate the advantages of using labeled dimensions with xarray for this type of medical data analysis.</p>
+</section>
+</section>
+
+    <script type="text/x-thebe-config">
+    {
+        requestKernel: true,
+        binderOptions: {
+            repo: "binder-examples/jupyter-stacks-datascience",
+            ref: "master",
+        },
+        codeMirrorConfig: {
+            theme: "abcdef",
+            mode: "python"
+        },
+        kernelOptions: {
+            name: "python3",
+            path: "./."
+        },
+        predefinedOutput: true
+    }
+    </script>
+    <script>kernelName = 'python3'</script>
+
+                </article>
+              
+
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="export_patterns_subsets_snapshots_reproducible_filters.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">Export Patterns: Subsets, Snapshots, Reproducible Filters</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="csv-excel-ndjson-to-parquet-arrow-batch-vs-streaming.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">CSV/Excel/NDJSON → Parquet/Arrow: Batch vs Streaming</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+  <div class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> Contents
+  </div>
+  <nav class="bd-toc-nav page-toc">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#understanding-array-shapes-in-medical-data">Understanding Array Shapes in Medical Data</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#data-types-dtypes-and-memory-efficiency">Data Types (dtypes) and Memory Efficiency</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#introduction-to-xarray">Introduction to xarray</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#understanding-chunking-with-dask">Understanding Chunking with Dask</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#practical-example-medical-image-analysis">Practical Example: Medical Image Analysis</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#exercise">Exercise</a></li>
+</ul>
+  </nav></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+<p class="component-author">
+By AI Generated Content
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+
+  </div>
+  
+  <div class="footer-item">
+    <p class="last-updated">
+  Last updated on Sep 13, 2025.
+  <br/>
+</p>
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+</div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b"></script>
+<script src="_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+  <footer class="bd-footer">
+  </footer>
+  </body>
+</html>

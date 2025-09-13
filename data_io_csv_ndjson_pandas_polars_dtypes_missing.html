@@ -1,0 +1,1216 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="./" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Reading and Writing Medical Data: CSV and NDJSON with Pandas and Polars &#8212; Foundations of Medical Data Integration</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="_static/styles/theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="_static/styles/bootstrap.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="_static/styles/pydata-sphinx-theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+
+  
+  <link href="_static/vendor/fontawesome/6.5.2/css/all.min.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.5.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.5.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.5.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="_static/styles/sphinx-book-theme.css?v=eba8b062" />
+    <link rel="stylesheet" type="text/css" href="_static/togglebutton.css?v=13237357" />
+    <link rel="stylesheet" type="text/css" href="_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="_static/mystnb.8ecb98da25f57f5357bf6f572d296f466b2cfe2517ffebfabe82451661e28f02.css" />
+    <link rel="stylesheet" type="text/css" href="_static/sphinx-thebe.css?v=4fa983c6" />
+    <link rel="stylesheet" type="text/css" href="_static/sphinx-design.min.css?v=95c83b7e" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b" />
+<link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
+  <script src="_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+    <script src="_static/documentation_options.js?v=9eb32ce0"></script>
+    <script src="_static/doctools.js?v=9a2dae69"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="_static/copybutton.js?v=f281be69"></script>
+    <script src="_static/scripts/sphinx-book-theme.js?v=887ef09a"></script>
+    <script>let toggleHintShow = 'Click to show';</script>
+    <script>let toggleHintHide = 'Click to hide';</script>
+    <script>let toggleOpenOnPrint = 'true';</script>
+    <script src="_static/togglebutton.js?v=4a39c7ea"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script src="_static/design-tabs.js?v=f930bc37"></script>
+    <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"; const thebe_selector = ".thebe,.cell"; const thebe_selector_input = "pre"; const thebe_selector_output = ".output, .cell_output"</script>
+    <script async="async" src="_static/sphinx-thebe.js?v=c100c467"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"; const thebe_selector = ".thebe,.cell"; const thebe_selector_input = "pre"; const thebe_selector_output = ".output, .cell_output"</script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'data_io_csv_ndjson_pandas_polars_dtypes_missing';</script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Schemas and Validation with Pandera" href="pandera_schemas_validation_coercion_constraints.html" />
+    <link rel="prev" title="Integrity Checks (Hashing) and Small-to-Large File Strategies" href="integrity_checks_hashing_file_strategies.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+    <meta name="docbuild:last-update" content="Sep 13, 2025"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-primary-sidebar-checkbox"/>
+  <label class="overlay overlay-primary" for="pst-primary-sidebar-checkbox"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-secondary-sidebar-checkbox"/>
+  <label class="overlay overlay-secondary" for="pst-secondary-sidebar-checkbox"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search this book..."
+         aria-label="Search this book..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="intro.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="_static/logo.png" class="logo__image only-light" alt="Foundations of Medical Data Integration - Home"/>
+    <script>document.write(`<img src="_static/logo.png" class="logo__image only-dark" alt="Foundations of Medical Data Integration - Home"/>`);</script>
+  
+  
+</a></div>
+        <div class="sidebar-primary-item">
+
+ <script>
+ document.write(`
+   <button class="btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script></div>
+        <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        <p aria-level="2" class="caption" role="heading"><span class="caption-text">Working with files and folders</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="files_folders_filesystems.html">Files, Folders, and Filesystems in Medical Data Integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="path_handling_portable_io_pathlib.html">Path Handling and Portable I/O with pathlib</a></li>
+<li class="toctree-l1"><a class="reference internal" href="sidecar_metadata_data_dictionaries.html">Sidecar Metadata (JSON/YAML) and Data Dictionaries</a></li>
+<li class="toctree-l1"><a class="reference internal" href="fsspec_cloud_storage_streaming_io.html">Local and Cloud Storage with fsspec (s3fs/gcsfs/adlfs), Streaming I/O</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">File formats</span></p>
+<ul class="current nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="integrity_checks_hashing_file_strategies.html">Integrity Checks (Hashing) and Small-to-Large File Strategies</a></li>
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">Reading and Writing Medical Data: CSV and NDJSON with Pandas and Polars</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pandera_schemas_validation_coercion_constraints.html">Schemas and Validation with Pandera</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Wrangling data</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="joins-grouping-windowing-duckdb-sql.html">Joins/Merges, Grouping, and Windowing with DuckDB</a></li>
+<li class="toctree-l1"><a class="reference internal" href="export_patterns_subsets_snapshots_reproducible_filters.html">Export Patterns: Subsets, Snapshots, Reproducible Filters</a></li>
+<li class="toctree-l1"><a class="reference internal" href="numpy-xarray-fundamentals-shapes-dtypes-chunking.html">NumPy/xarray Fundamentals: Shapes, Dtypes, and Chunking</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Data conversion</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="csv-excel-ndjson-to-parquet-arrow-batch-vs-streaming.html">CSV/Excel/NDJSON → Parquet/Arrow: Batch vs Streaming</a></li>
+<li class="toctree-l1"><a class="reference internal" href="longitudinal_data_preprocessing.html">Unit Normalization, Time Alignment, Resampling, and Windowing for Longitudinal Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dask-out-of-core-parallel-conversion-progress-retries-idempotency.html">Out-of-core/Parallel Conversion with Dask: Progress, Retries, and Idempotency</a></li>
+</ul>
+
+    </div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><button class="sidebar-toggle primary-toggle btn btn-sm" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</button></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<div class="article-header-buttons">
+
+
+
+
+
+<div class="dropdown dropdown-launch-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Launch interactive content">
+    <i class="fas fa-rocket"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="https://mybinder.org/v2/gh/generated-books/medical-data-integration/main?urlpath=lab/tree/data_io_csv_ndjson_pandas_polars_dtypes_missing.ipynb" target="_blank"
+   class="btn btn-sm dropdown-item"
+   title="Launch on Binder"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  
+    <img alt="Binder logo" src="_static/images/logo_binder.svg">
+  </span>
+<span class="btn__text-container">Binder</span>
+</a>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+
+
+<div class="dropdown dropdown-source-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Source repositories">
+    <i class="fab fa-github"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="https://github.com/generated-books/medical-data-integration" target="_blank"
+   class="btn btn-sm btn-source-repository-button dropdown-item"
+   title="Source repository"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fab fa-github"></i>
+  </span>
+<span class="btn__text-container">Repository</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li><a href="https://github.com/generated-books/medical-data-integration/edit/main/data_io_csv_ndjson_pandas_polars_dtypes_missing.ipynb" target="_blank"
+   class="btn btn-sm btn-source-edit-button dropdown-item"
+   title="Suggest edit"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-pencil-alt"></i>
+  </span>
+<span class="btn__text-container">Suggest edit</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li><a href="https://github.com/generated-books/medical-data-integration/issues/new?title=Issue%20on%20page%20%2Fdata_io_csv_ndjson_pandas_polars_dtypes_missing.html&body=Your%20issue%20content%20here." target="_blank"
+   class="btn btn-sm btn-source-issues-button dropdown-item"
+   title="Open an issue"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-lightbulb"></i>
+  </span>
+<span class="btn__text-container">Open issue</span>
+</a>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+
+
+<div class="dropdown dropdown-download-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Download this page">
+    <i class="fas fa-download"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="_sources/data_io_csv_ndjson_pandas_polars_dtypes_missing.ipynb" target="_blank"
+   class="btn btn-sm btn-download-source-button dropdown-item"
+   title="Download source file"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file"></i>
+  </span>
+<span class="btn__text-container">.ipynb</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li>
+<button onclick="window.print()"
+  class="btn btn-sm btn-download-pdf-button dropdown-item"
+  title="Print to PDF"
+  data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file-pdf"></i>
+  </span>
+<span class="btn__text-container">.pdf</span>
+</button>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+<button onclick="toggleFullScreen()"
+  class="btn btn-sm btn-fullscreen-button"
+  title="Fullscreen mode"
+  data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-expand"></i>
+  </span>
+
+</button>
+
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"></i>
+  </button>
+`);
+</script>
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm pst-navbar-icon search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+  </button>
+`);
+</script>
+<button class="sidebar-toggle secondary-toggle btn btn-sm" title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="fa-solid fa-list"></span>
+</button>
+</div></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1>Reading and Writing Medical Data: CSV and NDJSON with Pandas and Polars</h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+            <div>
+                <h2> Contents </h2>
+            </div>
+            <nav aria-label="Page">
+                <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#setup-and-imports">Setup and Imports</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#creating-sample-medical-data">Creating Sample Medical Data</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#writing-csv-files-with-pandas">Writing CSV Files with Pandas</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#reading-csv-files-with-pandas-and-data-type-control">Reading CSV Files with Pandas and Data Type Control</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#handling-missing-values-in-csv-reading">Handling Missing Values in CSV Reading</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#working-with-polars-for-csv-operations">Working with Polars for CSV Operations</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#creating-and-writing-ndjson-data">Creating and Writing NDJSON Data</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#reading-ndjson-with-pandas">Reading NDJSON with Pandas</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#reading-ndjson-with-polars">Reading NDJSON with Polars</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#handling-missing-values-in-ndjson-data">Handling Missing Values in NDJSON Data</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#writing-data-back-to-files">Writing Data Back to Files</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#performance-comparison">Performance Comparison</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#summary">Summary</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#exercise">Exercise</a></li>
+</ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section class="tex2jax_ignore mathjax_ignore" id="reading-and-writing-medical-data-csv-and-ndjson-with-pandas-and-polars">
+<h1>Reading and Writing Medical Data: CSV and NDJSON with Pandas and Polars<a class="headerlink" href="#reading-and-writing-medical-data-csv-and-ndjson-with-pandas-and-polars" title="Link to this heading">#</a></h1>
+<p>In medical data integration, we frequently work with structured data in CSV format and semi-structured data in NDJSON (Newline Delimited JSON) format. This notebook covers essential techniques for reading, writing, and handling these formats using both pandas and polars libraries, with special attention to data type control and missing value management.</p>
+<section id="setup-and-imports">
+<h2>Setup and Imports<a class="headerlink" href="#setup-and-imports" title="Link to this heading">#</a></h2>
+<p>We’ll start by importing the necessary libraries and creating sample medical data to work with.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">polars</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pl</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">datetime</span><span class="w"> </span><span class="kn">import</span> <span class="n">datetime</span><span class="p">,</span> <span class="n">date</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Pandas version: </span><span class="si">{</span><span class="n">pd</span><span class="o">.</span><span class="n">__version__</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Polars version: </span><span class="si">{</span><span class="n">pl</span><span class="o">.</span><span class="n">__version__</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Pandas version: 2.3.2
+Polars version: 1.33.1
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="creating-sample-medical-data">
+<h2>Creating Sample Medical Data<a class="headerlink" href="#creating-sample-medical-data" title="Link to this heading">#</a></h2>
+<p>Let’s create a sample dataset representing patient information with various data types commonly found in medical records.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Create sample medical data</span>
+<span class="n">medical_data</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">&#39;patient_id&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;P001&#39;</span><span class="p">,</span> <span class="s1">&#39;P002&#39;</span><span class="p">,</span> <span class="s1">&#39;P003&#39;</span><span class="p">,</span> <span class="s1">&#39;P004&#39;</span><span class="p">,</span> <span class="s1">&#39;P005&#39;</span><span class="p">],</span>
+    <span class="s1">&#39;age&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mi">45</span><span class="p">,</span> <span class="mi">32</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="mi">67</span><span class="p">,</span> <span class="mi">28</span><span class="p">],</span>
+    <span class="s1">&#39;gender&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;M&#39;</span><span class="p">,</span> <span class="s1">&#39;F&#39;</span><span class="p">,</span> <span class="s1">&#39;F&#39;</span><span class="p">,</span> <span class="s1">&#39;M&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">],</span>
+    <span class="s1">&#39;blood_pressure_systolic&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mi">120</span><span class="p">,</span> <span class="mi">130</span><span class="p">,</span> <span class="mi">140</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="mi">110</span><span class="p">],</span>
+    <span class="s1">&#39;blood_pressure_diastolic&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mi">80</span><span class="p">,</span> <span class="mi">85</span><span class="p">,</span> <span class="mi">90</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="mi">70</span><span class="p">],</span>
+    <span class="s1">&#39;diagnosis_date&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;2023-01-15&#39;</span><span class="p">,</span> <span class="s1">&#39;2023-02-20&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="s1">&#39;2023-03-10&#39;</span><span class="p">,</span> <span class="s1">&#39;2023-04-05&#39;</span><span class="p">],</span>
+    <span class="s1">&#39;has_diabetes&#39;</span><span class="p">:</span> <span class="p">[</span><span class="kc">True</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">None</span><span class="p">],</span>
+    <span class="s1">&#39;medication_count&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
+<span class="p">}</span>
+
+<span class="n">df_sample</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">medical_data</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Sample medical dataset:&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">df_sample</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Sample medical dataset:
+  patient_id   age gender  blood_pressure_systolic  blood_pressure_diastolic  \
+0       P001  45.0      M                    120.0                      80.0   
+1       P002  32.0      F                    130.0                      85.0   
+2       P003   NaN      F                    140.0                      90.0   
+3       P004  67.0      M                      NaN                       NaN   
+4       P005  28.0   None                    110.0                      70.0   
+
+  diagnosis_date has_diabetes  medication_count  
+0     2023-01-15         True                 2  
+1     2023-02-20        False                 0  
+2           None        False                 1  
+3     2023-03-10         True                 5  
+4     2023-04-05         None                 1  
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="writing-csv-files-with-pandas">
+<h2>Writing CSV Files with Pandas<a class="headerlink" href="#writing-csv-files-with-pandas" title="Link to this heading">#</a></h2>
+<p>We’ll save our sample data to a CSV file, which is one of the most common formats for medical data exchange.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Write CSV file with pandas</span>
+<span class="n">csv_file</span> <span class="o">=</span> <span class="s1">&#39;medical_data.csv&#39;</span>
+<span class="n">df_sample</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">csv_file</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Data saved to </span><span class="si">{</span><span class="n">csv_file</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+<span class="c1"># Check the file contents</span>
+<span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">csv_file</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">CSV file contents:&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">())</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Data saved to medical_data.csv
+
+CSV file contents:
+patient_id,age,gender,blood_pressure_systolic,blood_pressure_diastolic,diagnosis_date,has_diabetes,medication_count
+P001,45.0,M,120.0,80.0,2023-01-15,True,2
+P002,32.0,F,130.0,85.0,2023-02-20,False,0
+P003,,F,140.0,90.0,,False,1
+P004,67.0,M,,,2023-03-10,True,5
+P005,28.0,,110.0,70.0,2023-04-05,,1
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="reading-csv-files-with-pandas-and-data-type-control">
+<h2>Reading CSV Files with Pandas and Data Type Control<a class="headerlink" href="#reading-csv-files-with-pandas-and-data-type-control" title="Link to this heading">#</a></h2>
+<p>When reading CSV files, it’s crucial to control data types to ensure data integrity, especially for medical data where precision matters.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Read CSV with automatic type inference</span>
+<span class="n">df_auto</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">csv_file</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Data types with automatic inference:&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">df_auto</span><span class="o">.</span><span class="n">dtypes</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Data preview:&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">df_auto</span><span class="o">.</span><span class="n">head</span><span class="p">())</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Data types with automatic inference:
+patient_id                   object
+age                         float64
+gender                       object
+blood_pressure_systolic     float64
+blood_pressure_diastolic    float64
+diagnosis_date               object
+has_diabetes                 object
+medication_count              int64
+dtype: object
+
+Data preview:
+  patient_id   age gender  blood_pressure_systolic  blood_pressure_diastolic  \
+0       P001  45.0      M                    120.0                      80.0   
+1       P002  32.0      F                    130.0                      85.0   
+2       P003   NaN      F                    140.0                      90.0   
+3       P004  67.0      M                      NaN                       NaN   
+4       P005  28.0    NaN                    110.0                      70.0   
+
+  diagnosis_date has_diabetes  medication_count  
+0     2023-01-15         True                 2  
+1     2023-02-20        False                 0  
+2            NaN        False                 1  
+3     2023-03-10         True                 5  
+4     2023-04-05          NaN                 1  
+</pre></div>
+</div>
+</div>
+</div>
+<p>Now let’s read the same CSV file with explicit data type control to ensure medical data is properly typed.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Define explicit data types for medical data</span>
+<span class="n">dtype_dict</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">&#39;patient_id&#39;</span><span class="p">:</span> <span class="s1">&#39;string&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;age&#39;</span><span class="p">:</span> <span class="s1">&#39;Int64&#39;</span><span class="p">,</span>  <span class="c1"># Nullable integer</span>
+    <span class="s1">&#39;gender&#39;</span><span class="p">:</span> <span class="s1">&#39;category&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;blood_pressure_systolic&#39;</span><span class="p">:</span> <span class="s1">&#39;Int64&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;blood_pressure_diastolic&#39;</span><span class="p">:</span> <span class="s1">&#39;Int64&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;has_diabetes&#39;</span><span class="p">:</span> <span class="s1">&#39;boolean&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;medication_count&#39;</span><span class="p">:</span> <span class="s1">&#39;Int64&#39;</span>
+<span class="p">}</span>
+
+<span class="n">df_typed</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">csv_file</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype_dict</span><span class="p">,</span> <span class="n">parse_dates</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;diagnosis_date&#39;</span><span class="p">])</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Data types with explicit control:&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">df_typed</span><span class="o">.</span><span class="n">dtypes</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Data types with explicit control:
+patient_id                  string[python]
+age                                  Int64
+gender                            category
+blood_pressure_systolic              Int64
+blood_pressure_diastolic             Int64
+diagnosis_date              datetime64[ns]
+has_diabetes                       boolean
+medication_count                     Int64
+dtype: object
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="handling-missing-values-in-csv-reading">
+<h2>Handling Missing Values in CSV Reading<a class="headerlink" href="#handling-missing-values-in-csv-reading" title="Link to this heading">#</a></h2>
+<p>Medical data often contains missing values, and we need to handle them appropriately during data loading.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Check for missing values</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Missing values count:&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">df_typed</span><span class="o">.</span><span class="n">isnull</span><span class="p">()</span><span class="o">.</span><span class="n">sum</span><span class="p">())</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Missing values percentage:&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">((</span><span class="n">df_typed</span><span class="o">.</span><span class="n">isnull</span><span class="p">()</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">df_typed</span><span class="p">))</span> <span class="o">*</span> <span class="mi">100</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Missing values count:
+patient_id                  0
+age                         1
+gender                      1
+blood_pressure_systolic     1
+blood_pressure_diastolic    1
+diagnosis_date              1
+has_diabetes                1
+medication_count            0
+dtype: int64
+
+Missing values percentage:
+patient_id                   0.0
+age                         20.0
+gender                      20.0
+blood_pressure_systolic     20.0
+blood_pressure_diastolic    20.0
+diagnosis_date              20.0
+has_diabetes                20.0
+medication_count             0.0
+dtype: float64
+</pre></div>
+</div>
+</div>
+</div>
+<p>We can customize how missing values are interpreted during CSV reading by specifying custom NA values.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Read CSV with custom missing value indicators</span>
+<span class="n">df_custom_na</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span>
+    <span class="n">csv_file</span><span class="p">,</span> 
+    <span class="n">dtype</span><span class="o">=</span><span class="n">dtype_dict</span><span class="p">,</span> 
+    <span class="n">parse_dates</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;diagnosis_date&#39;</span><span class="p">],</span>
+    <span class="n">na_values</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="s1">&#39;NA&#39;</span><span class="p">,</span> <span class="s1">&#39;NULL&#39;</span><span class="p">,</span> <span class="s1">&#39;missing&#39;</span><span class="p">,</span> <span class="s1">&#39;unknown&#39;</span><span class="p">,</span> <span class="s1">&#39;999&#39;</span><span class="p">,</span> <span class="s1">&#39;-1&#39;</span><span class="p">]</span>
+<span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;DataFrame info after custom NA handling:&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">df_custom_na</span><span class="o">.</span><span class="n">info</span><span class="p">())</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>DataFrame info after custom NA handling:
+&lt;class &#39;pandas.core.frame.DataFrame&#39;&gt;
+RangeIndex: 5 entries, 0 to 4
+Data columns (total 8 columns):
+ #   Column                    Non-Null Count  Dtype         
+---  ------                    --------------  -----         
+ 0   patient_id                5 non-null      string        
+ 1   age                       4 non-null      Int64         
+ 2   gender                    4 non-null      category      
+ 3   blood_pressure_systolic   4 non-null      Int64         
+ 4   blood_pressure_diastolic  4 non-null      Int64         
+ 5   diagnosis_date            4 non-null      datetime64[ns]
+ 6   has_diabetes              4 non-null      boolean       
+ 7   medication_count          5 non-null      Int64         
+dtypes: Int64(4), boolean(1), category(1), datetime64[ns](1), string(1)
+memory usage: 531.0 bytes
+None
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="working-with-polars-for-csv-operations">
+<h2>Working with Polars for CSV Operations<a class="headerlink" href="#working-with-polars-for-csv-operations" title="Link to this heading">#</a></h2>
+<p>Polars offers excellent performance for large medical datasets and has built-in support for proper data type handling.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Read CSV with Polars</span>
+<span class="n">df_polars</span> <span class="o">=</span> <span class="n">pl</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">csv_file</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Polars DataFrame schema:&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">df_polars</span><span class="o">.</span><span class="n">schema</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Polars DataFrame:&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">df_polars</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Polars DataFrame schema:
+Schema([(&#39;patient_id&#39;, String), (&#39;age&#39;, Float64), (&#39;gender&#39;, String), (&#39;blood_pressure_systolic&#39;, Float64), (&#39;blood_pressure_diastolic&#39;, Float64), (&#39;diagnosis_date&#39;, String), (&#39;has_diabetes&#39;, Boolean), (&#39;medication_count&#39;, Int64)])
+
+Polars DataFrame:
+shape: (5, 8)
+┌────────────┬──────┬────────┬─────────────┬─────────────┬─────────────┬─────────────┬─────────────┐
+│ patient_id ┆ age  ┆ gender ┆ blood_press ┆ blood_press ┆ diagnosis_d ┆ has_diabete ┆ medication_ │
+│ ---        ┆ ---  ┆ ---    ┆ ure_systoli ┆ ure_diastol ┆ ate         ┆ s           ┆ count       │
+│ str        ┆ f64  ┆ str    ┆ c           ┆ ic          ┆ ---         ┆ ---         ┆ ---         │
+│            ┆      ┆        ┆ ---         ┆ ---         ┆ str         ┆ bool        ┆ i64         │
+│            ┆      ┆        ┆ f64         ┆ f64         ┆             ┆             ┆             │
+╞════════════╪══════╪════════╪═════════════╪═════════════╪═════════════╪═════════════╪═════════════╡
+│ P001       ┆ 45.0 ┆ M      ┆ 120.0       ┆ 80.0        ┆ 2023-01-15  ┆ true        ┆ 2           │
+│ P002       ┆ 32.0 ┆ F      ┆ 130.0       ┆ 85.0        ┆ 2023-02-20  ┆ false       ┆ 0           │
+│ P003       ┆ null ┆ F      ┆ 140.0       ┆ 90.0        ┆ null        ┆ false       ┆ 1           │
+│ P004       ┆ 67.0 ┆ M      ┆ null        ┆ null        ┆ 2023-03-10  ┆ true        ┆ 5           │
+│ P005       ┆ 28.0 ┆ null   ┆ 110.0       ┆ 70.0        ┆ 2023-04-05  ┆ null        ┆ 1           │
+└────────────┴──────┴────────┴─────────────┴─────────────┴─────────────┴─────────────┴─────────────┘
+</pre></div>
+</div>
+</div>
+</div>
+<p>Let’s read the CSV with explicit schema definition in Polars to ensure proper medical data typing.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Define schema for Polars</span>
+<span class="n">polars_schema</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">&#39;patient_id&#39;</span><span class="p">:</span> <span class="n">pl</span><span class="o">.</span><span class="n">Utf8</span><span class="p">,</span>
+    <span class="s1">&#39;age&#39;</span><span class="p">:</span> <span class="n">pl</span><span class="o">.</span><span class="n">Float64</span><span class="p">,</span>
+    <span class="s1">&#39;gender&#39;</span><span class="p">:</span> <span class="n">pl</span><span class="o">.</span><span class="n">Categorical</span><span class="p">,</span>
+    <span class="s1">&#39;blood_pressure_systolic&#39;</span><span class="p">:</span> <span class="n">pl</span><span class="o">.</span><span class="n">Float64</span><span class="p">,</span>
+    <span class="s1">&#39;blood_pressure_diastolic&#39;</span><span class="p">:</span> <span class="n">pl</span><span class="o">.</span><span class="n">Float64</span><span class="p">,</span>
+    <span class="s1">&#39;diagnosis_date&#39;</span><span class="p">:</span> <span class="n">pl</span><span class="o">.</span><span class="n">Date</span><span class="p">,</span>
+    <span class="s1">&#39;has_diabetes&#39;</span><span class="p">:</span> <span class="n">pl</span><span class="o">.</span><span class="n">Boolean</span><span class="p">,</span>
+    <span class="s1">&#39;medication_count&#39;</span><span class="p">:</span> <span class="n">pl</span><span class="o">.</span><span class="n">Float64</span>
+<span class="p">}</span>
+
+<span class="n">df_polars_typed</span> <span class="o">=</span> <span class="n">pl</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">csv_file</span><span class="p">,</span> <span class="n">schema</span><span class="o">=</span><span class="n">polars_schema</span><span class="p">,</span> <span class="n">try_parse_dates</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Polars DataFrame with explicit schema:&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">df_polars_typed</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Polars DataFrame with explicit schema:
+shape: (5, 8)
+┌────────────┬──────┬────────┬─────────────┬─────────────┬─────────────┬─────────────┬─────────────┐
+│ patient_id ┆ age  ┆ gender ┆ blood_press ┆ blood_press ┆ diagnosis_d ┆ has_diabete ┆ medication_ │
+│ ---        ┆ ---  ┆ ---    ┆ ure_systoli ┆ ure_diastol ┆ ate         ┆ s           ┆ count       │
+│ str        ┆ f64  ┆ cat    ┆ c           ┆ ic          ┆ ---         ┆ ---         ┆ ---         │
+│            ┆      ┆        ┆ ---         ┆ ---         ┆ date        ┆ bool        ┆ f64         │
+│            ┆      ┆        ┆ f64         ┆ f64         ┆             ┆             ┆             │
+╞════════════╪══════╪════════╪═════════════╪═════════════╪═════════════╪═════════════╪═════════════╡
+│ P001       ┆ 45.0 ┆ M      ┆ 120.0       ┆ 80.0        ┆ 2023-01-15  ┆ true        ┆ 2.0         │
+│ P002       ┆ 32.0 ┆ F      ┆ 130.0       ┆ 85.0        ┆ 2023-02-20  ┆ false       ┆ 0.0         │
+│ P003       ┆ null ┆ F      ┆ 140.0       ┆ 90.0        ┆ null        ┆ false       ┆ 1.0         │
+│ P004       ┆ 67.0 ┆ M      ┆ null        ┆ null        ┆ 2023-03-10  ┆ true        ┆ 5.0         │
+│ P005       ┆ 28.0 ┆ null   ┆ 110.0       ┆ 70.0        ┆ 2023-04-05  ┆ null        ┆ 1.0         │
+└────────────┴──────┴────────┴─────────────┴─────────────┴─────────────┴─────────────┴─────────────┘
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="creating-and-writing-ndjson-data">
+<h2>Creating and Writing NDJSON Data<a class="headerlink" href="#creating-and-writing-ndjson-data" title="Link to this heading">#</a></h2>
+<p>NDJSON (Newline Delimited JSON) is commonly used for streaming medical data or when dealing with nested patient records.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Create sample NDJSON medical data with nested structure</span>
+<span class="n">medical_records</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;patient_id&quot;</span><span class="p">:</span> <span class="s2">&quot;P001&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;demographics&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;age&quot;</span><span class="p">:</span> <span class="mi">45</span><span class="p">,</span> <span class="s2">&quot;gender&quot;</span><span class="p">:</span> <span class="s2">&quot;M&quot;</span><span class="p">},</span>
+        <span class="s2">&quot;vitals&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;bp_sys&quot;</span><span class="p">:</span> <span class="mi">120</span><span class="p">,</span> <span class="s2">&quot;bp_dia&quot;</span><span class="p">:</span> <span class="mi">80</span><span class="p">},</span>
+        <span class="s2">&quot;conditions&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;diabetes&quot;</span><span class="p">,</span> <span class="s2">&quot;hypertension&quot;</span><span class="p">],</span>
+        <span class="s2">&quot;last_visit&quot;</span><span class="p">:</span> <span class="s2">&quot;2023-01-15&quot;</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;patient_id&quot;</span><span class="p">:</span> <span class="s2">&quot;P002&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;demographics&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;age&quot;</span><span class="p">:</span> <span class="mi">32</span><span class="p">,</span> <span class="s2">&quot;gender&quot;</span><span class="p">:</span> <span class="s2">&quot;F&quot;</span><span class="p">},</span>
+        <span class="s2">&quot;vitals&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;bp_sys&quot;</span><span class="p">:</span> <span class="mi">130</span><span class="p">,</span> <span class="s2">&quot;bp_dia&quot;</span><span class="p">:</span> <span class="mi">85</span><span class="p">},</span>
+        <span class="s2">&quot;conditions&quot;</span><span class="p">:</span> <span class="p">[],</span>
+        <span class="s2">&quot;last_visit&quot;</span><span class="p">:</span> <span class="s2">&quot;2023-02-20&quot;</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;patient_id&quot;</span><span class="p">:</span> <span class="s2">&quot;P003&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;demographics&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;age&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span> <span class="s2">&quot;gender&quot;</span><span class="p">:</span> <span class="s2">&quot;F&quot;</span><span class="p">},</span>
+        <span class="s2">&quot;vitals&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;bp_sys&quot;</span><span class="p">:</span> <span class="mi">140</span><span class="p">,</span> <span class="s2">&quot;bp_dia&quot;</span><span class="p">:</span> <span class="mi">90</span><span class="p">},</span>
+        <span class="s2">&quot;conditions&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;anxiety&quot;</span><span class="p">],</span>
+        <span class="s2">&quot;last_visit&quot;</span><span class="p">:</span> <span class="kc">None</span>
+    <span class="p">}</span>
+<span class="p">]</span>
+
+<span class="c1"># Write NDJSON file</span>
+<span class="n">ndjson_file</span> <span class="o">=</span> <span class="s1">&#39;medical_records.ndjson&#39;</span>
+<span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">ndjson_file</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+    <span class="k">for</span> <span class="n">record</span> <span class="ow">in</span> <span class="n">medical_records</span><span class="p">:</span>
+        <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">record</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;NDJSON data written to </span><span class="si">{</span><span class="n">ndjson_file</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>NDJSON data written to medical_records.ndjson
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="reading-ndjson-with-pandas">
+<h2>Reading NDJSON with Pandas<a class="headerlink" href="#reading-ndjson-with-pandas" title="Link to this heading">#</a></h2>
+<p>We’ll read the NDJSON file and handle the nested structure appropriately for analysis.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Read NDJSON file with pandas</span>
+<span class="n">records</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">ndjson_file</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+    <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">f</span><span class="p">:</span>
+        <span class="n">records</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()))</span>
+
+<span class="n">df_ndjson</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">json_normalize</span><span class="p">(</span><span class="n">records</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;NDJSON data loaded with pandas:&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">df_ndjson</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Column names:&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">df_ndjson</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">tolist</span><span class="p">())</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>NDJSON data loaded with pandas:
+  patient_id                conditions  last_visit  demographics.age  \
+0       P001  [diabetes, hypertension]  2023-01-15              45.0   
+1       P002                        []  2023-02-20              32.0   
+2       P003                 [anxiety]        None               NaN   
+
+  demographics.gender  vitals.bp_sys  vitals.bp_dia  
+0                   M            120             80  
+1                   F            130             85  
+2                   F            140             90  
+
+Column names:
+[&#39;patient_id&#39;, &#39;conditions&#39;, &#39;last_visit&#39;, &#39;demographics.age&#39;, &#39;demographics.gender&#39;, &#39;vitals.bp_sys&#39;, &#39;vitals.bp_dia&#39;]
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="reading-ndjson-with-polars">
+<h2>Reading NDJSON with Polars<a class="headerlink" href="#reading-ndjson-with-polars" title="Link to this heading">#</a></h2>
+<p>Polars provides native support for NDJSON files, making it easy to work with semi-structured medical data.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Read NDJSON with Polars</span>
+<span class="n">df_polars_ndjson</span> <span class="o">=</span> <span class="n">pl</span><span class="o">.</span><span class="n">read_ndjson</span><span class="p">(</span><span class="n">ndjson_file</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;NDJSON data loaded with Polars:&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">df_polars_ndjson</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Schema:&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">df_polars_ndjson</span><span class="o">.</span><span class="n">schema</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>NDJSON data loaded with Polars:
+shape: (3, 5)
+┌────────────┬──────────────┬───────────┬──────────────────────────────┬────────────┐
+│ patient_id ┆ demographics ┆ vitals    ┆ conditions                   ┆ last_visit │
+│ ---        ┆ ---          ┆ ---       ┆ ---                          ┆ ---        │
+│ str        ┆ struct[2]    ┆ struct[2] ┆ list[str]                    ┆ str        │
+╞════════════╪══════════════╪═══════════╪══════════════════════════════╪════════════╡
+│ P001       ┆ {45,&quot;M&quot;}     ┆ {120,80}  ┆ [&quot;diabetes&quot;, &quot;hypertension&quot;] ┆ 2023-01-15 │
+│ P002       ┆ {32,&quot;F&quot;}     ┆ {130,85}  ┆ []                           ┆ 2023-02-20 │
+│ P003       ┆ {null,&quot;F&quot;}   ┆ {140,90}  ┆ [&quot;anxiety&quot;]                  ┆ null       │
+└────────────┴──────────────┴───────────┴──────────────────────────────┴────────────┘
+
+Schema:
+Schema([(&#39;patient_id&#39;, String), (&#39;demographics&#39;, Struct({&#39;age&#39;: Int64, &#39;gender&#39;: String})), (&#39;vitals&#39;, Struct({&#39;bp_sys&#39;: Int64, &#39;bp_dia&#39;: Int64})), (&#39;conditions&#39;, List(String)), (&#39;last_visit&#39;, String)])
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="handling-missing-values-in-ndjson-data">
+<h2>Handling Missing Values in NDJSON Data<a class="headerlink" href="#handling-missing-values-in-ndjson-data" title="Link to this heading">#</a></h2>
+<p>Let’s examine how missing values are handled in the NDJSON data and apply appropriate strategies.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Check missing values in pandas NDJSON data</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Missing values in pandas NDJSON data:&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">df_ndjson</span><span class="o">.</span><span class="n">isnull</span><span class="p">()</span><span class="o">.</span><span class="n">sum</span><span class="p">())</span>
+
+<span class="c1"># Check null values in Polars NDJSON data</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Null values in Polars NDJSON data:&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">df_polars_ndjson</span><span class="o">.</span><span class="n">null_count</span><span class="p">())</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Missing values in pandas NDJSON data:
+patient_id             0
+conditions             0
+last_visit             1
+demographics.age       1
+demographics.gender    0
+vitals.bp_sys          0
+vitals.bp_dia          0
+dtype: int64
+
+Null values in Polars NDJSON data:
+shape: (1, 5)
+┌────────────┬──────────────┬────────┬────────────┬────────────┐
+│ patient_id ┆ demographics ┆ vitals ┆ conditions ┆ last_visit │
+│ ---        ┆ ---          ┆ ---    ┆ ---        ┆ ---        │
+│ u32        ┆ u32          ┆ u32    ┆ u32        ┆ u32        │
+╞════════════╪══════════════╪════════╪════════════╪════════════╡
+│ 0          ┆ 0            ┆ 0      ┆ 0          ┆ 1          │
+└────────────┴──────────────┴────────┴────────────┴────────────┘
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="writing-data-back-to-files">
+<h2>Writing Data Back to Files<a class="headerlink" href="#writing-data-back-to-files" title="Link to this heading">#</a></h2>
+<p>Finally, let’s demonstrate how to write the processed data back to both CSV and NDJSON formats.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Write processed data to CSV with pandas</span>
+<span class="n">df_ndjson</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="s1">&#39;processed_medical_data.csv&#39;</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+<span class="c1"># Write data to CSV with Polars</span>
+<span class="n">df_polars_typed</span><span class="o">.</span><span class="n">write_csv</span><span class="p">(</span><span class="s1">&#39;polars_medical_data.csv&#39;</span><span class="p">)</span>
+
+<span class="c1"># Write back to NDJSON with Polars</span>
+<span class="n">df_polars_ndjson</span><span class="o">.</span><span class="n">write_ndjson</span><span class="p">(</span><span class="s1">&#39;processed_medical_records.ndjson&#39;</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Files written successfully:&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;- processed_medical_data.csv (pandas)&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;- polars_medical_data.csv (polars)&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;- processed_medical_records.ndjson (polars)&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Files written successfully:
+- processed_medical_data.csv (pandas)
+- polars_medical_data.csv (polars)
+- processed_medical_records.ndjson (polars)
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="performance-comparison">
+<h2>Performance Comparison<a class="headerlink" href="#performance-comparison" title="Link to this heading">#</a></h2>
+<p>Let’s create a larger dataset to compare the performance of pandas vs polars for medical data operations.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">time</span>
+
+<span class="c1"># Create larger dataset for performance testing</span>
+<span class="n">n_patients</span> <span class="o">=</span> <span class="mi">10000</span>
+<span class="n">large_data</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">&#39;patient_id&#39;</span><span class="p">:</span> <span class="p">[</span><span class="sa">f</span><span class="s1">&#39;P</span><span class="si">{</span><span class="n">i</span><span class="si">:</span><span class="s1">06d</span><span class="si">}</span><span class="s1">&#39;</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_patients</span><span class="p">)],</span>
+    <span class="s1">&#39;age&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">18</span><span class="p">,</span> <span class="mi">90</span><span class="p">,</span> <span class="n">n_patients</span><span class="p">),</span>
+    <span class="s1">&#39;gender&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">([</span><span class="s1">&#39;M&#39;</span><span class="p">,</span> <span class="s1">&#39;F&#39;</span><span class="p">],</span> <span class="n">n_patients</span><span class="p">),</span>
+    <span class="s1">&#39;blood_pressure_systolic&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">90</span><span class="p">,</span> <span class="mi">180</span><span class="p">,</span> <span class="n">n_patients</span><span class="p">),</span>
+    <span class="s1">&#39;blood_pressure_diastolic&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">60</span><span class="p">,</span> <span class="mi">120</span><span class="p">,</span> <span class="n">n_patients</span><span class="p">),</span>
+    <span class="s1">&#39;has_diabetes&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">([</span><span class="kc">True</span><span class="p">,</span> <span class="kc">False</span><span class="p">],</span> <span class="n">n_patients</span><span class="p">),</span>
+    <span class="s1">&#39;medication_count&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="n">n_patients</span><span class="p">)</span>
+<span class="p">}</span>
+
+<span class="n">large_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">large_data</span><span class="p">)</span>
+<span class="n">large_df</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="s1">&#39;large_medical_data.csv&#39;</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Created dataset with </span><span class="si">{</span><span class="n">n_patients</span><span class="si">:</span><span class="s2">,</span><span class="si">}</span><span class="s2"> patients&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Created dataset with 10,000 patients
+</pre></div>
+</div>
+</div>
+</div>
+<p>Now let’s compare the read performance between pandas and polars for this larger medical dataset.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Time pandas read</span>
+<span class="n">start_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+<span class="n">df_pandas_large</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s1">&#39;large_medical_data.csv&#39;</span><span class="p">)</span>
+<span class="n">pandas_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">start_time</span>
+
+<span class="c1"># Time polars read</span>
+<span class="n">start_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+<span class="n">df_polars_large</span> <span class="o">=</span> <span class="n">pl</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s1">&#39;large_medical_data.csv&#39;</span><span class="p">)</span>
+<span class="n">polars_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">start_time</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Pandas read time: </span><span class="si">{</span><span class="n">pandas_time</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2"> seconds&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Polars read time: </span><span class="si">{</span><span class="n">polars_time</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2"> seconds&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Speedup: </span><span class="si">{</span><span class="n">pandas_time</span><span class="o">/</span><span class="n">polars_time</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">x&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Pandas read time: 0.0073 seconds
+Polars read time: 0.0013 seconds
+Speedup: 5.75x
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="summary">
+<h2>Summary<a class="headerlink" href="#summary" title="Link to this heading">#</a></h2>
+<p>In this notebook, we’ve covered essential techniques for reading and writing medical data in CSV and NDJSON formats using both pandas and polars. Key takeaways include:</p>
+<ol class="arabic simple">
+<li><p><strong>Data Type Control</strong>: Always specify explicit data types when reading medical data to ensure data integrity</p></li>
+<li><p><strong>Missing Value Handling</strong>: Use appropriate nullable data types and custom NA value specifications</p></li>
+<li><p><strong>Format Choice</strong>: CSV for tabular data, NDJSON for semi-structured or nested medical records</p></li>
+<li><p><strong>Performance</strong>: Polars often provides better performance for large datasets</p></li>
+<li><p><strong>Schema Definition</strong>: Define schemas upfront to catch data quality issues early</p></li>
+</ol>
+</section>
+<section id="exercise">
+<h2>Exercise<a class="headerlink" href="#exercise" title="Link to this heading">#</a></h2>
+<p>Create a medical dataset with the following requirements:</p>
+<ol class="arabic simple">
+<li><p>Generate a CSV file containing 1,000 patient records with columns: <code class="docutils literal notranslate"><span class="pre">patient_id</span></code>, <code class="docutils literal notranslate"><span class="pre">age</span></code>, <code class="docutils literal notranslate"><span class="pre">gender</span></code>, <code class="docutils literal notranslate"><span class="pre">height_cm</span></code>, <code class="docutils literal notranslate"><span class="pre">weight_kg</span></code>, <code class="docutils literal notranslate"><span class="pre">diagnosis_code</span></code>, <code class="docutils literal notranslate"><span class="pre">admission_date</span></code>, <code class="docutils literal notranslate"><span class="pre">discharge_date</span></code>, <code class="docutils literal notranslate"><span class="pre">treatment_cost</span></code></p></li>
+<li><p>Introduce missing values in 10% of the records across different columns</p></li>
+<li><p>Read the CSV file using both pandas and polars with appropriate data types:</p>
+<ul class="simple">
+<li><p>Use categorical type for gender</p></li>
+<li><p>Use nullable integers for height and weight</p></li>
+<li><p>Parse dates correctly</p></li>
+<li><p>Use string type for diagnosis codes</p></li>
+</ul>
+</li>
+<li><p>Create an NDJSON version of the same data with nested structure (group demographic info and medical info)</p></li>
+<li><p>Compare the file sizes and read performance between CSV and NDJSON formats</p></li>
+<li><p>Calculate summary statistics for missing values and identify patterns</p></li>
+</ol>
+<p>Bonus: Implement data validation to ensure age is between 0-120, weight and height are positive, and discharge_date is after admission_date.</p>
+</section>
+</section>
+
+    <script type="text/x-thebe-config">
+    {
+        requestKernel: true,
+        binderOptions: {
+            repo: "binder-examples/jupyter-stacks-datascience",
+            ref: "master",
+        },
+        codeMirrorConfig: {
+            theme: "abcdef",
+            mode: "python"
+        },
+        kernelOptions: {
+            name: "python3",
+            path: "./."
+        },
+        predefinedOutput: true
+    }
+    </script>
+    <script>kernelName = 'python3'</script>
+
+                </article>
+              
+
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="integrity_checks_hashing_file_strategies.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">Integrity Checks (Hashing) and Small-to-Large File Strategies</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="pandera_schemas_validation_coercion_constraints.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">Schemas and Validation with Pandera</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+  <div class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> Contents
+  </div>
+  <nav class="bd-toc-nav page-toc">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#setup-and-imports">Setup and Imports</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#creating-sample-medical-data">Creating Sample Medical Data</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#writing-csv-files-with-pandas">Writing CSV Files with Pandas</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#reading-csv-files-with-pandas-and-data-type-control">Reading CSV Files with Pandas and Data Type Control</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#handling-missing-values-in-csv-reading">Handling Missing Values in CSV Reading</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#working-with-polars-for-csv-operations">Working with Polars for CSV Operations</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#creating-and-writing-ndjson-data">Creating and Writing NDJSON Data</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#reading-ndjson-with-pandas">Reading NDJSON with Pandas</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#reading-ndjson-with-polars">Reading NDJSON with Polars</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#handling-missing-values-in-ndjson-data">Handling Missing Values in NDJSON Data</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#writing-data-back-to-files">Writing Data Back to Files</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#performance-comparison">Performance Comparison</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#summary">Summary</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#exercise">Exercise</a></li>
+</ul>
+  </nav></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+<p class="component-author">
+By AI Generated Content
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+
+  </div>
+  
+  <div class="footer-item">
+    <p class="last-updated">
+  Last updated on Sep 13, 2025.
+  <br/>
+</p>
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+</div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b"></script>
+<script src="_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+  <footer class="bd-footer">
+  </footer>
+  </body>
+</html>

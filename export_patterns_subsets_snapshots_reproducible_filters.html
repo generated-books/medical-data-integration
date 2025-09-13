@@ -1,0 +1,1547 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="./" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Export Patterns: Subsets, Snapshots, Reproducible Filters &#8212; Foundations of Medical Data Integration</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="_static/styles/theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="_static/styles/bootstrap.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="_static/styles/pydata-sphinx-theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+
+  
+  <link href="_static/vendor/fontawesome/6.5.2/css/all.min.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.5.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.5.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.5.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="_static/styles/sphinx-book-theme.css?v=eba8b062" />
+    <link rel="stylesheet" type="text/css" href="_static/togglebutton.css?v=13237357" />
+    <link rel="stylesheet" type="text/css" href="_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="_static/mystnb.8ecb98da25f57f5357bf6f572d296f466b2cfe2517ffebfabe82451661e28f02.css" />
+    <link rel="stylesheet" type="text/css" href="_static/sphinx-thebe.css?v=4fa983c6" />
+    <link rel="stylesheet" type="text/css" href="_static/sphinx-design.min.css?v=95c83b7e" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b" />
+<link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
+  <script src="_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+    <script src="_static/documentation_options.js?v=9eb32ce0"></script>
+    <script src="_static/doctools.js?v=9a2dae69"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="_static/copybutton.js?v=f281be69"></script>
+    <script src="_static/scripts/sphinx-book-theme.js?v=887ef09a"></script>
+    <script>let toggleHintShow = 'Click to show';</script>
+    <script>let toggleHintHide = 'Click to hide';</script>
+    <script>let toggleOpenOnPrint = 'true';</script>
+    <script src="_static/togglebutton.js?v=4a39c7ea"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script src="_static/design-tabs.js?v=f930bc37"></script>
+    <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"; const thebe_selector = ".thebe,.cell"; const thebe_selector_input = "pre"; const thebe_selector_output = ".output, .cell_output"</script>
+    <script async="async" src="_static/sphinx-thebe.js?v=c100c467"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"; const thebe_selector = ".thebe,.cell"; const thebe_selector_input = "pre"; const thebe_selector_output = ".output, .cell_output"</script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'export_patterns_subsets_snapshots_reproducible_filters';</script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="NumPy/xarray Fundamentals: Shapes, Dtypes, and Chunking" href="numpy-xarray-fundamentals-shapes-dtypes-chunking.html" />
+    <link rel="prev" title="Joins/Merges, Grouping, and Windowing with DuckDB" href="joins-grouping-windowing-duckdb-sql.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+    <meta name="docbuild:last-update" content="Sep 13, 2025"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-primary-sidebar-checkbox"/>
+  <label class="overlay overlay-primary" for="pst-primary-sidebar-checkbox"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-secondary-sidebar-checkbox"/>
+  <label class="overlay overlay-secondary" for="pst-secondary-sidebar-checkbox"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search this book..."
+         aria-label="Search this book..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="intro.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="_static/logo.png" class="logo__image only-light" alt="Foundations of Medical Data Integration - Home"/>
+    <script>document.write(`<img src="_static/logo.png" class="logo__image only-dark" alt="Foundations of Medical Data Integration - Home"/>`);</script>
+  
+  
+</a></div>
+        <div class="sidebar-primary-item">
+
+ <script>
+ document.write(`
+   <button class="btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script></div>
+        <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        <p aria-level="2" class="caption" role="heading"><span class="caption-text">Working with files and folders</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="files_folders_filesystems.html">Files, Folders, and Filesystems in Medical Data Integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="path_handling_portable_io_pathlib.html">Path Handling and Portable I/O with pathlib</a></li>
+<li class="toctree-l1"><a class="reference internal" href="sidecar_metadata_data_dictionaries.html">Sidecar Metadata (JSON/YAML) and Data Dictionaries</a></li>
+<li class="toctree-l1"><a class="reference internal" href="fsspec_cloud_storage_streaming_io.html">Local and Cloud Storage with fsspec (s3fs/gcsfs/adlfs), Streaming I/O</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">File formats</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="integrity_checks_hashing_file_strategies.html">Integrity Checks (Hashing) and Small-to-Large File Strategies</a></li>
+<li class="toctree-l1"><a class="reference internal" href="data_io_csv_ndjson_pandas_polars_dtypes_missing.html">Reading and Writing Medical Data: CSV and NDJSON with Pandas and Polars</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pandera_schemas_validation_coercion_constraints.html">Schemas and Validation with Pandera</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Wrangling data</span></p>
+<ul class="current nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="joins-grouping-windowing-duckdb-sql.html">Joins/Merges, Grouping, and Windowing with DuckDB</a></li>
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">Export Patterns: Subsets, Snapshots, Reproducible Filters</a></li>
+<li class="toctree-l1"><a class="reference internal" href="numpy-xarray-fundamentals-shapes-dtypes-chunking.html">NumPy/xarray Fundamentals: Shapes, Dtypes, and Chunking</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Data conversion</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="csv-excel-ndjson-to-parquet-arrow-batch-vs-streaming.html">CSV/Excel/NDJSON → Parquet/Arrow: Batch vs Streaming</a></li>
+<li class="toctree-l1"><a class="reference internal" href="longitudinal_data_preprocessing.html">Unit Normalization, Time Alignment, Resampling, and Windowing for Longitudinal Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dask-out-of-core-parallel-conversion-progress-retries-idempotency.html">Out-of-core/Parallel Conversion with Dask: Progress, Retries, and Idempotency</a></li>
+</ul>
+
+    </div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><button class="sidebar-toggle primary-toggle btn btn-sm" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</button></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<div class="article-header-buttons">
+
+
+
+
+
+<div class="dropdown dropdown-launch-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Launch interactive content">
+    <i class="fas fa-rocket"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="https://mybinder.org/v2/gh/generated-books/medical-data-integration/main?urlpath=lab/tree/export_patterns_subsets_snapshots_reproducible_filters.ipynb" target="_blank"
+   class="btn btn-sm dropdown-item"
+   title="Launch on Binder"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  
+    <img alt="Binder logo" src="_static/images/logo_binder.svg">
+  </span>
+<span class="btn__text-container">Binder</span>
+</a>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+
+
+<div class="dropdown dropdown-source-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Source repositories">
+    <i class="fab fa-github"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="https://github.com/generated-books/medical-data-integration" target="_blank"
+   class="btn btn-sm btn-source-repository-button dropdown-item"
+   title="Source repository"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fab fa-github"></i>
+  </span>
+<span class="btn__text-container">Repository</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li><a href="https://github.com/generated-books/medical-data-integration/edit/main/export_patterns_subsets_snapshots_reproducible_filters.ipynb" target="_blank"
+   class="btn btn-sm btn-source-edit-button dropdown-item"
+   title="Suggest edit"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-pencil-alt"></i>
+  </span>
+<span class="btn__text-container">Suggest edit</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li><a href="https://github.com/generated-books/medical-data-integration/issues/new?title=Issue%20on%20page%20%2Fexport_patterns_subsets_snapshots_reproducible_filters.html&body=Your%20issue%20content%20here." target="_blank"
+   class="btn btn-sm btn-source-issues-button dropdown-item"
+   title="Open an issue"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-lightbulb"></i>
+  </span>
+<span class="btn__text-container">Open issue</span>
+</a>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+
+
+<div class="dropdown dropdown-download-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Download this page">
+    <i class="fas fa-download"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="_sources/export_patterns_subsets_snapshots_reproducible_filters.ipynb" target="_blank"
+   class="btn btn-sm btn-download-source-button dropdown-item"
+   title="Download source file"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file"></i>
+  </span>
+<span class="btn__text-container">.ipynb</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li>
+<button onclick="window.print()"
+  class="btn btn-sm btn-download-pdf-button dropdown-item"
+  title="Print to PDF"
+  data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file-pdf"></i>
+  </span>
+<span class="btn__text-container">.pdf</span>
+</button>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+<button onclick="toggleFullScreen()"
+  class="btn btn-sm btn-fullscreen-button"
+  title="Fullscreen mode"
+  data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-expand"></i>
+  </span>
+
+</button>
+
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"></i>
+  </button>
+`);
+</script>
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm pst-navbar-icon search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+  </button>
+`);
+</script>
+<button class="sidebar-toggle secondary-toggle btn btn-sm" title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="fa-solid fa-list"></span>
+</button>
+</div></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1>Export Patterns: Subsets, Snapshots, Reproducible Filters</h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+            <div>
+                <h2> Contents </h2>
+            </div>
+            <nav aria-label="Page">
+                <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#creating-data-subsets">1. Creating Data Subsets</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#creating-temporal-snapshots">2. Creating Temporal Snapshots</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#reproducible-filters">3. Reproducible Filters</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#export-pipeline-integration">4. Export Pipeline Integration</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#summary">Summary</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#exercise">Exercise</a></li>
+</ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section class="tex2jax_ignore mathjax_ignore" id="export-patterns-subsets-snapshots-reproducible-filters">
+<h1>Export Patterns: Subsets, Snapshots, Reproducible Filters<a class="headerlink" href="#export-patterns-subsets-snapshots-reproducible-filters" title="Link to this heading">#</a></h1>
+<p>In medical data integration, it’s crucial to create reproducible and well-documented data exports. This notebook covers three essential export patterns: creating data subsets, taking temporal snapshots, and implementing reproducible filters. These techniques ensure data consistency across research teams and enable reliable analysis workflows.</p>
+<p>Let’s start by importing the necessary libraries and creating a sample medical dataset that simulates patient records with temporal information.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">datetime</span><span class="w"> </span><span class="kn">import</span> <span class="n">datetime</span><span class="p">,</span> <span class="n">timedelta</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">hashlib</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">warnings</span>
+<span class="n">warnings</span><span class="o">.</span><span class="n">filterwarnings</span><span class="p">(</span><span class="s1">&#39;ignore&#39;</span><span class="p">)</span>
+
+<span class="c1"># Set random seed for reproducibility</span>
+<span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="mi">42</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>Now we’ll create a synthetic medical dataset with patient information, including demographics, lab results, and visit dates.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Create synthetic medical data</span>
+<span class="n">n_patients</span> <span class="o">=</span> <span class="mi">1000</span>
+<span class="n">base_date</span> <span class="o">=</span> <span class="n">datetime</span><span class="p">(</span><span class="mi">2020</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+
+<span class="c1"># Generate patient data</span>
+<span class="n">patients_data</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">&#39;patient_id&#39;</span><span class="p">:</span> <span class="p">[</span><span class="sa">f</span><span class="s1">&#39;P_</span><span class="si">{</span><span class="n">i</span><span class="si">:</span><span class="s1">04d</span><span class="si">}</span><span class="s1">&#39;</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">n_patients</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)],</span>
+    <span class="s1">&#39;age&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mi">55</span><span class="p">,</span> <span class="mi">15</span><span class="p">,</span> <span class="n">n_patients</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">),</span>
+    <span class="s1">&#39;gender&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">([</span><span class="s1">&#39;M&#39;</span><span class="p">,</span> <span class="s1">&#39;F&#39;</span><span class="p">],</span> <span class="n">n_patients</span><span class="p">),</span>
+    <span class="s1">&#39;diagnosis&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">([</span><span class="s1">&#39;Diabetes&#39;</span><span class="p">,</span> <span class="s1">&#39;Hypertension&#39;</span><span class="p">,</span> <span class="s1">&#39;Asthma&#39;</span><span class="p">,</span> <span class="s1">&#39;Obesity&#39;</span><span class="p">,</span> <span class="s1">&#39;Healthy&#39;</span><span class="p">],</span> <span class="n">n_patients</span><span class="p">),</span>
+    <span class="s1">&#39;admission_date&#39;</span><span class="p">:</span> <span class="p">[</span><span class="n">base_date</span> <span class="o">+</span> <span class="n">timedelta</span><span class="p">(</span><span class="n">days</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1095</span><span class="p">))</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_patients</span><span class="p">)],</span>
+    <span class="s1">&#39;glucose_level&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mi">100</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="n">n_patients</span><span class="p">),</span>
+    <span class="s1">&#39;blood_pressure_sys&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mi">120</span><span class="p">,</span> <span class="mi">15</span><span class="p">,</span> <span class="n">n_patients</span><span class="p">),</span>
+    <span class="s1">&#39;blood_pressure_dia&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mi">80</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="n">n_patients</span><span class="p">),</span>
+    <span class="s1">&#39;hospital&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">([</span><span class="s1">&#39;Hospital_A&#39;</span><span class="p">,</span> <span class="s1">&#39;Hospital_B&#39;</span><span class="p">,</span> <span class="s1">&#39;Hospital_C&#39;</span><span class="p">],</span> <span class="n">n_patients</span><span class="p">)</span>
+<span class="p">}</span>
+
+<span class="n">df_patients</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">patients_data</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Created dataset with </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">df_patients</span><span class="p">)</span><span class="si">}</span><span class="s2"> patients&quot;</span><span class="p">)</span>
+<span class="n">df_patients</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Created dataset with 1000 patients
+</pre></div>
+</div>
+<div class="output text_html"><div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>patient_id</th>
+      <th>age</th>
+      <th>gender</th>
+      <th>diagnosis</th>
+      <th>admission_date</th>
+      <th>glucose_level</th>
+      <th>blood_pressure_sys</th>
+      <th>blood_pressure_dia</th>
+      <th>hospital</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>P_0001</td>
+      <td>62</td>
+      <td>M</td>
+      <td>Asthma</td>
+      <td>2022-04-29</td>
+      <td>84.600079</td>
+      <td>124.745375</td>
+      <td>87.309590</td>
+      <td>Hospital_B</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>P_0002</td>
+      <td>52</td>
+      <td>F</td>
+      <td>Diabetes</td>
+      <td>2020-12-19</td>
+      <td>74.077667</td>
+      <td>106.721270</td>
+      <td>73.493402</td>
+      <td>Hospital_C</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>P_0003</td>
+      <td>64</td>
+      <td>M</td>
+      <td>Healthy</td>
+      <td>2022-05-22</td>
+      <td>90.877583</td>
+      <td>122.715941</td>
+      <td>59.096971</td>
+      <td>Hospital_C</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>P_0004</td>
+      <td>77</td>
+      <td>F</td>
+      <td>Asthma</td>
+      <td>2022-09-17</td>
+      <td>103.628532</td>
+      <td>139.549171</td>
+      <td>78.297418</td>
+      <td>Hospital_A</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>P_0005</td>
+      <td>51</td>
+      <td>M</td>
+      <td>Asthma</td>
+      <td>2022-10-14</td>
+      <td>111.900589</td>
+      <td>128.792487</td>
+      <td>77.343954</td>
+      <td>Hospital_A</td>
+    </tr>
+  </tbody>
+</table>
+</div></div></div>
+</div>
+<p>Let’s examine the basic characteristics of our dataset to understand its structure and temporal distribution.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Basic dataset information</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Dataset Overview:&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Date range: </span><span class="si">{</span><span class="n">df_patients</span><span class="p">[</span><span class="s1">&#39;admission_date&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">min</span><span class="p">()</span><span class="si">}</span><span class="s2"> to </span><span class="si">{</span><span class="n">df_patients</span><span class="p">[</span><span class="s1">&#39;admission_date&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">max</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Diagnosis distribution:&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">df_patients</span><span class="p">[</span><span class="s1">&#39;diagnosis&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value_counts</span><span class="p">())</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Hospital distribution:&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">df_patients</span><span class="p">[</span><span class="s1">&#39;hospital&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value_counts</span><span class="p">())</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Dataset Overview:
+Date range: 2020-01-03 00:00:00 to 2022-12-30 00:00:00
+
+Diagnosis distribution:
+diagnosis
+Obesity         215
+Asthma          209
+Healthy         202
+Diabetes        198
+Hypertension    176
+Name: count, dtype: int64
+
+Hospital distribution:
+hospital
+Hospital_A    370
+Hospital_C    341
+Hospital_B    289
+Name: count, dtype: int64
+</pre></div>
+</div>
+</div>
+</div>
+<section id="creating-data-subsets">
+<h2>1. Creating Data Subsets<a class="headerlink" href="#creating-data-subsets" title="Link to this heading">#</a></h2>
+<p>Data subsets allow us to extract specific portions of the dataset based on clinical criteria. We’ll create a function that generates subsets based on multiple conditions.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">create_subset</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">conditions</span><span class="p">,</span> <span class="n">subset_name</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Create a data subset based on multiple conditions</span>
+<span class="sd">    </span>
+<span class="sd">    Parameters:</span>
+<span class="sd">    df: pandas DataFrame</span>
+<span class="sd">    conditions: dict with column names as keys and filter conditions as values</span>
+<span class="sd">    subset_name: string identifier for the subset</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">subset_df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    <span class="n">filter_log</span> <span class="o">=</span> <span class="p">[]</span>
+    
+    <span class="k">for</span> <span class="n">column</span><span class="p">,</span> <span class="n">condition</span> <span class="ow">in</span> <span class="n">conditions</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="n">initial_count</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">subset_df</span><span class="p">)</span>
+        
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">condition</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+            <span class="c1"># Filter for values in list</span>
+            <span class="n">subset_df</span> <span class="o">=</span> <span class="n">subset_df</span><span class="p">[</span><span class="n">subset_df</span><span class="p">[</span><span class="n">column</span><span class="p">]</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="n">condition</span><span class="p">)]</span>
+            <span class="n">filter_log</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">column</span><span class="si">}</span><span class="s2"> in </span><span class="si">{</span><span class="n">condition</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">initial_count</span><span class="si">}</span><span class="s2"> -&gt; </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">subset_df</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">condition</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+            <span class="c1"># Handle range conditions</span>
+            <span class="k">if</span> <span class="s1">&#39;min&#39;</span> <span class="ow">in</span> <span class="n">condition</span><span class="p">:</span>
+                <span class="n">subset_df</span> <span class="o">=</span> <span class="n">subset_df</span><span class="p">[</span><span class="n">subset_df</span><span class="p">[</span><span class="n">column</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="n">condition</span><span class="p">[</span><span class="s1">&#39;min&#39;</span><span class="p">]]</span>
+            <span class="k">if</span> <span class="s1">&#39;max&#39;</span> <span class="ow">in</span> <span class="n">condition</span><span class="p">:</span>
+                <span class="n">subset_df</span> <span class="o">=</span> <span class="n">subset_df</span><span class="p">[</span><span class="n">subset_df</span><span class="p">[</span><span class="n">column</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">condition</span><span class="p">[</span><span class="s1">&#39;max&#39;</span><span class="p">]]</span>
+            <span class="n">filter_log</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">column</span><span class="si">}</span><span class="s2"> range </span><span class="si">{</span><span class="n">condition</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">initial_count</span><span class="si">}</span><span class="s2"> -&gt; </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">subset_df</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Subset &#39;</span><span class="si">{</span><span class="n">subset_name</span><span class="si">}</span><span class="s2">&#39; created:&quot;</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">log</span> <span class="ow">in</span> <span class="n">filter_log</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  </span><span class="si">{</span><span class="n">log</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Final subset size: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">subset_df</span><span class="p">)</span><span class="si">}</span><span class="s2"> patients&quot;</span><span class="p">)</span>
+    
+    <span class="k">return</span> <span class="n">subset_df</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>Now let’s create a specific subset for diabetic patients with certain age and glucose criteria.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Create subset: Diabetic patients with specific criteria</span>
+<span class="n">diabetes_conditions</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">&#39;diagnosis&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;Diabetes&#39;</span><span class="p">],</span>
+    <span class="s1">&#39;age&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;min&#39;</span><span class="p">:</span> <span class="mi">40</span><span class="p">,</span> <span class="s1">&#39;max&#39;</span><span class="p">:</span> <span class="mi">70</span><span class="p">},</span>
+    <span class="s1">&#39;glucose_level&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;min&#39;</span><span class="p">:</span> <span class="mi">110</span><span class="p">}</span>
+<span class="p">}</span>
+
+<span class="n">diabetes_subset</span> <span class="o">=</span> <span class="n">create_subset</span><span class="p">(</span><span class="n">df_patients</span><span class="p">,</span> <span class="n">diabetes_conditions</span><span class="p">,</span> <span class="s1">&#39;Diabetes_40-70_HighGlucose&#39;</span><span class="p">)</span>
+<span class="n">diabetes_subset</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Subset &#39;Diabetes_40-70_HighGlucose&#39; created:
+  diagnosis in [&#39;Diabetes&#39;]: 1000 -&gt; 198
+  age range {&#39;min&#39;: 40, &#39;max&#39;: 70}: 198 -&gt; 134
+  glucose_level range {&#39;min&#39;: 110}: 134 -&gt; 49
+Final subset size: 49 patients
+</pre></div>
+</div>
+<div class="output text_html"><div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>patient_id</th>
+      <th>age</th>
+      <th>gender</th>
+      <th>diagnosis</th>
+      <th>admission_date</th>
+      <th>glucose_level</th>
+      <th>blood_pressure_sys</th>
+      <th>blood_pressure_dia</th>
+      <th>hospital</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>29</th>
+      <td>P_0030</td>
+      <td>50</td>
+      <td>M</td>
+      <td>Diabetes</td>
+      <td>2021-09-23</td>
+      <td>116.283035</td>
+      <td>93.103403</td>
+      <td>77.522476</td>
+      <td>Hospital_B</td>
+    </tr>
+    <tr>
+      <th>51</th>
+      <td>P_0052</td>
+      <td>49</td>
+      <td>M</td>
+      <td>Diabetes</td>
+      <td>2020-07-28</td>
+      <td>132.519178</td>
+      <td>125.696515</td>
+      <td>72.412347</td>
+      <td>Hospital_A</td>
+    </tr>
+    <tr>
+      <th>52</th>
+      <td>P_0053</td>
+      <td>44</td>
+      <td>M</td>
+      <td>Diabetes</td>
+      <td>2022-01-10</td>
+      <td>144.375605</td>
+      <td>105.479314</td>
+      <td>93.508523</td>
+      <td>Hospital_C</td>
+    </tr>
+    <tr>
+      <th>56</th>
+      <td>P_0057</td>
+      <td>42</td>
+      <td>M</td>
+      <td>Diabetes</td>
+      <td>2021-10-10</td>
+      <td>129.538689</td>
+      <td>134.683343</td>
+      <td>86.855897</td>
+      <td>Hospital_C</td>
+    </tr>
+    <tr>
+      <th>77</th>
+      <td>P_0078</td>
+      <td>50</td>
+      <td>M</td>
+      <td>Diabetes</td>
+      <td>2021-07-18</td>
+      <td>113.627190</td>
+      <td>116.765856</td>
+      <td>66.494440</td>
+      <td>Hospital_C</td>
+    </tr>
+  </tbody>
+</table>
+</div></div></div>
+</div>
+<p>Let’s create another subset focusing on patients from specific hospitals with hypertension.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Create subset: Hypertension patients from specific hospitals</span>
+<span class="n">hypertension_conditions</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">&#39;diagnosis&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;Hypertension&#39;</span><span class="p">],</span>
+    <span class="s1">&#39;hospital&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;Hospital_A&#39;</span><span class="p">,</span> <span class="s1">&#39;Hospital_B&#39;</span><span class="p">],</span>
+    <span class="s1">&#39;blood_pressure_sys&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;min&#39;</span><span class="p">:</span> <span class="mi">130</span><span class="p">}</span>
+<span class="p">}</span>
+
+<span class="n">hypertension_subset</span> <span class="o">=</span> <span class="n">create_subset</span><span class="p">(</span><span class="n">df_patients</span><span class="p">,</span> <span class="n">hypertension_conditions</span><span class="p">,</span> <span class="s1">&#39;Hypertension_HospAB_HighBP&#39;</span><span class="p">)</span>
+<span class="n">hypertension_subset</span><span class="o">.</span><span class="n">describe</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Subset &#39;Hypertension_HospAB_HighBP&#39; created:
+  diagnosis in [&#39;Hypertension&#39;]: 1000 -&gt; 176
+  hospital in [&#39;Hospital_A&#39;, &#39;Hospital_B&#39;]: 176 -&gt; 115
+  blood_pressure_sys range {&#39;min&#39;: 130}: 115 -&gt; 26
+Final subset size: 26 patients
+</pre></div>
+</div>
+<div class="output text_html"><div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>age</th>
+      <th>admission_date</th>
+      <th>glucose_level</th>
+      <th>blood_pressure_sys</th>
+      <th>blood_pressure_dia</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>count</th>
+      <td>26.000000</td>
+      <td>26</td>
+      <td>26.000000</td>
+      <td>26.000000</td>
+      <td>26.000000</td>
+    </tr>
+    <tr>
+      <th>mean</th>
+      <td>55.961538</td>
+      <td>2021-07-09 18:27:41.538461440</td>
+      <td>104.250918</td>
+      <td>139.636405</td>
+      <td>78.499770</td>
+    </tr>
+    <tr>
+      <th>min</th>
+      <td>24.000000</td>
+      <td>2020-01-20 00:00:00</td>
+      <td>66.867536</td>
+      <td>130.658237</td>
+      <td>58.087461</td>
+    </tr>
+    <tr>
+      <th>25%</th>
+      <td>51.000000</td>
+      <td>2020-12-01 00:00:00</td>
+      <td>92.780618</td>
+      <td>134.059704</td>
+      <td>72.975822</td>
+    </tr>
+    <tr>
+      <th>50%</th>
+      <td>55.000000</td>
+      <td>2021-07-08 12:00:00</td>
+      <td>106.500608</td>
+      <td>138.821596</td>
+      <td>78.638687</td>
+    </tr>
+    <tr>
+      <th>75%</th>
+      <td>64.750000</td>
+      <td>2022-03-07 00:00:00</td>
+      <td>115.116613</td>
+      <td>140.893893</td>
+      <td>83.887794</td>
+    </tr>
+    <tr>
+      <th>max</th>
+      <td>91.000000</td>
+      <td>2022-12-19 00:00:00</td>
+      <td>140.937244</td>
+      <td>162.219817</td>
+      <td>97.045921</td>
+    </tr>
+    <tr>
+      <th>std</th>
+      <td>13.791246</td>
+      <td>NaN</td>
+      <td>20.087026</td>
+      <td>7.820617</td>
+      <td>8.631747</td>
+    </tr>
+  </tbody>
+</table>
+</div></div></div>
+</div>
+</section>
+<section id="creating-temporal-snapshots">
+<h2>2. Creating Temporal Snapshots<a class="headerlink" href="#creating-temporal-snapshots" title="Link to this heading">#</a></h2>
+<p>Temporal snapshots capture the state of data at specific time points, which is crucial for longitudinal medical studies. We’ll create functions to generate snapshots based on admission dates.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">create_temporal_snapshot</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">snapshot_date</span><span class="p">,</span> <span class="n">date_column</span><span class="o">=</span><span class="s1">&#39;admission_date&#39;</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Create a snapshot of data up to a specific date</span>
+<span class="sd">    </span>
+<span class="sd">    Parameters:</span>
+<span class="sd">    df: pandas DataFrame</span>
+<span class="sd">    snapshot_date: datetime object or string</span>
+<span class="sd">    date_column: column name containing dates</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">snapshot_date</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="n">snapshot_date</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">(</span><span class="n">snapshot_date</span><span class="p">)</span>
+    
+    <span class="n">snapshot_df</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">df</span><span class="p">[</span><span class="n">date_column</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">snapshot_date</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    
+    <span class="n">snapshot_info</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">&#39;snapshot_date&#39;</span><span class="p">:</span> <span class="n">snapshot_date</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s1">&#39;%Y-%m-</span><span class="si">%d</span><span class="s1">&#39;</span><span class="p">),</span>
+        <span class="s1">&#39;total_records&#39;</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">snapshot_df</span><span class="p">),</span>
+        <span class="s1">&#39;date_range&#39;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">snapshot_df</span><span class="p">[</span><span class="n">date_column</span><span class="p">]</span><span class="o">.</span><span class="n">min</span><span class="p">()</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s1">&#39;%Y-%m-</span><span class="si">%d</span><span class="s1">&#39;</span><span class="p">)</span><span class="si">}</span><span class="s2"> to </span><span class="si">{</span><span class="n">snapshot_df</span><span class="p">[</span><span class="n">date_column</span><span class="p">]</span><span class="o">.</span><span class="n">max</span><span class="p">()</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s1">&#39;%Y-%m-</span><span class="si">%d</span><span class="s1">&#39;</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+        <span class="s1">&#39;created_at&#39;</span><span class="p">:</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s1">&#39;%Y-%m-</span><span class="si">%d</span><span class="s1"> %H:%M:%S&#39;</span><span class="p">)</span>
+    <span class="p">}</span>
+    
+    <span class="k">return</span> <span class="n">snapshot_df</span><span class="p">,</span> <span class="n">snapshot_info</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>Let’s create snapshots for different time points to see how our patient population evolved over time.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Create snapshots for different time points</span>
+<span class="n">snapshot_dates</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;2021-01-01&#39;</span><span class="p">,</span> <span class="s1">&#39;2021-12-31&#39;</span><span class="p">,</span> <span class="s1">&#39;2022-12-31&#39;</span><span class="p">]</span>
+
+<span class="n">snapshots</span> <span class="o">=</span> <span class="p">{}</span>
+<span class="k">for</span> <span class="n">date</span> <span class="ow">in</span> <span class="n">snapshot_dates</span><span class="p">:</span>
+    <span class="n">snapshot_df</span><span class="p">,</span> <span class="n">snapshot_info</span> <span class="o">=</span> <span class="n">create_temporal_snapshot</span><span class="p">(</span><span class="n">df_patients</span><span class="p">,</span> <span class="n">date</span><span class="p">)</span>
+    <span class="n">snapshots</span><span class="p">[</span><span class="n">date</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;data&#39;</span><span class="p">:</span> <span class="n">snapshot_df</span><span class="p">,</span> <span class="s1">&#39;info&#39;</span><span class="p">:</span> <span class="n">snapshot_info</span><span class="p">}</span>
+    
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Snapshot </span><span class="si">{</span><span class="n">date</span><span class="si">}</span><span class="s2">:&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  Records: </span><span class="si">{</span><span class="n">snapshot_info</span><span class="p">[</span><span class="s1">&#39;total_records&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  Date range: </span><span class="si">{</span><span class="n">snapshot_info</span><span class="p">[</span><span class="s1">&#39;date_range&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Snapshot 2021-01-01:
+  Records: 324
+  Date range: 2020-01-03 to 2021-01-01
+
+Snapshot 2021-12-31:
+  Records: 673
+  Date range: 2020-01-03 to 2021-12-29
+
+Snapshot 2022-12-31:
+  Records: 1000
+  Date range: 2020-01-03 to 2022-12-30
+</pre></div>
+</div>
+</div>
+</div>
+<p>Let’s compare the diagnosis distribution across different snapshots to observe temporal trends.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Compare diagnosis distribution across snapshots</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Diagnosis distribution across temporal snapshots:&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;=&quot;</span> <span class="o">*</span> <span class="mi">50</span><span class="p">)</span>
+
+<span class="k">for</span> <span class="n">date</span><span class="p">,</span> <span class="n">snapshot</span> <span class="ow">in</span> <span class="n">snapshots</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Snapshot </span><span class="si">{</span><span class="n">date</span><span class="si">}</span><span class="s2"> (</span><span class="si">{</span><span class="n">snapshot</span><span class="p">[</span><span class="s1">&#39;info&#39;</span><span class="p">][</span><span class="s1">&#39;total_records&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2"> patients):&quot;</span><span class="p">)</span>
+    <span class="n">diagnosis_counts</span> <span class="o">=</span> <span class="n">snapshot</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">][</span><span class="s1">&#39;diagnosis&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value_counts</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">diagnosis</span><span class="p">,</span> <span class="n">count</span> <span class="ow">in</span> <span class="n">diagnosis_counts</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="n">percentage</span> <span class="o">=</span> <span class="p">(</span><span class="n">count</span> <span class="o">/</span> <span class="n">snapshot</span><span class="p">[</span><span class="s1">&#39;info&#39;</span><span class="p">][</span><span class="s1">&#39;total_records&#39;</span><span class="p">])</span> <span class="o">*</span> <span class="mi">100</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  </span><span class="si">{</span><span class="n">diagnosis</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">count</span><span class="si">}</span><span class="s2"> (</span><span class="si">{</span><span class="n">percentage</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2">%)&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Diagnosis distribution across temporal snapshots:
+==================================================
+
+Snapshot 2021-01-01 (324 patients):
+  Obesity: 74 (22.8%)
+  Diabetes: 71 (21.9%)
+  Healthy: 64 (19.8%)
+  Asthma: 58 (17.9%)
+  Hypertension: 57 (17.6%)
+
+Snapshot 2021-12-31 (673 patients):
+  Obesity: 147 (21.8%)
+  Diabetes: 141 (21.0%)
+  Healthy: 139 (20.7%)
+  Asthma: 130 (19.3%)
+  Hypertension: 116 (17.2%)
+
+Snapshot 2022-12-31 (1000 patients):
+  Obesity: 215 (21.5%)
+  Asthma: 209 (20.9%)
+  Healthy: 202 (20.2%)
+  Diabetes: 198 (19.8%)
+  Hypertension: 176 (17.6%)
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="reproducible-filters">
+<h2>3. Reproducible Filters<a class="headerlink" href="#reproducible-filters" title="Link to this heading">#</a></h2>
+<p>Reproducible filters ensure that the same filtering criteria can be applied consistently across different analyses. We’ll create a system to save and load filter configurations.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">ReproducibleFilter</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">description</span> <span class="o">=</span> <span class="n">description</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">conditions</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">metadata</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;created_at&#39;</span><span class="p">:</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span><span class="o">.</span><span class="n">isoformat</span><span class="p">(),</span>
+            <span class="s1">&#39;version&#39;</span><span class="p">:</span> <span class="s1">&#39;1.0&#39;</span>
+        <span class="p">}</span>
+    
+    <span class="k">def</span><span class="w"> </span><span class="nf">add_condition</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">column</span><span class="p">,</span> <span class="n">condition_type</span><span class="p">,</span> <span class="n">values</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Add a filter condition&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">conditions</span><span class="p">[</span><span class="n">column</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="n">condition_type</span><span class="p">,</span>
+            <span class="s1">&#39;values&#39;</span><span class="p">:</span> <span class="n">values</span>
+        <span class="p">}</span>
+        <span class="k">return</span> <span class="bp">self</span>
+    
+    <span class="k">def</span><span class="w"> </span><span class="nf">apply</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Apply filter to dataframe&quot;&quot;&quot;</span>
+        <span class="n">filtered_df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">filter_log</span> <span class="o">=</span> <span class="p">[]</span>
+        
+        <span class="k">for</span> <span class="n">column</span><span class="p">,</span> <span class="n">condition</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">conditions</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">initial_count</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">filtered_df</span><span class="p">)</span>
+            
+            <span class="k">if</span> <span class="n">condition</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;in&#39;</span><span class="p">:</span>
+                <span class="n">filtered_df</span> <span class="o">=</span> <span class="n">filtered_df</span><span class="p">[</span><span class="n">filtered_df</span><span class="p">[</span><span class="n">column</span><span class="p">]</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="n">condition</span><span class="p">[</span><span class="s1">&#39;values&#39;</span><span class="p">])]</span>
+            <span class="k">elif</span> <span class="n">condition</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;range&#39;</span><span class="p">:</span>
+                <span class="k">if</span> <span class="s1">&#39;min&#39;</span> <span class="ow">in</span> <span class="n">condition</span><span class="p">[</span><span class="s1">&#39;values&#39;</span><span class="p">]:</span>
+                    <span class="n">filtered_df</span> <span class="o">=</span> <span class="n">filtered_df</span><span class="p">[</span><span class="n">filtered_df</span><span class="p">[</span><span class="n">column</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="n">condition</span><span class="p">[</span><span class="s1">&#39;values&#39;</span><span class="p">][</span><span class="s1">&#39;min&#39;</span><span class="p">]]</span>
+                <span class="k">if</span> <span class="s1">&#39;max&#39;</span> <span class="ow">in</span> <span class="n">condition</span><span class="p">[</span><span class="s1">&#39;values&#39;</span><span class="p">]:</span>
+                    <span class="n">filtered_df</span> <span class="o">=</span> <span class="n">filtered_df</span><span class="p">[</span><span class="n">filtered_df</span><span class="p">[</span><span class="n">column</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">condition</span><span class="p">[</span><span class="s1">&#39;values&#39;</span><span class="p">][</span><span class="s1">&#39;max&#39;</span><span class="p">]]</span>
+            <span class="k">elif</span> <span class="n">condition</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;greater_than&#39;</span><span class="p">:</span>
+                <span class="n">filtered_df</span> <span class="o">=</span> <span class="n">filtered_df</span><span class="p">[</span><span class="n">filtered_df</span><span class="p">[</span><span class="n">column</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">condition</span><span class="p">[</span><span class="s1">&#39;values&#39;</span><span class="p">]]</span>
+            <span class="k">elif</span> <span class="n">condition</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;less_than&#39;</span><span class="p">:</span>
+                <span class="n">filtered_df</span> <span class="o">=</span> <span class="n">filtered_df</span><span class="p">[</span><span class="n">filtered_df</span><span class="p">[</span><span class="n">column</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">condition</span><span class="p">[</span><span class="s1">&#39;values&#39;</span><span class="p">]]</span>
+            
+            <span class="n">filter_log</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">column</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">initial_count</span><span class="si">}</span><span class="s2"> -&gt; </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">filtered_df</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        
+        <span class="k">return</span> <span class="n">filtered_df</span><span class="p">,</span> <span class="n">filter_log</span>
+    
+    <span class="k">def</span><span class="w"> </span><span class="nf">save_config</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filepath</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Save filter configuration to JSON file&quot;&quot;&quot;</span>
+        <span class="n">config</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;name&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+            <span class="s1">&#39;description&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">description</span><span class="p">,</span>
+            <span class="s1">&#39;conditions&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">conditions</span><span class="p">,</span>
+            <span class="s1">&#39;metadata&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">metadata</span>
+        <span class="p">}</span>
+        
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">filepath</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+        
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Filter configuration saved to </span><span class="si">{</span><span class="n">filepath</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">load_config</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">filepath</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Load filter configuration from JSON file&quot;&quot;&quot;</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">filepath</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="n">config</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+        
+        <span class="n">filter_obj</span> <span class="o">=</span> <span class="bp">cls</span><span class="p">(</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">],</span> <span class="n">config</span><span class="p">[</span><span class="s1">&#39;description&#39;</span><span class="p">])</span>
+        <span class="n">filter_obj</span><span class="o">.</span><span class="n">conditions</span> <span class="o">=</span> <span class="n">config</span><span class="p">[</span><span class="s1">&#39;conditions&#39;</span><span class="p">]</span>
+        <span class="n">filter_obj</span><span class="o">.</span><span class="n">metadata</span> <span class="o">=</span> <span class="n">config</span><span class="p">[</span><span class="s1">&#39;metadata&#39;</span><span class="p">]</span>
+        
+        <span class="k">return</span> <span class="n">filter_obj</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>Now let’s create and configure a reproducible filter for high-risk patients.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Create a reproducible filter for high-risk patients</span>
+<span class="n">high_risk_filter</span> <span class="o">=</span> <span class="n">ReproducibleFilter</span><span class="p">(</span>
+    <span class="n">name</span><span class="o">=</span><span class="s2">&quot;High_Risk_Patients_v1&quot;</span><span class="p">,</span>
+    <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Filter for patients with elevated cardiovascular risk factors&quot;</span>
+<span class="p">)</span>
+
+<span class="c1"># Add conditions to the filter</span>
+<span class="n">high_risk_filter</span><span class="o">.</span><span class="n">add_condition</span><span class="p">(</span><span class="s1">&#39;age&#39;</span><span class="p">,</span> <span class="s1">&#39;greater_than&#39;</span><span class="p">,</span> <span class="mi">50</span><span class="p">)</span>
+<span class="n">high_risk_filter</span><span class="o">.</span><span class="n">add_condition</span><span class="p">(</span><span class="s1">&#39;blood_pressure_sys&#39;</span><span class="p">,</span> <span class="s1">&#39;greater_than&#39;</span><span class="p">,</span> <span class="mi">130</span><span class="p">)</span>
+<span class="n">high_risk_filter</span><span class="o">.</span><span class="n">add_condition</span><span class="p">(</span><span class="s1">&#39;diagnosis&#39;</span><span class="p">,</span> <span class="s1">&#39;in&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;Diabetes&#39;</span><span class="p">,</span> <span class="s1">&#39;Hypertension&#39;</span><span class="p">])</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Created filter: </span><span class="si">{</span><span class="n">high_risk_filter</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Description: </span><span class="si">{</span><span class="n">high_risk_filter</span><span class="o">.</span><span class="n">description</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Conditions: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">high_risk_filter</span><span class="o">.</span><span class="n">conditions</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Created filter: High_Risk_Patients_v1
+Description: Filter for patients with elevated cardiovascular risk factors
+Conditions: 3
+</pre></div>
+</div>
+</div>
+</div>
+<p>Let’s apply the reproducible filter to our dataset and examine the results.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Apply the filter</span>
+<span class="n">filtered_data</span><span class="p">,</span> <span class="n">log</span> <span class="o">=</span> <span class="n">high_risk_filter</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">df_patients</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Filter application log:&quot;</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">entry</span> <span class="ow">in</span> <span class="n">log</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  </span><span class="si">{</span><span class="n">entry</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Final filtered dataset: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">filtered_data</span><span class="p">)</span><span class="si">}</span><span class="s2"> patients&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Filtered data characteristics:&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">filtered_data</span><span class="p">[[</span><span class="s1">&#39;age&#39;</span><span class="p">,</span> <span class="s1">&#39;diagnosis&#39;</span><span class="p">,</span> <span class="s1">&#39;blood_pressure_sys&#39;</span><span class="p">,</span> <span class="s1">&#39;glucose_level&#39;</span><span class="p">]]</span><span class="o">.</span><span class="n">describe</span><span class="p">())</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Filter application log:
+  age: 1000 -&gt; 611
+  blood_pressure_sys: 611 -&gt; 145
+  diagnosis: 145 -&gt; 58
+
+Final filtered dataset: 58 patients
+
+Filtered data characteristics:
+             age  blood_pressure_sys  glucose_level
+count  58.000000           58.000000      58.000000
+mean   64.465517          138.510543     100.958458
+std    10.453264            6.310871      21.473827
+min    51.000000          130.203305      57.887061
+25%    56.000000          133.199292      84.479159
+50%    63.500000          137.715145      99.863525
+75%    71.000000          141.663767     115.083356
+max    91.000000          162.219817     146.158325
+</pre></div>
+</div>
+</div>
+</div>
+<p>Now we’ll save the filter configuration to ensure reproducibility across different analysis sessions.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Save the filter configuration</span>
+<span class="n">filter_path</span> <span class="o">=</span> <span class="s2">&quot;high_risk_filter_config.json&quot;</span>
+<span class="n">high_risk_filter</span><span class="o">.</span><span class="n">save_config</span><span class="p">(</span><span class="n">filter_path</span><span class="p">)</span>
+
+<span class="c1"># Demonstrate loading the saved configuration</span>
+<span class="n">loaded_filter</span> <span class="o">=</span> <span class="n">ReproducibleFilter</span><span class="o">.</span><span class="n">load_config</span><span class="p">(</span><span class="n">filter_path</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Loaded filter: </span><span class="si">{</span><span class="n">loaded_filter</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Created at: </span><span class="si">{</span><span class="n">loaded_filter</span><span class="o">.</span><span class="n">metadata</span><span class="p">[</span><span class="s1">&#39;created_at&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Conditions loaded: </span><span class="si">{</span><span class="nb">list</span><span class="p">(</span><span class="n">loaded_filter</span><span class="o">.</span><span class="n">conditions</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Filter configuration saved to high_risk_filter_config.json
+
+Loaded filter: High_Risk_Patients_v1
+Created at: 2025-09-13T16:34:27.740631
+Conditions loaded: [&#39;age&#39;, &#39;blood_pressure_sys&#39;, &#39;diagnosis&#39;]
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="export-pipeline-integration">
+<h2>4. Export Pipeline Integration<a class="headerlink" href="#export-pipeline-integration" title="Link to this heading">#</a></h2>
+<p>Let’s combine all three export patterns into a comprehensive pipeline that creates documented, reproducible exports.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">create_export_pipeline</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">filter_obj</span><span class="p">,</span> <span class="n">snapshot_date</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">export_name</span><span class="o">=</span><span class="s2">&quot;medical_export&quot;</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Comprehensive export pipeline combining filters, snapshots, and documentation</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">pipeline_info</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">&#39;export_name&#39;</span><span class="p">:</span> <span class="n">export_name</span><span class="p">,</span>
+        <span class="s1">&#39;original_records&#39;</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">df</span><span class="p">),</span>
+        <span class="s1">&#39;pipeline_steps&#39;</span><span class="p">:</span> <span class="p">[],</span>
+        <span class="s1">&#39;created_at&#39;</span><span class="p">:</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span><span class="o">.</span><span class="n">isoformat</span><span class="p">()</span>
+    <span class="p">}</span>
+    
+    <span class="c1"># Step 1: Apply temporal snapshot if specified</span>
+    <span class="n">current_df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">snapshot_date</span><span class="p">:</span>
+        <span class="n">current_df</span><span class="p">,</span> <span class="n">snapshot_info</span> <span class="o">=</span> <span class="n">create_temporal_snapshot</span><span class="p">(</span><span class="n">current_df</span><span class="p">,</span> <span class="n">snapshot_date</span><span class="p">)</span>
+        <span class="n">pipeline_info</span><span class="p">[</span><span class="s1">&#39;pipeline_steps&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">({</span>
+            <span class="s1">&#39;step&#39;</span><span class="p">:</span> <span class="s1">&#39;temporal_snapshot&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;snapshot_date&#39;</span><span class="p">:</span> <span class="n">snapshot_date</span><span class="p">,</span>
+            <span class="s1">&#39;records_after&#39;</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">current_df</span><span class="p">)</span>
+        <span class="p">})</span>
+    
+    <span class="c1"># Step 2: Apply reproducible filter</span>
+    <span class="n">filtered_df</span><span class="p">,</span> <span class="n">filter_log</span> <span class="o">=</span> <span class="n">filter_obj</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">current_df</span><span class="p">)</span>
+    <span class="n">pipeline_info</span><span class="p">[</span><span class="s1">&#39;pipeline_steps&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">({</span>
+        <span class="s1">&#39;step&#39;</span><span class="p">:</span> <span class="s1">&#39;reproducible_filter&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;filter_name&#39;</span><span class="p">:</span> <span class="n">filter_obj</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+        <span class="s1">&#39;filter_log&#39;</span><span class="p">:</span> <span class="n">filter_log</span><span class="p">,</span>
+        <span class="s1">&#39;records_after&#39;</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">filtered_df</span><span class="p">)</span>
+    <span class="p">})</span>
+    
+    <span class="c1"># Step 3: Generate data hash for integrity checking</span>
+    <span class="n">data_string</span> <span class="o">=</span> <span class="n">filtered_df</span><span class="o">.</span><span class="n">to_string</span><span class="p">()</span>
+    <span class="n">data_hash</span> <span class="o">=</span> <span class="n">hashlib</span><span class="o">.</span><span class="n">md5</span><span class="p">(</span><span class="n">data_string</span><span class="o">.</span><span class="n">encode</span><span class="p">())</span><span class="o">.</span><span class="n">hexdigest</span><span class="p">()</span>
+    <span class="n">pipeline_info</span><span class="p">[</span><span class="s1">&#39;data_hash&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data_hash</span>
+    <span class="n">pipeline_info</span><span class="p">[</span><span class="s1">&#39;final_records&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">filtered_df</span><span class="p">)</span>
+    
+    <span class="k">return</span> <span class="n">filtered_df</span><span class="p">,</span> <span class="n">pipeline_info</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>Let’s execute the complete export pipeline with a temporal snapshot and our high-risk filter.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Execute complete export pipeline</span>
+<span class="n">export_df</span><span class="p">,</span> <span class="n">export_info</span> <span class="o">=</span> <span class="n">create_export_pipeline</span><span class="p">(</span>
+    <span class="n">df_patients</span><span class="p">,</span> 
+    <span class="n">high_risk_filter</span><span class="p">,</span> 
+    <span class="n">snapshot_date</span><span class="o">=</span><span class="s1">&#39;2022-01-01&#39;</span><span class="p">,</span>
+    <span class="n">export_name</span><span class="o">=</span><span class="s2">&quot;HighRisk_2022_Export&quot;</span>
+<span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Export Pipeline Results:&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Export name: </span><span class="si">{</span><span class="n">export_info</span><span class="p">[</span><span class="s1">&#39;export_name&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Original records: </span><span class="si">{</span><span class="n">export_info</span><span class="p">[</span><span class="s1">&#39;original_records&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Final records: </span><span class="si">{</span><span class="n">export_info</span><span class="p">[</span><span class="s1">&#39;final_records&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Data integrity hash: </span><span class="si">{</span><span class="n">export_info</span><span class="p">[</span><span class="s1">&#39;data_hash&#39;</span><span class="p">][:</span><span class="mi">16</span><span class="p">]</span><span class="si">}</span><span class="s2">...&quot;</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Pipeline steps:&quot;</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">step</span> <span class="ow">in</span> <span class="n">export_info</span><span class="p">[</span><span class="s1">&#39;pipeline_steps&#39;</span><span class="p">]:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  </span><span class="si">{</span><span class="n">step</span><span class="p">[</span><span class="s1">&#39;step&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">step</span><span class="p">[</span><span class="s1">&#39;records_after&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2"> records&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Export Pipeline Results:
+Export name: HighRisk_2022_Export
+Original records: 1000
+Final records: 41
+Data integrity hash: 8892aa43fdd594e8...
+
+Pipeline steps:
+  temporal_snapshot: 674 records
+  reproducible_filter: 41 records
+</pre></div>
+</div>
+</div>
+</div>
+<p>Finally, let’s save both the exported data and its metadata for complete reproducibility.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Save export data and metadata</span>
+<span class="n">export_filename</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">export_info</span><span class="p">[</span><span class="s1">&#39;export_name&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">.csv&quot;</span>
+<span class="n">metadata_filename</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">export_info</span><span class="p">[</span><span class="s1">&#39;export_name&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">_metadata.json&quot;</span>
+
+<span class="c1"># Save data</span>
+<span class="n">export_df</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">export_filename</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+<span class="c1"># Save metadata</span>
+<span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">metadata_filename</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+    <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">export_info</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Export completed successfully!&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Data saved to: </span><span class="si">{</span><span class="n">export_filename</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Metadata saved to: </span><span class="si">{</span><span class="n">metadata_filename</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Exported dataset preview:&quot;</span><span class="p">)</span>
+<span class="n">export_df</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Export completed successfully!
+Data saved to: HighRisk_2022_Export.csv
+Metadata saved to: HighRisk_2022_Export_metadata.json
+
+Exported dataset preview:
+</pre></div>
+</div>
+<div class="output text_html"><div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>patient_id</th>
+      <th>age</th>
+      <th>gender</th>
+      <th>diagnosis</th>
+      <th>admission_date</th>
+      <th>glucose_level</th>
+      <th>blood_pressure_sys</th>
+      <th>blood_pressure_dia</th>
+      <th>hospital</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>111</th>
+      <td>P_0112</td>
+      <td>54</td>
+      <td>M</td>
+      <td>Hypertension</td>
+      <td>2021-04-28</td>
+      <td>134.493933</td>
+      <td>130.658237</td>
+      <td>68.799526</td>
+      <td>Hospital_A</td>
+    </tr>
+    <tr>
+      <th>145</th>
+      <td>P_0146</td>
+      <td>66</td>
+      <td>F</td>
+      <td>Hypertension</td>
+      <td>2020-09-23</td>
+      <td>90.889209</td>
+      <td>142.920470</td>
+      <td>58.087461</td>
+      <td>Hospital_A</td>
+    </tr>
+    <tr>
+      <th>191</th>
+      <td>P_0192</td>
+      <td>67</td>
+      <td>F</td>
+      <td>Diabetes</td>
+      <td>2020-09-30</td>
+      <td>83.073680</td>
+      <td>141.709585</td>
+      <td>81.158246</td>
+      <td>Hospital_C</td>
+    </tr>
+    <tr>
+      <th>234</th>
+      <td>P_0235</td>
+      <td>87</td>
+      <td>F</td>
+      <td>Diabetes</td>
+      <td>2021-10-28</td>
+      <td>124.005235</td>
+      <td>152.549049</td>
+      <td>79.420923</td>
+      <td>Hospital_B</td>
+    </tr>
+    <tr>
+      <th>237</th>
+      <td>P_0238</td>
+      <td>57</td>
+      <td>M</td>
+      <td>Diabetes</td>
+      <td>2021-08-23</td>
+      <td>123.078015</td>
+      <td>131.753845</td>
+      <td>64.006052</td>
+      <td>Hospital_C</td>
+    </tr>
+  </tbody>
+</table>
+</div></div></div>
+</div>
+</section>
+<section id="summary">
+<h2>Summary<a class="headerlink" href="#summary" title="Link to this heading">#</a></h2>
+<p>In this notebook, we covered three essential export patterns for medical data integration:</p>
+<ol class="arabic simple">
+<li><p><strong>Data Subsets</strong>: Creating focused datasets based on clinical criteria</p></li>
+<li><p><strong>Temporal Snapshots</strong>: Capturing data state at specific time points for longitudinal studies</p></li>
+<li><p><strong>Reproducible Filters</strong>: Implementing reusable, configurable filtering systems</p></li>
+</ol>
+<p>These patterns ensure data consistency, reproducibility, and proper documentation in medical research workflows.</p>
+</section>
+<section id="exercise">
+<h2>Exercise<a class="headerlink" href="#exercise" title="Link to this heading">#</a></h2>
+<p>Create a comprehensive export for a pediatric study using the patterns learned in this notebook:</p>
+<ol class="arabic simple">
+<li><p><strong>Create a pediatric filter</strong>: Design a ReproducibleFilter for patients aged 0-18 with asthma diagnosis</p></li>
+<li><p><strong>Generate quarterly snapshots</strong>: Create temporal snapshots for each quarter of 2021 (Q1: March 31, Q2: June 30, Q3: September 30, Q4: December 31)</p></li>
+<li><p><strong>Compare trends</strong>: Analyze how the pediatric asthma population changed across these quarters</p></li>
+<li><p><strong>Export pipeline</strong>: Use the export pipeline to create a final dataset combining your filter with the Q4 2021 snapshot</p></li>
+<li><p><strong>Documentation</strong>: Save all configurations and metadata to ensure your analysis can be reproduced</p></li>
+</ol>
+<p><strong>Bonus</strong>: Calculate the percentage change in pediatric asthma cases between Q1 and Q4 2021, and create a filter configuration that could identify patients with concerning vital signs (you define the criteria).</p>
+</section>
+</section>
+
+    <script type="text/x-thebe-config">
+    {
+        requestKernel: true,
+        binderOptions: {
+            repo: "binder-examples/jupyter-stacks-datascience",
+            ref: "master",
+        },
+        codeMirrorConfig: {
+            theme: "abcdef",
+            mode: "python"
+        },
+        kernelOptions: {
+            name: "python3",
+            path: "./."
+        },
+        predefinedOutput: true
+    }
+    </script>
+    <script>kernelName = 'python3'</script>
+
+                </article>
+              
+
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="joins-grouping-windowing-duckdb-sql.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">Joins/Merges, Grouping, and Windowing with DuckDB</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="numpy-xarray-fundamentals-shapes-dtypes-chunking.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">NumPy/xarray Fundamentals: Shapes, Dtypes, and Chunking</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+  <div class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> Contents
+  </div>
+  <nav class="bd-toc-nav page-toc">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#creating-data-subsets">1. Creating Data Subsets</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#creating-temporal-snapshots">2. Creating Temporal Snapshots</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#reproducible-filters">3. Reproducible Filters</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#export-pipeline-integration">4. Export Pipeline Integration</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#summary">Summary</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#exercise">Exercise</a></li>
+</ul>
+  </nav></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+<p class="component-author">
+By AI Generated Content
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+
+  </div>
+  
+  <div class="footer-item">
+    <p class="last-updated">
+  Last updated on Sep 13, 2025.
+  <br/>
+</p>
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+</div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b"></script>
+<script src="_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+  <footer class="bd-footer">
+  </footer>
+  </body>
+</html>

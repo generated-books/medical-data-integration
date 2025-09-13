@@ -1,0 +1,1084 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="./" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Integrity Checks (Hashing) and Small-to-Large File Strategies &#8212; Foundations of Medical Data Integration</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="_static/styles/theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="_static/styles/bootstrap.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="_static/styles/pydata-sphinx-theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+
+  
+  <link href="_static/vendor/fontawesome/6.5.2/css/all.min.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.5.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.5.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.5.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="_static/styles/sphinx-book-theme.css?v=eba8b062" />
+    <link rel="stylesheet" type="text/css" href="_static/togglebutton.css?v=13237357" />
+    <link rel="stylesheet" type="text/css" href="_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="_static/mystnb.8ecb98da25f57f5357bf6f572d296f466b2cfe2517ffebfabe82451661e28f02.css" />
+    <link rel="stylesheet" type="text/css" href="_static/sphinx-thebe.css?v=4fa983c6" />
+    <link rel="stylesheet" type="text/css" href="_static/sphinx-design.min.css?v=95c83b7e" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b" />
+<link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
+  <script src="_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+    <script src="_static/documentation_options.js?v=9eb32ce0"></script>
+    <script src="_static/doctools.js?v=9a2dae69"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="_static/copybutton.js?v=f281be69"></script>
+    <script src="_static/scripts/sphinx-book-theme.js?v=887ef09a"></script>
+    <script>let toggleHintShow = 'Click to show';</script>
+    <script>let toggleHintHide = 'Click to hide';</script>
+    <script>let toggleOpenOnPrint = 'true';</script>
+    <script src="_static/togglebutton.js?v=4a39c7ea"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script src="_static/design-tabs.js?v=f930bc37"></script>
+    <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"; const thebe_selector = ".thebe,.cell"; const thebe_selector_input = "pre"; const thebe_selector_output = ".output, .cell_output"</script>
+    <script async="async" src="_static/sphinx-thebe.js?v=c100c467"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"; const thebe_selector = ".thebe,.cell"; const thebe_selector_input = "pre"; const thebe_selector_output = ".output, .cell_output"</script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'integrity_checks_hashing_file_strategies';</script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Reading and Writing Medical Data: CSV and NDJSON with Pandas and Polars" href="data_io_csv_ndjson_pandas_polars_dtypes_missing.html" />
+    <link rel="prev" title="Local and Cloud Storage with fsspec (s3fs/gcsfs/adlfs), Streaming I/O" href="fsspec_cloud_storage_streaming_io.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+    <meta name="docbuild:last-update" content="Sep 13, 2025"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-primary-sidebar-checkbox"/>
+  <label class="overlay overlay-primary" for="pst-primary-sidebar-checkbox"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-secondary-sidebar-checkbox"/>
+  <label class="overlay overlay-secondary" for="pst-secondary-sidebar-checkbox"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search this book..."
+         aria-label="Search this book..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="intro.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="_static/logo.png" class="logo__image only-light" alt="Foundations of Medical Data Integration - Home"/>
+    <script>document.write(`<img src="_static/logo.png" class="logo__image only-dark" alt="Foundations of Medical Data Integration - Home"/>`);</script>
+  
+  
+</a></div>
+        <div class="sidebar-primary-item">
+
+ <script>
+ document.write(`
+   <button class="btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script></div>
+        <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        <p aria-level="2" class="caption" role="heading"><span class="caption-text">Working with files and folders</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="files_folders_filesystems.html">Files, Folders, and Filesystems in Medical Data Integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="path_handling_portable_io_pathlib.html">Path Handling and Portable I/O with pathlib</a></li>
+<li class="toctree-l1"><a class="reference internal" href="sidecar_metadata_data_dictionaries.html">Sidecar Metadata (JSON/YAML) and Data Dictionaries</a></li>
+<li class="toctree-l1"><a class="reference internal" href="fsspec_cloud_storage_streaming_io.html">Local and Cloud Storage with fsspec (s3fs/gcsfs/adlfs), Streaming I/O</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">File formats</span></p>
+<ul class="current nav bd-sidenav">
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">Integrity Checks (Hashing) and Small-to-Large File Strategies</a></li>
+<li class="toctree-l1"><a class="reference internal" href="data_io_csv_ndjson_pandas_polars_dtypes_missing.html">Reading and Writing Medical Data: CSV and NDJSON with Pandas and Polars</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pandera_schemas_validation_coercion_constraints.html">Schemas and Validation with Pandera</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Wrangling data</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="joins-grouping-windowing-duckdb-sql.html">Joins/Merges, Grouping, and Windowing with DuckDB</a></li>
+<li class="toctree-l1"><a class="reference internal" href="export_patterns_subsets_snapshots_reproducible_filters.html">Export Patterns: Subsets, Snapshots, Reproducible Filters</a></li>
+<li class="toctree-l1"><a class="reference internal" href="numpy-xarray-fundamentals-shapes-dtypes-chunking.html">NumPy/xarray Fundamentals: Shapes, Dtypes, and Chunking</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Data conversion</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="csv-excel-ndjson-to-parquet-arrow-batch-vs-streaming.html">CSV/Excel/NDJSON → Parquet/Arrow: Batch vs Streaming</a></li>
+<li class="toctree-l1"><a class="reference internal" href="longitudinal_data_preprocessing.html">Unit Normalization, Time Alignment, Resampling, and Windowing for Longitudinal Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dask-out-of-core-parallel-conversion-progress-retries-idempotency.html">Out-of-core/Parallel Conversion with Dask: Progress, Retries, and Idempotency</a></li>
+</ul>
+
+    </div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><button class="sidebar-toggle primary-toggle btn btn-sm" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</button></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<div class="article-header-buttons">
+
+
+
+
+
+<div class="dropdown dropdown-launch-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Launch interactive content">
+    <i class="fas fa-rocket"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="https://mybinder.org/v2/gh/generated-books/medical-data-integration/main?urlpath=lab/tree/integrity_checks_hashing_file_strategies.ipynb" target="_blank"
+   class="btn btn-sm dropdown-item"
+   title="Launch on Binder"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  
+    <img alt="Binder logo" src="_static/images/logo_binder.svg">
+  </span>
+<span class="btn__text-container">Binder</span>
+</a>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+
+
+<div class="dropdown dropdown-source-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Source repositories">
+    <i class="fab fa-github"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="https://github.com/generated-books/medical-data-integration" target="_blank"
+   class="btn btn-sm btn-source-repository-button dropdown-item"
+   title="Source repository"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fab fa-github"></i>
+  </span>
+<span class="btn__text-container">Repository</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li><a href="https://github.com/generated-books/medical-data-integration/edit/main/integrity_checks_hashing_file_strategies.ipynb" target="_blank"
+   class="btn btn-sm btn-source-edit-button dropdown-item"
+   title="Suggest edit"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-pencil-alt"></i>
+  </span>
+<span class="btn__text-container">Suggest edit</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li><a href="https://github.com/generated-books/medical-data-integration/issues/new?title=Issue%20on%20page%20%2Fintegrity_checks_hashing_file_strategies.html&body=Your%20issue%20content%20here." target="_blank"
+   class="btn btn-sm btn-source-issues-button dropdown-item"
+   title="Open an issue"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-lightbulb"></i>
+  </span>
+<span class="btn__text-container">Open issue</span>
+</a>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+
+
+<div class="dropdown dropdown-download-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Download this page">
+    <i class="fas fa-download"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="_sources/integrity_checks_hashing_file_strategies.ipynb" target="_blank"
+   class="btn btn-sm btn-download-source-button dropdown-item"
+   title="Download source file"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file"></i>
+  </span>
+<span class="btn__text-container">.ipynb</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li>
+<button onclick="window.print()"
+  class="btn btn-sm btn-download-pdf-button dropdown-item"
+  title="Print to PDF"
+  data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file-pdf"></i>
+  </span>
+<span class="btn__text-container">.pdf</span>
+</button>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+<button onclick="toggleFullScreen()"
+  class="btn btn-sm btn-fullscreen-button"
+  title="Fullscreen mode"
+  data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-expand"></i>
+  </span>
+
+</button>
+
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"></i>
+  </button>
+`);
+</script>
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm pst-navbar-icon search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+  </button>
+`);
+</script>
+<button class="sidebar-toggle secondary-toggle btn btn-sm" title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="fa-solid fa-list"></span>
+</button>
+</div></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1>Integrity Checks (Hashing) and Small-to-Large File Strategies</h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+            <div>
+                <h2> Contents </h2>
+            </div>
+            <nav aria-label="Page">
+                <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#introduction-to-data-integrity-in-medical-context">Introduction to Data Integrity in Medical Context</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#basic-hashing-concepts">Basic Hashing Concepts</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#file-hashing-for-different-file-sizes">File Hashing for Different File Sizes</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#smart-file-processing-strategy">Smart File Processing Strategy</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#creating-an-integrity-manifest">Creating an Integrity Manifest</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#verifying-file-integrity">Verifying File Integrity</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#performance-comparison">Performance Comparison</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#key-takeaways">Key Takeaways</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#exercise">Exercise</a></li>
+</ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section class="tex2jax_ignore mathjax_ignore" id="integrity-checks-hashing-and-small-to-large-file-strategies">
+<h1>Integrity Checks (Hashing) and Small-to-Large File Strategies<a class="headerlink" href="#integrity-checks-hashing-and-small-to-large-file-strategies" title="Link to this heading">#</a></h1>
+<p>In medical data integration, ensuring data integrity throughout the pipeline is crucial for patient safety and regulatory compliance. This notebook covers hashing techniques for integrity verification and strategies for handling files of different sizes in medical data workflows.</p>
+<section id="introduction-to-data-integrity-in-medical-context">
+<h2>Introduction to Data Integrity in Medical Context<a class="headerlink" href="#introduction-to-data-integrity-in-medical-context" title="Link to this heading">#</a></h2>
+<p>Medical data must maintain its integrity from collection to analysis to ensure accurate diagnoses and treatments. Hash functions provide a mathematical way to verify that data hasn’t been corrupted or tampered with during transfer or storage.</p>
+<p>Let’s start by importing the necessary libraries for hashing and file operations.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">hashlib</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">time</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Tuple</span>
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="basic-hashing-concepts">
+<h2>Basic Hashing Concepts<a class="headerlink" href="#basic-hashing-concepts" title="Link to this heading">#</a></h2>
+<p>We’ll create a simple function to generate MD5 and SHA-256 hashes for different types of data. These algorithms produce fixed-length strings that uniquely represent the input data.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">generate_hash</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">algorithm</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;sha256&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Generate hash for given data using specified algorithm.&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">algorithm</span> <span class="o">==</span> <span class="s1">&#39;md5&#39;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">hashlib</span><span class="o">.</span><span class="n">md5</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">encode</span><span class="p">())</span><span class="o">.</span><span class="n">hexdigest</span><span class="p">()</span>
+    <span class="k">elif</span> <span class="n">algorithm</span> <span class="o">==</span> <span class="s1">&#39;sha256&#39;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">hashlib</span><span class="o">.</span><span class="n">sha256</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">encode</span><span class="p">())</span><span class="o">.</span><span class="n">hexdigest</span><span class="p">()</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Supported algorithms: &#39;md5&#39;, &#39;sha256&#39;&quot;</span><span class="p">)</span>
+
+<span class="c1"># Test with sample medical data</span>
+<span class="n">patient_id</span> <span class="o">=</span> <span class="s2">&quot;PAT001&quot;</span>
+<span class="n">md5_hash</span> <span class="o">=</span> <span class="n">generate_hash</span><span class="p">(</span><span class="n">patient_id</span><span class="p">,</span> <span class="s1">&#39;md5&#39;</span><span class="p">)</span>
+<span class="n">sha256_hash</span> <span class="o">=</span> <span class="n">generate_hash</span><span class="p">(</span><span class="n">patient_id</span><span class="p">,</span> <span class="s1">&#39;sha256&#39;</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Original data: </span><span class="si">{</span><span class="n">patient_id</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;MD5 hash: </span><span class="si">{</span><span class="n">md5_hash</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;SHA-256 hash: </span><span class="si">{</span><span class="n">sha256_hash</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Original data: PAT001
+MD5 hash: 23a636587eb00292688bacedf0be14db
+SHA-256 hash: ea711c655944838aa8a4b98030207d6d37e9495e5fba12af2209d8275ec3e41d
+</pre></div>
+</div>
+</div>
+</div>
+<p>Let’s demonstrate how even tiny changes in data result in completely different hashes, which is crucial for detecting data corruption.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Original patient record</span>
+<span class="n">original_record</span> <span class="o">=</span> <span class="s2">&quot;Patient: John Doe, Age: 45, Diagnosis: Hypertension&quot;</span>
+<span class="n">original_hash</span> <span class="o">=</span> <span class="n">generate_hash</span><span class="p">(</span><span class="n">original_record</span><span class="p">)</span>
+
+<span class="c1"># Modified record (small typo)</span>
+<span class="n">modified_record</span> <span class="o">=</span> <span class="s2">&quot;Patient: John Doe, Age: 46, Diagnosis: Hypertension&quot;</span>
+<span class="n">modified_hash</span> <span class="o">=</span> <span class="n">generate_hash</span><span class="p">(</span><span class="n">modified_record</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Original: </span><span class="si">{</span><span class="n">original_record</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Original hash: </span><span class="si">{</span><span class="n">original_hash</span><span class="p">[:</span><span class="mi">16</span><span class="p">]</span><span class="si">}</span><span class="s2">...&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Modified: </span><span class="si">{</span><span class="n">modified_record</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Modified hash: </span><span class="si">{</span><span class="n">modified_hash</span><span class="p">[:</span><span class="mi">16</span><span class="p">]</span><span class="si">}</span><span class="s2">...&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Hashes match: </span><span class="si">{</span><span class="n">original_hash</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">modified_hash</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Original: Patient: John Doe, Age: 45, Diagnosis: Hypertension
+Original hash: 7e3942315c13ca93...
+
+Modified: Patient: John Doe, Age: 46, Diagnosis: Hypertension
+Modified hash: e379a88b747881ff...
+
+Hashes match: False
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="file-hashing-for-different-file-sizes">
+<h2>File Hashing for Different File Sizes<a class="headerlink" href="#file-hashing-for-different-file-sizes" title="Link to this heading">#</a></h2>
+<p>Now we’ll create functions to handle hashing of files efficiently, with different strategies for small and large files. For large files, we’ll use chunk-based processing to avoid memory issues.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">hash_small_file</span><span class="p">(</span><span class="n">filepath</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">algorithm</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;sha256&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Hash small files by loading entire content into memory.&quot;&quot;&quot;</span>
+    <span class="n">hasher</span> <span class="o">=</span> <span class="n">hashlib</span><span class="o">.</span><span class="n">sha256</span><span class="p">()</span> <span class="k">if</span> <span class="n">algorithm</span> <span class="o">==</span> <span class="s1">&#39;sha256&#39;</span> <span class="k">else</span> <span class="n">hashlib</span><span class="o">.</span><span class="n">md5</span><span class="p">()</span>
+    
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">filepath</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="n">content</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+        <span class="n">hasher</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">content</span><span class="p">)</span>
+    
+    <span class="k">return</span> <span class="n">hasher</span><span class="o">.</span><span class="n">hexdigest</span><span class="p">()</span>
+
+<span class="c1"># Create a sample small medical data file</span>
+<span class="n">sample_data</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">&#39;patient_id&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;PAT001&#39;</span><span class="p">,</span> <span class="s1">&#39;PAT002&#39;</span><span class="p">,</span> <span class="s1">&#39;PAT003&#39;</span><span class="p">],</span>
+    <span class="s1">&#39;age&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mi">45</span><span class="p">,</span> <span class="mi">32</span><span class="p">,</span> <span class="mi">67</span><span class="p">],</span>
+    <span class="s1">&#39;diagnosis&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;Hypertension&#39;</span><span class="p">,</span> <span class="s1">&#39;Diabetes&#39;</span><span class="p">,</span> <span class="s1">&#39;Arthritis&#39;</span><span class="p">]</span>
+<span class="p">}</span>
+<span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">sample_data</span><span class="p">)</span>
+<span class="n">df</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="s1">&#39;small_medical_data.csv&#39;</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+<span class="n">small_file_hash</span> <span class="o">=</span> <span class="n">hash_small_file</span><span class="p">(</span><span class="s1">&#39;small_medical_data.csv&#39;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Small file hash: </span><span class="si">{</span><span class="n">small_file_hash</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Small file hash: ad0ed047a425334e99c382e30ab0439a6d96e2c66b0cea8a823700ae79965e1b
+</pre></div>
+</div>
+</div>
+</div>
+<p>For large medical files (like medical imaging data or genomic sequences), we need a chunk-based approach to avoid loading the entire file into memory.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">hash_large_file</span><span class="p">(</span><span class="n">filepath</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">chunk_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">8192</span><span class="p">,</span> <span class="n">algorithm</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;sha256&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Hash large files using chunk-based processing.&quot;&quot;&quot;</span>
+    <span class="n">hasher</span> <span class="o">=</span> <span class="n">hashlib</span><span class="o">.</span><span class="n">sha256</span><span class="p">()</span> <span class="k">if</span> <span class="n">algorithm</span> <span class="o">==</span> <span class="s1">&#39;sha256&#39;</span> <span class="k">else</span> <span class="n">hashlib</span><span class="o">.</span><span class="n">md5</span><span class="p">()</span>
+    
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">filepath</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="k">while</span> <span class="n">chunk</span> <span class="o">:=</span> <span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">chunk_size</span><span class="p">):</span>
+            <span class="n">hasher</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">chunk</span><span class="p">)</span>
+    
+    <span class="k">return</span> <span class="n">hasher</span><span class="o">.</span><span class="n">hexdigest</span><span class="p">()</span>
+
+<span class="c1"># Create a larger sample file to demonstrate</span>
+<span class="n">large_data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span>
+    <span class="s1">&#39;patient_id&#39;</span><span class="p">:</span> <span class="p">[</span><span class="sa">f</span><span class="s1">&#39;PAT</span><span class="si">{</span><span class="n">i</span><span class="si">:</span><span class="s1">05d</span><span class="si">}</span><span class="s1">&#39;</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10000</span><span class="p">)],</span>
+    <span class="s1">&#39;measurement_1&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mi">100</span><span class="p">,</span> <span class="mi">15</span><span class="p">,</span> <span class="mi">10000</span><span class="p">),</span>
+    <span class="s1">&#39;measurement_2&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mi">80</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">10000</span><span class="p">),</span>
+    <span class="s1">&#39;timestamp&#39;</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">date_range</span><span class="p">(</span><span class="s1">&#39;2023-01-01&#39;</span><span class="p">,</span> <span class="n">periods</span><span class="o">=</span><span class="mi">10000</span><span class="p">,</span> <span class="n">freq</span><span class="o">=</span><span class="s1">&#39;H&#39;</span><span class="p">)</span>
+<span class="p">})</span>
+<span class="n">large_data</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="s1">&#39;large_medical_data.csv&#39;</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+<span class="n">large_file_hash</span> <span class="o">=</span> <span class="n">hash_large_file</span><span class="p">(</span><span class="s1">&#39;large_medical_data.csv&#39;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Large file hash: </span><span class="si">{</span><span class="n">large_file_hash</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;File size: </span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">getsize</span><span class="p">(</span><span class="s1">&#39;large_medical_data.csv&#39;</span><span class="p">)</span><span class="si">}</span><span class="s2"> bytes&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Large file hash: 51e27bcce45ad0faaed255da5c44b5980376d01b8c4c9933f9425588f9c41558
+File size: 652270 bytes
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>/tmp/ipykernel_2404/2689253228.py:16: FutureWarning: &#39;H&#39; is deprecated and will be removed in a future version, please use &#39;h&#39; instead.
+  &#39;timestamp&#39;: pd.date_range(&#39;2023-01-01&#39;, periods=10000, freq=&#39;H&#39;)
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="smart-file-processing-strategy">
+<h2>Smart File Processing Strategy<a class="headerlink" href="#smart-file-processing-strategy" title="Link to this heading">#</a></h2>
+<p>Let’s create an intelligent function that automatically chooses the appropriate hashing strategy based on file size. This is particularly useful in medical data pipelines where file sizes can vary dramatically.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">smart_file_hash</span><span class="p">(</span><span class="n">filepath</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">size_threshold</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">10</span><span class="o">*</span><span class="mi">1024</span><span class="o">*</span><span class="mi">1024</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Choose hashing strategy based on file size (default threshold: 10MB).&quot;&quot;&quot;</span>
+    <span class="n">file_size</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">getsize</span><span class="p">(</span><span class="n">filepath</span><span class="p">)</span>
+    <span class="n">start_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+    
+    <span class="k">if</span> <span class="n">file_size</span> <span class="o">&lt;</span> <span class="n">size_threshold</span><span class="p">:</span>
+        <span class="n">strategy</span> <span class="o">=</span> <span class="s2">&quot;small_file&quot;</span>
+        <span class="n">file_hash</span> <span class="o">=</span> <span class="n">hash_small_file</span><span class="p">(</span><span class="n">filepath</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">strategy</span> <span class="o">=</span> <span class="s2">&quot;large_file_chunked&quot;</span>
+        <span class="n">file_hash</span> <span class="o">=</span> <span class="n">hash_large_file</span><span class="p">(</span><span class="n">filepath</span><span class="p">)</span>
+    
+    <span class="n">processing_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">start_time</span>
+    
+    <span class="k">return</span> <span class="p">{</span>
+        <span class="s1">&#39;filepath&#39;</span><span class="p">:</span> <span class="n">filepath</span><span class="p">,</span>
+        <span class="s1">&#39;file_size_bytes&#39;</span><span class="p">:</span> <span class="n">file_size</span><span class="p">,</span>
+        <span class="s1">&#39;strategy_used&#39;</span><span class="p">:</span> <span class="n">strategy</span><span class="p">,</span>
+        <span class="s1">&#39;hash&#39;</span><span class="p">:</span> <span class="n">file_hash</span><span class="p">,</span>
+        <span class="s1">&#39;processing_time_seconds&#39;</span><span class="p">:</span> <span class="nb">round</span><span class="p">(</span><span class="n">processing_time</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span>
+    <span class="p">}</span>
+
+<span class="c1"># Test with both files</span>
+<span class="n">small_result</span> <span class="o">=</span> <span class="n">smart_file_hash</span><span class="p">(</span><span class="s1">&#39;small_medical_data.csv&#39;</span><span class="p">)</span>
+<span class="n">large_result</span> <span class="o">=</span> <span class="n">smart_file_hash</span><span class="p">(</span><span class="s1">&#39;large_medical_data.csv&#39;</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Small file processing:&quot;</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">small_result</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  </span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Large file processing:&quot;</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">large_result</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  </span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Small file processing:
+  filepath: small_medical_data.csv
+  file_size_bytes: 87
+  strategy_used: small_file
+  hash: ad0ed047a425334e99c382e30ab0439a6d96e2c66b0cea8a823700ae79965e1b
+  processing_time_seconds: 0.0004
+
+Large file processing:
+  filepath: large_medical_data.csv
+  file_size_bytes: 652270
+  strategy_used: small_file
+  hash: 51e27bcce45ad0faaed255da5c44b5980376d01b8c4c9933f9425588f9c41558
+  processing_time_seconds: 0.0007
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="creating-an-integrity-manifest">
+<h2>Creating an Integrity Manifest<a class="headerlink" href="#creating-an-integrity-manifest" title="Link to this heading">#</a></h2>
+<p>In medical data integration, it’s common to create manifest files that store hash values for multiple files. This allows for batch integrity verification across entire datasets.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">create_integrity_manifest</span><span class="p">(</span><span class="n">file_paths</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">manifest_path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;integrity_manifest.json&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Create a manifest file with hash values for multiple files.&quot;&quot;&quot;</span>
+    <span class="n">manifest</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">&#39;created_timestamp&#39;</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">Timestamp</span><span class="o">.</span><span class="n">now</span><span class="p">()</span><span class="o">.</span><span class="n">isoformat</span><span class="p">(),</span>
+        <span class="s1">&#39;files&#39;</span><span class="p">:</span> <span class="p">[]</span>
+    <span class="p">}</span>
+    
+    <span class="k">for</span> <span class="n">filepath</span> <span class="ow">in</span> <span class="n">file_paths</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">filepath</span><span class="p">):</span>
+            <span class="n">file_info</span> <span class="o">=</span> <span class="n">smart_file_hash</span><span class="p">(</span><span class="n">filepath</span><span class="p">)</span>
+            <span class="n">manifest</span><span class="p">[</span><span class="s1">&#39;files&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">file_info</span><span class="p">)</span>
+    
+    <span class="c1"># Save manifest to file</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">manifest_path</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">manifest</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+    
+    <span class="k">return</span> <span class="n">manifest</span>
+
+<span class="c1"># Create manifest for our sample files</span>
+<span class="n">files_to_check</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;small_medical_data.csv&#39;</span><span class="p">,</span> <span class="s1">&#39;large_medical_data.csv&#39;</span><span class="p">]</span>
+<span class="n">manifest</span> <span class="o">=</span> <span class="n">create_integrity_manifest</span><span class="p">(</span><span class="n">files_to_check</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Manifest created with </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">manifest</span><span class="p">[</span><span class="s1">&#39;files&#39;</span><span class="p">])</span><span class="si">}</span><span class="s2"> files&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Creation time: </span><span class="si">{</span><span class="n">manifest</span><span class="p">[</span><span class="s1">&#39;created_timestamp&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Manifest created with 2 files
+Creation time: 2025-09-13T16:34:33.823101
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="verifying-file-integrity">
+<h2>Verifying File Integrity<a class="headerlink" href="#verifying-file-integrity" title="Link to this heading">#</a></h2>
+<p>Now we’ll create a function to verify file integrity by comparing current hash values with those stored in our manifest. This is essential for detecting data corruption in medical data pipelines.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">verify_integrity</span><span class="p">(</span><span class="n">manifest_path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;integrity_manifest.json&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Verify file integrity against stored manifest.&quot;&quot;&quot;</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">manifest_path</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="n">manifest</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+    
+    <span class="n">verification_results</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">&#39;verification_timestamp&#39;</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">Timestamp</span><span class="o">.</span><span class="n">now</span><span class="p">()</span><span class="o">.</span><span class="n">isoformat</span><span class="p">(),</span>
+        <span class="s1">&#39;total_files&#39;</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">manifest</span><span class="p">[</span><span class="s1">&#39;files&#39;</span><span class="p">]),</span>
+        <span class="s1">&#39;passed&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+        <span class="s1">&#39;failed&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+        <span class="s1">&#39;missing&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+        <span class="s1">&#39;details&#39;</span><span class="p">:</span> <span class="p">[]</span>
+    <span class="p">}</span>
+    
+    <span class="k">for</span> <span class="n">file_info</span> <span class="ow">in</span> <span class="n">manifest</span><span class="p">[</span><span class="s1">&#39;files&#39;</span><span class="p">]:</span>
+        <span class="n">filepath</span> <span class="o">=</span> <span class="n">file_info</span><span class="p">[</span><span class="s1">&#39;filepath&#39;</span><span class="p">]</span>
+        <span class="n">expected_hash</span> <span class="o">=</span> <span class="n">file_info</span><span class="p">[</span><span class="s1">&#39;hash&#39;</span><span class="p">]</span>
+        
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">filepath</span><span class="p">):</span>
+            <span class="n">verification_results</span><span class="p">[</span><span class="s1">&#39;missing&#39;</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="n">status</span> <span class="o">=</span> <span class="s1">&#39;MISSING&#39;</span>
+            <span class="n">current_hash</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">current_result</span> <span class="o">=</span> <span class="n">smart_file_hash</span><span class="p">(</span><span class="n">filepath</span><span class="p">)</span>
+            <span class="n">current_hash</span> <span class="o">=</span> <span class="n">current_result</span><span class="p">[</span><span class="s1">&#39;hash&#39;</span><span class="p">]</span>
+            
+            <span class="k">if</span> <span class="n">current_hash</span> <span class="o">==</span> <span class="n">expected_hash</span><span class="p">:</span>
+                <span class="n">verification_results</span><span class="p">[</span><span class="s1">&#39;passed&#39;</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="n">status</span> <span class="o">=</span> <span class="s1">&#39;PASSED&#39;</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">verification_results</span><span class="p">[</span><span class="s1">&#39;failed&#39;</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="n">status</span> <span class="o">=</span> <span class="s1">&#39;FAILED&#39;</span>
+        
+        <span class="n">verification_results</span><span class="p">[</span><span class="s1">&#39;details&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">({</span>
+            <span class="s1">&#39;filepath&#39;</span><span class="p">:</span> <span class="n">filepath</span><span class="p">,</span>
+            <span class="s1">&#39;status&#39;</span><span class="p">:</span> <span class="n">status</span><span class="p">,</span>
+            <span class="s1">&#39;expected_hash&#39;</span><span class="p">:</span> <span class="n">expected_hash</span><span class="p">[:</span><span class="mi">16</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39;...&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;current_hash&#39;</span><span class="p">:</span> <span class="n">current_hash</span><span class="p">[:</span><span class="mi">16</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39;...&#39;</span> <span class="k">if</span> <span class="n">current_hash</span> <span class="k">else</span> <span class="kc">None</span>
+        <span class="p">})</span>
+    
+    <span class="k">return</span> <span class="n">verification_results</span>
+
+<span class="c1"># Verify integrity of our files</span>
+<span class="n">verification</span> <span class="o">=</span> <span class="n">verify_integrity</span><span class="p">()</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Verification completed at: </span><span class="si">{</span><span class="n">verification</span><span class="p">[</span><span class="s1">&#39;verification_timestamp&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Files passed: </span><span class="si">{</span><span class="n">verification</span><span class="p">[</span><span class="s1">&#39;passed&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">verification</span><span class="p">[</span><span class="s1">&#39;total_files&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Files failed: </span><span class="si">{</span><span class="n">verification</span><span class="p">[</span><span class="s1">&#39;failed&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Files missing: </span><span class="si">{</span><span class="n">verification</span><span class="p">[</span><span class="s1">&#39;missing&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Detailed results:&quot;</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">detail</span> <span class="ow">in</span> <span class="n">verification</span><span class="p">[</span><span class="s1">&#39;details&#39;</span><span class="p">]:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  </span><span class="si">{</span><span class="n">detail</span><span class="p">[</span><span class="s1">&#39;filepath&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">detail</span><span class="p">[</span><span class="s1">&#39;status&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Verification completed at: 2025-09-13T16:34:33.831991
+Files passed: 2/2
+Files failed: 0
+Files missing: 0
+
+Detailed results:
+  small_medical_data.csv: PASSED
+  large_medical_data.csv: PASSED
+</pre></div>
+</div>
+</div>
+</div>
+<p>Let’s simulate a file corruption scenario to see how our integrity verification detects changes.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Simulate file corruption by modifying the small file</span>
+<span class="n">original_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s1">&#39;small_medical_data.csv&#39;</span><span class="p">)</span>
+<span class="n">corrupted_df</span> <span class="o">=</span> <span class="n">original_df</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+<span class="n">corrupted_df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="s1">&#39;age&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">999</span>  <span class="c1"># Introduce corruption</span>
+<span class="n">corrupted_df</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="s1">&#39;small_medical_data.csv&#39;</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;File corrupted (age changed from 45 to 999)&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Re-running integrity verification...&quot;</span><span class="p">)</span>
+
+<span class="n">verification_after_corruption</span> <span class="o">=</span> <span class="n">verify_integrity</span><span class="p">()</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Files passed: </span><span class="si">{</span><span class="n">verification_after_corruption</span><span class="p">[</span><span class="s1">&#39;passed&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">verification_after_corruption</span><span class="p">[</span><span class="s1">&#39;total_files&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Files failed: </span><span class="si">{</span><span class="n">verification_after_corruption</span><span class="p">[</span><span class="s1">&#39;failed&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+<span class="k">for</span> <span class="n">detail</span> <span class="ow">in</span> <span class="n">verification_after_corruption</span><span class="p">[</span><span class="s1">&#39;details&#39;</span><span class="p">]:</span>
+    <span class="k">if</span> <span class="n">detail</span><span class="p">[</span><span class="s1">&#39;status&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;FAILED&#39;</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Corruption detected in: </span><span class="si">{</span><span class="n">detail</span><span class="p">[</span><span class="s1">&#39;filepath&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Expected hash: </span><span class="si">{</span><span class="n">detail</span><span class="p">[</span><span class="s1">&#39;expected_hash&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Current hash:  </span><span class="si">{</span><span class="n">detail</span><span class="p">[</span><span class="s1">&#39;current_hash&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>File corrupted (age changed from 45 to 999)
+
+Re-running integrity verification...
+Files passed: 1/2
+Files failed: 1
+
+Corruption detected in: small_medical_data.csv
+Expected hash: ad0ed047a425334e...
+Current hash:  93fcba7fb6e0cb20...
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="performance-comparison">
+<h2>Performance Comparison<a class="headerlink" href="#performance-comparison" title="Link to this heading">#</a></h2>
+<p>Let’s compare the performance of different hashing strategies to understand when to use each approach. This helps optimize medical data processing pipelines.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">performance_comparison</span><span class="p">(</span><span class="n">filepath</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">chunk_sizes</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1024</span><span class="p">,</span> <span class="mi">4096</span><span class="p">,</span> <span class="mi">8192</span><span class="p">,</span> <span class="mi">16384</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Compare performance of different chunk sizes for large file hashing.&quot;&quot;&quot;</span>
+    <span class="n">results</span> <span class="o">=</span> <span class="p">[]</span>
+    
+    <span class="c1"># Test small file strategy</span>
+    <span class="n">start_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+    <span class="n">hash_small_file</span><span class="p">(</span><span class="n">filepath</span><span class="p">)</span>
+    <span class="n">small_file_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">start_time</span>
+    
+    <span class="n">results</span><span class="o">.</span><span class="n">append</span><span class="p">({</span>
+        <span class="s1">&#39;strategy&#39;</span><span class="p">:</span> <span class="s1">&#39;load_entire_file&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;chunk_size&#39;</span><span class="p">:</span> <span class="s1">&#39;N/A&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;processing_time&#39;</span><span class="p">:</span> <span class="n">small_file_time</span>
+    <span class="p">})</span>
+    
+    <span class="c1"># Test different chunk sizes</span>
+    <span class="k">for</span> <span class="n">chunk_size</span> <span class="ow">in</span> <span class="n">chunk_sizes</span><span class="p">:</span>
+        <span class="n">start_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+        <span class="n">hash_large_file</span><span class="p">(</span><span class="n">filepath</span><span class="p">,</span> <span class="n">chunk_size</span><span class="p">)</span>
+        <span class="n">chunk_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">start_time</span>
+        
+        <span class="n">results</span><span class="o">.</span><span class="n">append</span><span class="p">({</span>
+            <span class="s1">&#39;strategy&#39;</span><span class="p">:</span> <span class="s1">&#39;chunked_processing&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;chunk_size&#39;</span><span class="p">:</span> <span class="n">chunk_size</span><span class="p">,</span>
+            <span class="s1">&#39;processing_time&#39;</span><span class="p">:</span> <span class="n">chunk_time</span>
+        <span class="p">})</span>
+    
+    <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">results</span><span class="p">)</span>
+
+<span class="c1"># Compare performance on our large file</span>
+<span class="n">perf_results</span> <span class="o">=</span> <span class="n">performance_comparison</span><span class="p">(</span><span class="s1">&#39;large_medical_data.csv&#39;</span><span class="p">)</span>
+<span class="n">perf_results</span><span class="p">[</span><span class="s1">&#39;processing_time&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">perf_results</span><span class="p">[</span><span class="s1">&#39;processing_time&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Performance comparison results:&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">perf_results</span><span class="o">.</span><span class="n">to_string</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Performance comparison results:
+          strategy chunk_size  processing_time
+  load_entire_file        N/A           0.0008
+chunked_processing       1024           0.0008
+chunked_processing       4096           0.0007
+chunked_processing       8192           0.0006
+chunked_processing      16384           0.0005
+</pre></div>
+</div>
+</div>
+</div>
+<p>Finally, let’s clean up the temporary files we created during this demonstration.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Clean up temporary files</span>
+<span class="n">temp_files</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;small_medical_data.csv&#39;</span><span class="p">,</span> <span class="s1">&#39;large_medical_data.csv&#39;</span><span class="p">,</span> <span class="s1">&#39;integrity_manifest.json&#39;</span><span class="p">]</span>
+
+<span class="k">for</span> <span class="n">filepath</span> <span class="ow">in</span> <span class="n">temp_files</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">filepath</span><span class="p">):</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">filepath</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Removed: </span><span class="si">{</span><span class="n">filepath</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Cleanup completed!&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Removed: small_medical_data.csv
+Removed: large_medical_data.csv
+Removed: integrity_manifest.json
+
+Cleanup completed!
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="key-takeaways">
+<h2>Key Takeaways<a class="headerlink" href="#key-takeaways" title="Link to this heading">#</a></h2>
+<ol class="arabic simple">
+<li><p><strong>Hash functions provide reliable integrity verification</strong> for medical data files</p></li>
+<li><p><strong>Different strategies are needed</strong> for small vs. large files to optimize performance</p></li>
+<li><p><strong>Manifest files enable batch integrity verification</strong> across multiple files</p></li>
+<li><p><strong>Chunk-based processing</strong> prevents memory issues with large medical datasets</p></li>
+<li><p><strong>Regular integrity checks</strong> are essential in medical data pipelines for patient safety</p></li>
+</ol>
+</section>
+<section id="exercise">
+<h2>Exercise<a class="headerlink" href="#exercise" title="Link to this heading">#</a></h2>
+<p>Create a medical data integrity monitoring system with the following requirements:</p>
+<ol class="arabic simple">
+<li><p><strong>Create sample medical files</strong>: Generate 3 CSV files with different sizes:</p>
+<ul class="simple">
+<li><p>Small file: 100 patient records with basic demographics</p></li>
+<li><p>Medium file: 5,000 patient records with vital signs data</p></li>
+<li><p>Large file: 50,000 patient records with lab results</p></li>
+</ul>
+</li>
+<li><p><strong>Implement automated integrity checking</strong>: Create a function that:</p>
+<ul class="simple">
+<li><p>Automatically detects the appropriate hashing strategy for each file</p></li>
+<li><p>Creates a timestamped integrity manifest</p></li>
+<li><p>Logs all operations with file sizes and processing times</p></li>
+</ul>
+</li>
+<li><p><strong>Simulate real-world scenarios</strong>:</p>
+<ul class="simple">
+<li><p>Verify integrity of all files initially (should pass)</p></li>
+<li><p>Simulate data corruption in one file by modifying a few values</p></li>
+<li><p>Run integrity verification again and identify which file was corrupted</p></li>
+<li><p>Generate a summary report showing which files passed/failed verification</p></li>
+</ul>
+</li>
+<li><p><strong>Bonus challenge</strong>: Implement a feature that can restore corrupted files from backup copies and re-verify integrity.</p></li>
+</ol>
+<p>This exercise will help you understand how integrity checking works in practice and how to build robust medical data processing pipelines.</p>
+</section>
+</section>
+
+    <script type="text/x-thebe-config">
+    {
+        requestKernel: true,
+        binderOptions: {
+            repo: "binder-examples/jupyter-stacks-datascience",
+            ref: "master",
+        },
+        codeMirrorConfig: {
+            theme: "abcdef",
+            mode: "python"
+        },
+        kernelOptions: {
+            name: "python3",
+            path: "./."
+        },
+        predefinedOutput: true
+    }
+    </script>
+    <script>kernelName = 'python3'</script>
+
+                </article>
+              
+
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="fsspec_cloud_storage_streaming_io.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">Local and Cloud Storage with fsspec (s3fs/gcsfs/adlfs), Streaming I/O</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="data_io_csv_ndjson_pandas_polars_dtypes_missing.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">Reading and Writing Medical Data: CSV and NDJSON with Pandas and Polars</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+  <div class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> Contents
+  </div>
+  <nav class="bd-toc-nav page-toc">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#introduction-to-data-integrity-in-medical-context">Introduction to Data Integrity in Medical Context</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#basic-hashing-concepts">Basic Hashing Concepts</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#file-hashing-for-different-file-sizes">File Hashing for Different File Sizes</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#smart-file-processing-strategy">Smart File Processing Strategy</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#creating-an-integrity-manifest">Creating an Integrity Manifest</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#verifying-file-integrity">Verifying File Integrity</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#performance-comparison">Performance Comparison</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#key-takeaways">Key Takeaways</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#exercise">Exercise</a></li>
+</ul>
+  </nav></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+<p class="component-author">
+By AI Generated Content
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+
+  </div>
+  
+  <div class="footer-item">
+    <p class="last-updated">
+  Last updated on Sep 13, 2025.
+  <br/>
+</p>
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+</div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b"></script>
+<script src="_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+  <footer class="bd-footer">
+  </footer>
+  </body>
+</html>

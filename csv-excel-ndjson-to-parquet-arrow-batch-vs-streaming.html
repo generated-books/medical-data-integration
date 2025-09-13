@@ -1,0 +1,1253 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="./" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>CSV/Excel/NDJSON → Parquet/Arrow: Batch vs Streaming &#8212; Foundations of Medical Data Integration</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="_static/styles/theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="_static/styles/bootstrap.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="_static/styles/pydata-sphinx-theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+
+  
+  <link href="_static/vendor/fontawesome/6.5.2/css/all.min.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.5.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.5.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.5.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="_static/styles/sphinx-book-theme.css?v=eba8b062" />
+    <link rel="stylesheet" type="text/css" href="_static/togglebutton.css?v=13237357" />
+    <link rel="stylesheet" type="text/css" href="_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="_static/mystnb.8ecb98da25f57f5357bf6f572d296f466b2cfe2517ffebfabe82451661e28f02.css" />
+    <link rel="stylesheet" type="text/css" href="_static/sphinx-thebe.css?v=4fa983c6" />
+    <link rel="stylesheet" type="text/css" href="_static/sphinx-design.min.css?v=95c83b7e" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b" />
+<link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
+  <script src="_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+    <script src="_static/documentation_options.js?v=9eb32ce0"></script>
+    <script src="_static/doctools.js?v=9a2dae69"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="_static/copybutton.js?v=f281be69"></script>
+    <script src="_static/scripts/sphinx-book-theme.js?v=887ef09a"></script>
+    <script>let toggleHintShow = 'Click to show';</script>
+    <script>let toggleHintHide = 'Click to hide';</script>
+    <script>let toggleOpenOnPrint = 'true';</script>
+    <script src="_static/togglebutton.js?v=4a39c7ea"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script src="_static/design-tabs.js?v=f930bc37"></script>
+    <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"; const thebe_selector = ".thebe,.cell"; const thebe_selector_input = "pre"; const thebe_selector_output = ".output, .cell_output"</script>
+    <script async="async" src="_static/sphinx-thebe.js?v=c100c467"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"; const thebe_selector = ".thebe,.cell"; const thebe_selector_input = "pre"; const thebe_selector_output = ".output, .cell_output"</script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'csv-excel-ndjson-to-parquet-arrow-batch-vs-streaming';</script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Unit Normalization, Time Alignment, Resampling, and Windowing for Longitudinal Data" href="longitudinal_data_preprocessing.html" />
+    <link rel="prev" title="NumPy/xarray Fundamentals: Shapes, Dtypes, and Chunking" href="numpy-xarray-fundamentals-shapes-dtypes-chunking.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+    <meta name="docbuild:last-update" content="Sep 13, 2025"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-primary-sidebar-checkbox"/>
+  <label class="overlay overlay-primary" for="pst-primary-sidebar-checkbox"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-secondary-sidebar-checkbox"/>
+  <label class="overlay overlay-secondary" for="pst-secondary-sidebar-checkbox"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search this book..."
+         aria-label="Search this book..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="intro.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="_static/logo.png" class="logo__image only-light" alt="Foundations of Medical Data Integration - Home"/>
+    <script>document.write(`<img src="_static/logo.png" class="logo__image only-dark" alt="Foundations of Medical Data Integration - Home"/>`);</script>
+  
+  
+</a></div>
+        <div class="sidebar-primary-item">
+
+ <script>
+ document.write(`
+   <button class="btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script></div>
+        <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        <p aria-level="2" class="caption" role="heading"><span class="caption-text">Working with files and folders</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="files_folders_filesystems.html">Files, Folders, and Filesystems in Medical Data Integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="path_handling_portable_io_pathlib.html">Path Handling and Portable I/O with pathlib</a></li>
+<li class="toctree-l1"><a class="reference internal" href="sidecar_metadata_data_dictionaries.html">Sidecar Metadata (JSON/YAML) and Data Dictionaries</a></li>
+<li class="toctree-l1"><a class="reference internal" href="fsspec_cloud_storage_streaming_io.html">Local and Cloud Storage with fsspec (s3fs/gcsfs/adlfs), Streaming I/O</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">File formats</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="integrity_checks_hashing_file_strategies.html">Integrity Checks (Hashing) and Small-to-Large File Strategies</a></li>
+<li class="toctree-l1"><a class="reference internal" href="data_io_csv_ndjson_pandas_polars_dtypes_missing.html">Reading and Writing Medical Data: CSV and NDJSON with Pandas and Polars</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pandera_schemas_validation_coercion_constraints.html">Schemas and Validation with Pandera</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Wrangling data</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="joins-grouping-windowing-duckdb-sql.html">Joins/Merges, Grouping, and Windowing with DuckDB</a></li>
+<li class="toctree-l1"><a class="reference internal" href="export_patterns_subsets_snapshots_reproducible_filters.html">Export Patterns: Subsets, Snapshots, Reproducible Filters</a></li>
+<li class="toctree-l1"><a class="reference internal" href="numpy-xarray-fundamentals-shapes-dtypes-chunking.html">NumPy/xarray Fundamentals: Shapes, Dtypes, and Chunking</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Data conversion</span></p>
+<ul class="current nav bd-sidenav">
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">CSV/Excel/NDJSON → Parquet/Arrow: Batch vs Streaming</a></li>
+<li class="toctree-l1"><a class="reference internal" href="longitudinal_data_preprocessing.html">Unit Normalization, Time Alignment, Resampling, and Windowing for Longitudinal Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dask-out-of-core-parallel-conversion-progress-retries-idempotency.html">Out-of-core/Parallel Conversion with Dask: Progress, Retries, and Idempotency</a></li>
+</ul>
+
+    </div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><button class="sidebar-toggle primary-toggle btn btn-sm" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</button></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<div class="article-header-buttons">
+
+
+
+
+
+<div class="dropdown dropdown-launch-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Launch interactive content">
+    <i class="fas fa-rocket"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="https://mybinder.org/v2/gh/generated-books/medical-data-integration/main?urlpath=lab/tree/csv-excel-ndjson-to-parquet-arrow-batch-vs-streaming.ipynb" target="_blank"
+   class="btn btn-sm dropdown-item"
+   title="Launch on Binder"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  
+    <img alt="Binder logo" src="_static/images/logo_binder.svg">
+  </span>
+<span class="btn__text-container">Binder</span>
+</a>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+
+
+<div class="dropdown dropdown-source-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Source repositories">
+    <i class="fab fa-github"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="https://github.com/generated-books/medical-data-integration" target="_blank"
+   class="btn btn-sm btn-source-repository-button dropdown-item"
+   title="Source repository"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fab fa-github"></i>
+  </span>
+<span class="btn__text-container">Repository</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li><a href="https://github.com/generated-books/medical-data-integration/edit/main/csv-excel-ndjson-to-parquet-arrow-batch-vs-streaming.ipynb" target="_blank"
+   class="btn btn-sm btn-source-edit-button dropdown-item"
+   title="Suggest edit"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-pencil-alt"></i>
+  </span>
+<span class="btn__text-container">Suggest edit</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li><a href="https://github.com/generated-books/medical-data-integration/issues/new?title=Issue%20on%20page%20%2Fcsv-excel-ndjson-to-parquet-arrow-batch-vs-streaming.html&body=Your%20issue%20content%20here." target="_blank"
+   class="btn btn-sm btn-source-issues-button dropdown-item"
+   title="Open an issue"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-lightbulb"></i>
+  </span>
+<span class="btn__text-container">Open issue</span>
+</a>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+
+
+<div class="dropdown dropdown-download-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Download this page">
+    <i class="fas fa-download"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="_sources/csv-excel-ndjson-to-parquet-arrow-batch-vs-streaming.ipynb" target="_blank"
+   class="btn btn-sm btn-download-source-button dropdown-item"
+   title="Download source file"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file"></i>
+  </span>
+<span class="btn__text-container">.ipynb</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li>
+<button onclick="window.print()"
+  class="btn btn-sm btn-download-pdf-button dropdown-item"
+  title="Print to PDF"
+  data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file-pdf"></i>
+  </span>
+<span class="btn__text-container">.pdf</span>
+</button>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+<button onclick="toggleFullScreen()"
+  class="btn btn-sm btn-fullscreen-button"
+  title="Fullscreen mode"
+  data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-expand"></i>
+  </span>
+
+</button>
+
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"></i>
+  </button>
+`);
+</script>
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm pst-navbar-icon search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+  </button>
+`);
+</script>
+<button class="sidebar-toggle secondary-toggle btn btn-sm" title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="fa-solid fa-list"></span>
+</button>
+</div></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1>CSV/Excel/NDJSON → Parquet/Arrow: Batch vs Streaming</h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+            <div>
+                <h2> Contents </h2>
+            </div>
+            <nav aria-label="Page">
+                <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#batch-processing-approach">Batch Processing Approach</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#streaming-processing-approach">Streaming Processing Approach</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#performance-comparison-and-memory-usage">Performance Comparison and Memory Usage</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#working-with-arrow-format-in-memory">Working with Arrow Format In-Memory</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#best-practices-summary">Best Practices Summary</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#exercise">Exercise</a></li>
+</ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section class="tex2jax_ignore mathjax_ignore" id="csv-excel-ndjson-parquet-arrow-batch-vs-streaming">
+<h1>CSV/Excel/NDJSON → Parquet/Arrow: Batch vs Streaming<a class="headerlink" href="#csv-excel-ndjson-parquet-arrow-batch-vs-streaming" title="Link to this heading">#</a></h1>
+<p>In medical data integration, we often need to convert data from various formats (CSV, Excel, NDJSON) into more efficient columnar formats like Parquet or Arrow. This notebook explores both batch and streaming approaches to handle large medical datasets efficiently.</p>
+<p>Let’s start by importing the necessary libraries for data processing and conversion. We’ll use pandas for basic operations, pyarrow for Arrow/Parquet handling, and other utilities for file operations.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pyarrow</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pa</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pyarrow.parquet</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pq</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">time</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>First, let’s create sample medical datasets in different formats to demonstrate the conversion process. We’ll generate synthetic patient data with common medical fields.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Create sample medical data</span>
+<span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="mi">42</span><span class="p">)</span>
+<span class="n">n_patients</span> <span class="o">=</span> <span class="mi">10000</span>
+
+<span class="n">medical_data</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">&#39;patient_id&#39;</span><span class="p">:</span> <span class="p">[</span><span class="sa">f</span><span class="s1">&#39;P</span><span class="si">{</span><span class="n">i</span><span class="si">:</span><span class="s1">06d</span><span class="si">}</span><span class="s1">&#39;</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_patients</span><span class="p">)],</span>
+    <span class="s1">&#39;age&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">18</span><span class="p">,</span> <span class="mi">90</span><span class="p">,</span> <span class="n">n_patients</span><span class="p">),</span>
+    <span class="s1">&#39;gender&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">([</span><span class="s1">&#39;M&#39;</span><span class="p">,</span> <span class="s1">&#39;F&#39;</span><span class="p">],</span> <span class="n">n_patients</span><span class="p">),</span>
+    <span class="s1">&#39;diagnosis_code&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">([</span><span class="s1">&#39;I10&#39;</span><span class="p">,</span> <span class="s1">&#39;E11&#39;</span><span class="p">,</span> <span class="s1">&#39;J44&#39;</span><span class="p">,</span> <span class="s1">&#39;N18&#39;</span><span class="p">,</span> <span class="s1">&#39;F32&#39;</span><span class="p">],</span> <span class="n">n_patients</span><span class="p">),</span>
+    <span class="s1">&#39;systolic_bp&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mi">130</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="n">n_patients</span><span class="p">)</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span>
+    <span class="s1">&#39;diastolic_bp&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mi">80</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="n">n_patients</span><span class="p">)</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span>
+    <span class="s1">&#39;lab_value_glucose&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mi">100</span><span class="p">,</span> <span class="mi">30</span><span class="p">,</span> <span class="n">n_patients</span><span class="p">)</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">2</span><span class="p">),</span>
+    <span class="s1">&#39;admission_date&#39;</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">date_range</span><span class="p">(</span><span class="s1">&#39;2020-01-01&#39;</span><span class="p">,</span> <span class="n">periods</span><span class="o">=</span><span class="n">n_patients</span><span class="p">,</span> <span class="n">freq</span><span class="o">=</span><span class="s1">&#39;H&#39;</span><span class="p">)</span>
+<span class="p">}</span>
+
+<span class="n">df_medical</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">medical_data</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Created medical dataset with </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">df_medical</span><span class="p">)</span><span class="si">}</span><span class="s2"> rows and </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">df_medical</span><span class="o">.</span><span class="n">columns</span><span class="p">)</span><span class="si">}</span><span class="s2"> columns&quot;</span><span class="p">)</span>
+<span class="n">df_medical</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Created medical dataset with 10000 rows and 8 columns
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>/tmp/ipykernel_2215/103369553.py:13: FutureWarning: &#39;H&#39; is deprecated and will be removed in a future version, please use &#39;h&#39; instead.
+  &#39;admission_date&#39;: pd.date_range(&#39;2020-01-01&#39;, periods=n_patients, freq=&#39;H&#39;)
+</pre></div>
+</div>
+<div class="output text_html"><div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>patient_id</th>
+      <th>age</th>
+      <th>gender</th>
+      <th>diagnosis_code</th>
+      <th>systolic_bp</th>
+      <th>diastolic_bp</th>
+      <th>lab_value_glucose</th>
+      <th>admission_date</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>P000000</td>
+      <td>69</td>
+      <td>M</td>
+      <td>F32</td>
+      <td>154.8</td>
+      <td>70.1</td>
+      <td>88.42</td>
+      <td>2020-01-01 00:00:00</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>P000001</td>
+      <td>32</td>
+      <td>M</td>
+      <td>F32</td>
+      <td>146.9</td>
+      <td>81.5</td>
+      <td>100.87</td>
+      <td>2020-01-01 01:00:00</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>P000002</td>
+      <td>89</td>
+      <td>F</td>
+      <td>E11</td>
+      <td>100.7</td>
+      <td>89.1</td>
+      <td>98.61</td>
+      <td>2020-01-01 02:00:00</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>P000003</td>
+      <td>78</td>
+      <td>M</td>
+      <td>E11</td>
+      <td>134.9</td>
+      <td>96.4</td>
+      <td>122.34</td>
+      <td>2020-01-01 03:00:00</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>P000004</td>
+      <td>38</td>
+      <td>F</td>
+      <td>J44</td>
+      <td>126.6</td>
+      <td>62.2</td>
+      <td>104.78</td>
+      <td>2020-01-01 04:00:00</td>
+    </tr>
+  </tbody>
+</table>
+</div></div></div>
+</div>
+<p>Now let’s save this data in different source formats that are commonly encountered in medical data integration. We’ll create CSV, Excel, and NDJSON files to demonstrate various input scenarios.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Create data directory</span>
+<span class="n">Path</span><span class="p">(</span><span class="s1">&#39;data&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+<span class="c1"># Save as CSV</span>
+<span class="n">df_medical</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="s1">&#39;data/medical_data.csv&#39;</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;CSV file size: </span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">getsize</span><span class="p">(</span><span class="s1">&#39;data/medical_data.csv&#39;</span><span class="p">)</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mi">1024</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mi">1024</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2"> MB&quot;</span><span class="p">)</span>
+
+<span class="c1"># Save as Excel</span>
+<span class="n">df_medical</span><span class="o">.</span><span class="n">to_excel</span><span class="p">(</span><span class="s1">&#39;data/medical_data.xlsx&#39;</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Excel file size: </span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">getsize</span><span class="p">(</span><span class="s1">&#39;data/medical_data.xlsx&#39;</span><span class="p">)</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mi">1024</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mi">1024</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2"> MB&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>CSV file size: 0.52 MB
+</pre></div>
+</div>
+<div class="output traceback highlight-ipythontb notranslate"><div class="highlight"><pre><span></span><span class="gt">---------------------------------------------------------------------------</span>
+<span class="ne">ModuleNotFoundError</span><span class="g g-Whitespace">                       </span>Traceback (most recent call last)
+<span class="n">Cell</span> <span class="n">In</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="n">line</span> <span class="mi">9</span>
+<span class="g g-Whitespace">      </span><span class="mi">6</span> <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;CSV file size: </span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">getsize</span><span class="p">(</span><span class="s1">&#39;data/medical_data.csv&#39;</span><span class="p">)</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mi">1024</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mi">1024</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2"> MB&quot;</span><span class="p">)</span>
+<span class="g g-Whitespace">      </span><span class="mi">8</span> <span class="c1"># Save as Excel</span>
+<span class="ne">----&gt; </span><span class="mi">9</span> <span class="n">df_medical</span><span class="o">.</span><span class="n">to_excel</span><span class="p">(</span><span class="s1">&#39;data/medical_data.xlsx&#39;</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="g g-Whitespace">     </span><span class="mi">10</span> <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Excel file size: </span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">getsize</span><span class="p">(</span><span class="s1">&#39;data/medical_data.xlsx&#39;</span><span class="p">)</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mi">1024</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mi">1024</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2"> MB&quot;</span><span class="p">)</span>
+
+<span class="nn">File /opt/hostedtoolcache/Python/3.11.13/x64/lib/python3.11/site-packages/pandas/util/_decorators.py:333,</span> in <span class="ni">deprecate_nonkeyword_arguments.&lt;locals&gt;.decorate.&lt;locals&gt;.wrapper</span><span class="nt">(*args, **kwargs)</span>
+<span class="g g-Whitespace">    </span><span class="mi">327</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">num_allow_args</span><span class="p">:</span>
+<span class="g g-Whitespace">    </span><span class="mi">328</span>     <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+<span class="g g-Whitespace">    </span><span class="mi">329</span>         <span class="n">msg</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">arguments</span><span class="o">=</span><span class="n">_format_argument_list</span><span class="p">(</span><span class="n">allow_args</span><span class="p">)),</span>
+<span class="g g-Whitespace">    </span><span class="mi">330</span>         <span class="ne">FutureWarning</span><span class="p">,</span>
+<span class="g g-Whitespace">    </span><span class="mi">331</span>         <span class="n">stacklevel</span><span class="o">=</span><span class="n">find_stack_level</span><span class="p">(),</span>
+<span class="g g-Whitespace">    </span><span class="mi">332</span>     <span class="p">)</span>
+<span class="ne">--&gt; </span><span class="mi">333</span> <span class="k">return</span> <span class="n">func</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+<span class="nn">File /opt/hostedtoolcache/Python/3.11.13/x64/lib/python3.11/site-packages/pandas/core/generic.py:2436,</span> in <span class="ni">NDFrame.to_excel</span><span class="nt">(self, excel_writer, sheet_name, na_rep, float_format, columns, header, index, index_label, startrow, startcol, engine, merge_cells, inf_rep, freeze_panes, storage_options, engine_kwargs)</span>
+<span class="g g-Whitespace">   </span><span class="mi">2423</span> <span class="kn">from</span><span class="w"> </span><span class="nn">pandas.io.formats.excel</span><span class="w"> </span><span class="kn">import</span> <span class="n">ExcelFormatter</span>
+<span class="g g-Whitespace">   </span><span class="mi">2425</span> <span class="n">formatter</span> <span class="o">=</span> <span class="n">ExcelFormatter</span><span class="p">(</span>
+<span class="g g-Whitespace">   </span><span class="mi">2426</span>     <span class="n">df</span><span class="p">,</span>
+<span class="g g-Whitespace">   </span><span class="mi">2427</span>     <span class="n">na_rep</span><span class="o">=</span><span class="n">na_rep</span><span class="p">,</span>
+   <span class="p">(</span><span class="o">...</span><span class="p">)</span>   <span class="mi">2434</span>     <span class="n">inf_rep</span><span class="o">=</span><span class="n">inf_rep</span><span class="p">,</span>
+<span class="g g-Whitespace">   </span><span class="mi">2435</span> <span class="p">)</span>
+<span class="ne">-&gt; </span><span class="mi">2436</span> <span class="n">formatter</span><span class="o">.</span><span class="n">write</span><span class="p">(</span>
+<span class="g g-Whitespace">   </span><span class="mi">2437</span>     <span class="n">excel_writer</span><span class="p">,</span>
+<span class="g g-Whitespace">   </span><span class="mi">2438</span>     <span class="n">sheet_name</span><span class="o">=</span><span class="n">sheet_name</span><span class="p">,</span>
+<span class="g g-Whitespace">   </span><span class="mi">2439</span>     <span class="n">startrow</span><span class="o">=</span><span class="n">startrow</span><span class="p">,</span>
+<span class="g g-Whitespace">   </span><span class="mi">2440</span>     <span class="n">startcol</span><span class="o">=</span><span class="n">startcol</span><span class="p">,</span>
+<span class="g g-Whitespace">   </span><span class="mi">2441</span>     <span class="n">freeze_panes</span><span class="o">=</span><span class="n">freeze_panes</span><span class="p">,</span>
+<span class="g g-Whitespace">   </span><span class="mi">2442</span>     <span class="n">engine</span><span class="o">=</span><span class="n">engine</span><span class="p">,</span>
+<span class="g g-Whitespace">   </span><span class="mi">2443</span>     <span class="n">storage_options</span><span class="o">=</span><span class="n">storage_options</span><span class="p">,</span>
+<span class="g g-Whitespace">   </span><span class="mi">2444</span>     <span class="n">engine_kwargs</span><span class="o">=</span><span class="n">engine_kwargs</span><span class="p">,</span>
+<span class="g g-Whitespace">   </span><span class="mi">2445</span> <span class="p">)</span>
+
+<span class="nn">File /opt/hostedtoolcache/Python/3.11.13/x64/lib/python3.11/site-packages/pandas/io/formats/excel.py:943,</span> in <span class="ni">ExcelFormatter.write</span><span class="nt">(self, writer, sheet_name, startrow, startcol, freeze_panes, engine, storage_options, engine_kwargs)</span>
+<span class="g g-Whitespace">    </span><span class="mi">941</span>     <span class="n">need_save</span> <span class="o">=</span> <span class="kc">False</span>
+<span class="g g-Whitespace">    </span><span class="mi">942</span> <span class="k">else</span><span class="p">:</span>
+<span class="ne">--&gt; </span><span class="mi">943</span>     <span class="n">writer</span> <span class="o">=</span> <span class="n">ExcelWriter</span><span class="p">(</span>
+<span class="g g-Whitespace">    </span><span class="mi">944</span>         <span class="n">writer</span><span class="p">,</span>
+<span class="g g-Whitespace">    </span><span class="mi">945</span>         <span class="n">engine</span><span class="o">=</span><span class="n">engine</span><span class="p">,</span>
+<span class="g g-Whitespace">    </span><span class="mi">946</span>         <span class="n">storage_options</span><span class="o">=</span><span class="n">storage_options</span><span class="p">,</span>
+<span class="g g-Whitespace">    </span><span class="mi">947</span>         <span class="n">engine_kwargs</span><span class="o">=</span><span class="n">engine_kwargs</span><span class="p">,</span>
+<span class="g g-Whitespace">    </span><span class="mi">948</span>     <span class="p">)</span>
+<span class="g g-Whitespace">    </span><span class="mi">949</span>     <span class="n">need_save</span> <span class="o">=</span> <span class="kc">True</span>
+<span class="g g-Whitespace">    </span><span class="mi">951</span> <span class="k">try</span><span class="p">:</span>
+
+<span class="nn">File /opt/hostedtoolcache/Python/3.11.13/x64/lib/python3.11/site-packages/pandas/io/excel/_openpyxl.py:57,</span> in <span class="ni">OpenpyxlWriter.__init__</span><span class="nt">(self, path, engine, date_format, datetime_format, mode, storage_options, if_sheet_exists, engine_kwargs, **kwargs)</span>
+<span class="g g-Whitespace">     </span><span class="mi">44</span> <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+<span class="g g-Whitespace">     </span><span class="mi">45</span>     <span class="bp">self</span><span class="p">,</span>
+<span class="g g-Whitespace">     </span><span class="mi">46</span>     <span class="n">path</span><span class="p">:</span> <span class="n">FilePath</span> <span class="o">|</span> <span class="n">WriteExcelBuffer</span> <span class="o">|</span> <span class="n">ExcelWriter</span><span class="p">,</span>
+   <span class="p">(</span><span class="o">...</span><span class="p">)</span>     <span class="mi">55</span> <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="g g-Whitespace">     </span><span class="mi">56</span>     <span class="c1"># Use the openpyxl module as the Excel writer.</span>
+<span class="ne">---&gt; </span><span class="mi">57</span>     <span class="kn">from</span><span class="w"> </span><span class="nn">openpyxl.workbook</span><span class="w"> </span><span class="kn">import</span> <span class="n">Workbook</span>
+<span class="g g-Whitespace">     </span><span class="mi">59</span>     <span class="n">engine_kwargs</span> <span class="o">=</span> <span class="n">combine_kwargs</span><span class="p">(</span><span class="n">engine_kwargs</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">)</span>
+<span class="g g-Whitespace">     </span><span class="mi">61</span>     <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+<span class="g g-Whitespace">     </span><span class="mi">62</span>         <span class="n">path</span><span class="p">,</span>
+<span class="g g-Whitespace">     </span><span class="mi">63</span>         <span class="n">mode</span><span class="o">=</span><span class="n">mode</span><span class="p">,</span>
+   <span class="p">(</span><span class="o">...</span><span class="p">)</span>     <span class="mi">66</span>         <span class="n">engine_kwargs</span><span class="o">=</span><span class="n">engine_kwargs</span><span class="p">,</span>
+<span class="g g-Whitespace">     </span><span class="mi">67</span>     <span class="p">)</span>
+
+<span class="ne">ModuleNotFoundError</span>: No module named &#39;openpyxl&#39;
+</pre></div>
+</div>
+</div>
+</div>
+<p>Let’s create an NDJSON file where each line represents a patient record. This format is common in streaming medical data systems and log files.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Save as NDJSON (Newline Delimited JSON)</span>
+<span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s1">&#39;data/medical_data.ndjson&#39;</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+    <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">df_medical</span><span class="o">.</span><span class="n">iterrows</span><span class="p">():</span>
+        <span class="c1"># Convert datetime to string for JSON serialization</span>
+        <span class="n">row_dict</span> <span class="o">=</span> <span class="n">row</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span>
+        <span class="n">row_dict</span><span class="p">[</span><span class="s1">&#39;admission_date&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">row_dict</span><span class="p">[</span><span class="s1">&#39;admission_date&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">isoformat</span><span class="p">()</span>
+        <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">row_dict</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;NDJSON file size: </span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">getsize</span><span class="p">(</span><span class="s1">&#39;data/medical_data.ndjson&#39;</span><span class="p">)</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mi">1024</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mi">1024</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2"> MB&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>NDJSON file size: 1.83 MB
+</pre></div>
+</div>
+</div>
+</div>
+<section id="batch-processing-approach">
+<h2>Batch Processing Approach<a class="headerlink" href="#batch-processing-approach" title="Link to this heading">#</a></h2>
+<p>Now let’s implement the batch processing approach where we load the entire dataset into memory at once. This method is suitable for datasets that fit comfortably in available RAM.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">batch_csv_to_parquet</span><span class="p">(</span><span class="n">csv_path</span><span class="p">,</span> <span class="n">parquet_path</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Convert CSV to Parquet using batch processing&quot;&quot;&quot;</span>
+    <span class="n">start_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+    
+    <span class="c1"># Read entire CSV into memory</span>
+    <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">csv_path</span><span class="p">,</span> <span class="n">parse_dates</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;admission_date&#39;</span><span class="p">])</span>
+    
+    <span class="c1"># Convert to Arrow table and save as Parquet</span>
+    <span class="n">table</span> <span class="o">=</span> <span class="n">pa</span><span class="o">.</span><span class="n">Table</span><span class="o">.</span><span class="n">from_pandas</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>
+    <span class="n">pq</span><span class="o">.</span><span class="n">write_table</span><span class="p">(</span><span class="n">table</span><span class="p">,</span> <span class="n">parquet_path</span><span class="p">)</span>
+    
+    <span class="n">end_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">end_time</span> <span class="o">-</span> <span class="n">start_time</span>
+
+<span class="c1"># Convert CSV to Parquet using batch processing</span>
+<span class="n">batch_time</span> <span class="o">=</span> <span class="n">batch_csv_to_parquet</span><span class="p">(</span><span class="s1">&#39;data/medical_data.csv&#39;</span><span class="p">,</span> <span class="s1">&#39;data/medical_batch.parquet&#39;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Batch conversion completed in </span><span class="si">{</span><span class="n">batch_time</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2"> seconds&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Parquet file size: </span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">getsize</span><span class="p">(</span><span class="s1">&#39;data/medical_batch.parquet&#39;</span><span class="p">)</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mi">1024</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mi">1024</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2"> MB&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Batch conversion completed in 0.04 seconds
+Parquet file size: 0.24 MB
+</pre></div>
+</div>
+</div>
+</div>
+<p>Let’s also implement batch processing for Excel files, which requires special handling due to the more complex file structure. Excel files often contain multiple sheets and formatting information.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">batch_excel_to_parquet</span><span class="p">(</span><span class="n">excel_path</span><span class="p">,</span> <span class="n">parquet_path</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Convert Excel to Parquet using batch processing&quot;&quot;&quot;</span>
+    <span class="n">start_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+    
+    <span class="c1"># Read entire Excel file into memory</span>
+    <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_excel</span><span class="p">(</span><span class="n">excel_path</span><span class="p">)</span>
+    <span class="n">df</span><span class="p">[</span><span class="s1">&#39;admission_date&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;admission_date&#39;</span><span class="p">])</span>
+    
+    <span class="c1"># Convert to Arrow table and save as Parquet</span>
+    <span class="n">table</span> <span class="o">=</span> <span class="n">pa</span><span class="o">.</span><span class="n">Table</span><span class="o">.</span><span class="n">from_pandas</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>
+    <span class="n">pq</span><span class="o">.</span><span class="n">write_table</span><span class="p">(</span><span class="n">table</span><span class="p">,</span> <span class="n">parquet_path</span><span class="p">)</span>
+    
+    <span class="n">end_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">end_time</span> <span class="o">-</span> <span class="n">start_time</span>
+
+<span class="c1"># Convert Excel to Parquet using batch processing</span>
+<span class="n">batch_excel_time</span> <span class="o">=</span> <span class="n">batch_excel_to_parquet</span><span class="p">(</span><span class="s1">&#39;data/medical_data.xlsx&#39;</span><span class="p">,</span> <span class="s1">&#39;data/medical_excel_batch.parquet&#39;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Excel batch conversion completed in </span><span class="si">{</span><span class="n">batch_excel_time</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2"> seconds&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Excel batch conversion completed in 1.00 seconds
+</pre></div>
+</div>
+</div>
+</div>
+<p>Now let’s implement batch processing for NDJSON files. Each line needs to be parsed as a separate JSON object and then combined into a single DataFrame.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">batch_ndjson_to_parquet</span><span class="p">(</span><span class="n">ndjson_path</span><span class="p">,</span> <span class="n">parquet_path</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Convert NDJSON to Parquet using batch processing&quot;&quot;&quot;</span>
+    <span class="n">start_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+    
+    <span class="c1"># Read all lines and parse JSON</span>
+    <span class="n">records</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">ndjson_path</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">f</span><span class="p">:</span>
+            <span class="n">records</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()))</span>
+    
+    <span class="c1"># Create DataFrame and convert dates</span>
+    <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">records</span><span class="p">)</span>
+    <span class="n">df</span><span class="p">[</span><span class="s1">&#39;admission_date&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;admission_date&#39;</span><span class="p">])</span>
+    
+    <span class="c1"># Convert to Arrow table and save as Parquet</span>
+    <span class="n">table</span> <span class="o">=</span> <span class="n">pa</span><span class="o">.</span><span class="n">Table</span><span class="o">.</span><span class="n">from_pandas</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>
+    <span class="n">pq</span><span class="o">.</span><span class="n">write_table</span><span class="p">(</span><span class="n">table</span><span class="p">,</span> <span class="n">parquet_path</span><span class="p">)</span>
+    
+    <span class="n">end_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">end_time</span> <span class="o">-</span> <span class="n">start_time</span>
+
+<span class="c1"># Convert NDJSON to Parquet using batch processing</span>
+<span class="n">batch_ndjson_time</span> <span class="o">=</span> <span class="n">batch_ndjson_to_parquet</span><span class="p">(</span><span class="s1">&#39;data/medical_data.ndjson&#39;</span><span class="p">,</span> <span class="s1">&#39;data/medical_ndjson_batch.parquet&#39;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;NDJSON batch conversion completed in </span><span class="si">{</span><span class="n">batch_ndjson_time</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2"> seconds&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>NDJSON batch conversion completed in 0.07 seconds
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="streaming-processing-approach">
+<h2>Streaming Processing Approach<a class="headerlink" href="#streaming-processing-approach" title="Link to this heading">#</a></h2>
+<p>Now let’s implement streaming processing, which processes data in chunks rather than loading everything into memory. This approach is essential for large medical datasets that exceed available RAM.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">streaming_csv_to_parquet</span><span class="p">(</span><span class="n">csv_path</span><span class="p">,</span> <span class="n">parquet_path</span><span class="p">,</span> <span class="n">chunk_size</span><span class="o">=</span><span class="mi">1000</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Convert CSV to Parquet using streaming processing&quot;&quot;&quot;</span>
+    <span class="n">start_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+    
+    <span class="c1"># Initialize Parquet writer</span>
+    <span class="n">writer</span> <span class="o">=</span> <span class="kc">None</span>
+    
+    <span class="c1"># Process CSV in chunks</span>
+    <span class="k">for</span> <span class="n">chunk_df</span> <span class="ow">in</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">csv_path</span><span class="p">,</span> <span class="n">chunksize</span><span class="o">=</span><span class="n">chunk_size</span><span class="p">,</span> <span class="n">parse_dates</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;admission_date&#39;</span><span class="p">]):</span>
+        <span class="c1"># Convert chunk to Arrow table</span>
+        <span class="n">table</span> <span class="o">=</span> <span class="n">pa</span><span class="o">.</span><span class="n">Table</span><span class="o">.</span><span class="n">from_pandas</span><span class="p">(</span><span class="n">chunk_df</span><span class="p">)</span>
+        
+        <span class="c1"># Initialize writer with schema from first chunk</span>
+        <span class="k">if</span> <span class="n">writer</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">writer</span> <span class="o">=</span> <span class="n">pq</span><span class="o">.</span><span class="n">ParquetWriter</span><span class="p">(</span><span class="n">parquet_path</span><span class="p">,</span> <span class="n">table</span><span class="o">.</span><span class="n">schema</span><span class="p">)</span>
+        
+        <span class="c1"># Write chunk to Parquet file</span>
+        <span class="n">writer</span><span class="o">.</span><span class="n">write_table</span><span class="p">(</span><span class="n">table</span><span class="p">)</span>
+    
+    <span class="c1"># Close the writer</span>
+    <span class="k">if</span> <span class="n">writer</span><span class="p">:</span>
+        <span class="n">writer</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+    
+    <span class="n">end_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">end_time</span> <span class="o">-</span> <span class="n">start_time</span>
+
+<span class="c1"># Convert CSV to Parquet using streaming processing</span>
+<span class="n">streaming_time</span> <span class="o">=</span> <span class="n">streaming_csv_to_parquet</span><span class="p">(</span><span class="s1">&#39;data/medical_data.csv&#39;</span><span class="p">,</span> <span class="s1">&#39;data/medical_streaming.parquet&#39;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Streaming conversion completed in </span><span class="si">{</span><span class="n">streaming_time</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2"> seconds&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Streaming Parquet file size: </span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">getsize</span><span class="p">(</span><span class="s1">&#39;data/medical_streaming.parquet&#39;</span><span class="p">)</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mi">1024</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mi">1024</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2"> MB&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Streaming conversion completed in 0.08 seconds
+Streaming Parquet file size: 0.28 MB
+</pre></div>
+</div>
+</div>
+</div>
+<p>Let’s implement streaming processing for NDJSON files, which is particularly useful for log files and real-time medical data streams. We’ll process the file line by line in batches.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">streaming_ndjson_to_parquet</span><span class="p">(</span><span class="n">ndjson_path</span><span class="p">,</span> <span class="n">parquet_path</span><span class="p">,</span> <span class="n">chunk_size</span><span class="o">=</span><span class="mi">1000</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Convert NDJSON to Parquet using streaming processing&quot;&quot;&quot;</span>
+    <span class="n">start_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+    
+    <span class="n">writer</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">records_batch</span> <span class="o">=</span> <span class="p">[]</span>
+    
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">ndjson_path</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">line_num</span><span class="p">,</span> <span class="n">line</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">f</span><span class="p">):</span>
+            <span class="c1"># Parse JSON record</span>
+            <span class="n">record</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span>
+            <span class="n">records_batch</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">record</span><span class="p">)</span>
+            
+            <span class="c1"># Process batch when chunk_size is reached</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">records_batch</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="n">chunk_size</span><span class="p">:</span>
+                <span class="c1"># Create DataFrame from batch</span>
+                <span class="n">df_batch</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">records_batch</span><span class="p">)</span>
+                <span class="n">df_batch</span><span class="p">[</span><span class="s1">&#39;admission_date&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">(</span><span class="n">df_batch</span><span class="p">[</span><span class="s1">&#39;admission_date&#39;</span><span class="p">])</span>
+                
+                <span class="c1"># Convert to Arrow table</span>
+                <span class="n">table</span> <span class="o">=</span> <span class="n">pa</span><span class="o">.</span><span class="n">Table</span><span class="o">.</span><span class="n">from_pandas</span><span class="p">(</span><span class="n">df_batch</span><span class="p">)</span>
+                
+                <span class="c1"># Initialize writer if needed</span>
+                <span class="k">if</span> <span class="n">writer</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="n">writer</span> <span class="o">=</span> <span class="n">pq</span><span class="o">.</span><span class="n">ParquetWriter</span><span class="p">(</span><span class="n">parquet_path</span><span class="p">,</span> <span class="n">table</span><span class="o">.</span><span class="n">schema</span><span class="p">)</span>
+                
+                <span class="c1"># Write batch</span>
+                <span class="n">writer</span><span class="o">.</span><span class="n">write_table</span><span class="p">(</span><span class="n">table</span><span class="p">)</span>
+                <span class="n">records_batch</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># Reset batch</span>
+        
+        <span class="c1"># Process remaining records</span>
+        <span class="k">if</span> <span class="n">records_batch</span><span class="p">:</span>
+            <span class="n">df_batch</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">records_batch</span><span class="p">)</span>
+            <span class="n">df_batch</span><span class="p">[</span><span class="s1">&#39;admission_date&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">(</span><span class="n">df_batch</span><span class="p">[</span><span class="s1">&#39;admission_date&#39;</span><span class="p">])</span>
+            <span class="n">table</span> <span class="o">=</span> <span class="n">pa</span><span class="o">.</span><span class="n">Table</span><span class="o">.</span><span class="n">from_pandas</span><span class="p">(</span><span class="n">df_batch</span><span class="p">)</span>
+            
+            <span class="k">if</span> <span class="n">writer</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">writer</span> <span class="o">=</span> <span class="n">pq</span><span class="o">.</span><span class="n">ParquetWriter</span><span class="p">(</span><span class="n">parquet_path</span><span class="p">,</span> <span class="n">table</span><span class="o">.</span><span class="n">schema</span><span class="p">)</span>
+            <span class="n">writer</span><span class="o">.</span><span class="n">write_table</span><span class="p">(</span><span class="n">table</span><span class="p">)</span>
+    
+    <span class="k">if</span> <span class="n">writer</span><span class="p">:</span>
+        <span class="n">writer</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+    
+    <span class="n">end_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">end_time</span> <span class="o">-</span> <span class="n">start_time</span>
+
+<span class="c1"># Convert NDJSON to Parquet using streaming processing</span>
+<span class="n">streaming_ndjson_time</span> <span class="o">=</span> <span class="n">streaming_ndjson_to_parquet</span><span class="p">(</span><span class="s1">&#39;data/medical_data.ndjson&#39;</span><span class="p">,</span> <span class="s1">&#39;data/medical_ndjson_streaming.parquet&#39;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;NDJSON streaming conversion completed in </span><span class="si">{</span><span class="n">streaming_ndjson_time</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2"> seconds&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>NDJSON streaming conversion completed in 0.12 seconds
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="performance-comparison-and-memory-usage">
+<h2>Performance Comparison and Memory Usage<a class="headerlink" href="#performance-comparison-and-memory-usage" title="Link to this heading">#</a></h2>
+<p>Let’s compare the performance and file sizes of both approaches. We’ll also verify that the converted files contain the same data as the original.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Create performance comparison</span>
+<span class="n">performance_data</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">&#39;Method&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;CSV Batch&#39;</span><span class="p">,</span> <span class="s1">&#39;CSV Streaming&#39;</span><span class="p">,</span> <span class="s1">&#39;NDJSON Batch&#39;</span><span class="p">,</span> <span class="s1">&#39;NDJSON Streaming&#39;</span><span class="p">,</span> <span class="s1">&#39;Excel Batch&#39;</span><span class="p">],</span>
+    <span class="s1">&#39;Time (seconds)&#39;</span><span class="p">:</span> <span class="p">[</span><span class="n">batch_time</span><span class="p">,</span> <span class="n">streaming_time</span><span class="p">,</span> <span class="n">batch_ndjson_time</span><span class="p">,</span> <span class="n">streaming_ndjson_time</span><span class="p">,</span> <span class="n">batch_excel_time</span><span class="p">]</span>
+<span class="p">}</span>
+
+<span class="n">performance_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">performance_data</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Performance Comparison:&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">performance_df</span><span class="p">)</span>
+
+<span class="c1"># File size comparison</span>
+<span class="n">file_sizes</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">&#39;Original CSV&#39;</span><span class="p">:</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">getsize</span><span class="p">(</span><span class="s1">&#39;data/medical_data.csv&#39;</span><span class="p">)</span> <span class="o">/</span> <span class="mi">1024</span> <span class="o">/</span> <span class="mi">1024</span><span class="p">,</span>
+    <span class="s1">&#39;Original Excel&#39;</span><span class="p">:</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">getsize</span><span class="p">(</span><span class="s1">&#39;data/medical_data.xlsx&#39;</span><span class="p">)</span> <span class="o">/</span> <span class="mi">1024</span> <span class="o">/</span> <span class="mi">1024</span><span class="p">,</span>
+    <span class="s1">&#39;Original NDJSON&#39;</span><span class="p">:</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">getsize</span><span class="p">(</span><span class="s1">&#39;data/medical_data.ndjson&#39;</span><span class="p">)</span> <span class="o">/</span> <span class="mi">1024</span> <span class="o">/</span> <span class="mi">1024</span><span class="p">,</span>
+    <span class="s1">&#39;Batch Parquet&#39;</span><span class="p">:</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">getsize</span><span class="p">(</span><span class="s1">&#39;data/medical_batch.parquet&#39;</span><span class="p">)</span> <span class="o">/</span> <span class="mi">1024</span> <span class="o">/</span> <span class="mi">1024</span><span class="p">,</span>
+    <span class="s1">&#39;Streaming Parquet&#39;</span><span class="p">:</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">getsize</span><span class="p">(</span><span class="s1">&#39;data/medical_streaming.parquet&#39;</span><span class="p">)</span> <span class="o">/</span> <span class="mi">1024</span> <span class="o">/</span> <span class="mi">1024</span>
+<span class="p">}</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">File Size Comparison (MB):&quot;</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">file_type</span><span class="p">,</span> <span class="n">size</span> <span class="ow">in</span> <span class="n">file_sizes</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">file_type</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">size</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2"> MB&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Performance Comparison:
+             Method  Time (seconds)
+0         CSV Batch        0.039538
+1     CSV Streaming        0.077791
+2      NDJSON Batch        0.071356
+3  NDJSON Streaming        0.118001
+4       Excel Batch        1.002253
+
+File Size Comparison (MB):
+Original CSV: 0.53 MB
+Original Excel: 0.43 MB
+Original NDJSON: 1.83 MB
+Batch Parquet: 0.24 MB
+Streaming Parquet: 0.28 MB
+</pre></div>
+</div>
+</div>
+</div>
+<p>Let’s verify data integrity by reading back one of the Parquet files and comparing it with the original data. This ensures our conversion process preserved all the medical data accurately.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Verify data integrity</span>
+<span class="n">original_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s1">&#39;data/medical_data.csv&#39;</span><span class="p">,</span> <span class="n">parse_dates</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;admission_date&#39;</span><span class="p">])</span>
+<span class="n">parquet_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_parquet</span><span class="p">(</span><span class="s1">&#39;data/medical_batch.parquet&#39;</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Original shape: </span><span class="si">{</span><span class="n">original_df</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Parquet shape: </span><span class="si">{</span><span class="n">parquet_df</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Data types match: </span><span class="si">{</span><span class="n">original_df</span><span class="o">.</span><span class="n">dtypes</span><span class="o">.</span><span class="n">equals</span><span class="p">(</span><span class="n">parquet_df</span><span class="o">.</span><span class="n">dtypes</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Data values match: </span><span class="si">{</span><span class="n">original_df</span><span class="o">.</span><span class="n">equals</span><span class="p">(</span><span class="n">parquet_df</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+<span class="c1"># Show compression ratio</span>
+<span class="n">csv_size</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">getsize</span><span class="p">(</span><span class="s1">&#39;data/medical_data.csv&#39;</span><span class="p">)</span>
+<span class="n">parquet_size</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">getsize</span><span class="p">(</span><span class="s1">&#39;data/medical_batch.parquet&#39;</span><span class="p">)</span>
+<span class="n">compression_ratio</span> <span class="o">=</span> <span class="n">csv_size</span> <span class="o">/</span> <span class="n">parquet_size</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Compression ratio: </span><span class="si">{</span><span class="n">compression_ratio</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">x smaller&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Original shape: (10000, 8)
+Parquet shape: (10000, 8)
+Data types match: True
+Data values match: True
+
+Compression ratio: 2.17x smaller
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="working-with-arrow-format-in-memory">
+<h2>Working with Arrow Format In-Memory<a class="headerlink" href="#working-with-arrow-format-in-memory" title="Link to this heading">#</a></h2>
+<p>Let’s demonstrate working directly with Apache Arrow format in memory, which is beneficial for medical data processing pipelines. Arrow provides zero-copy reads and efficient columnar operations.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Load data as Arrow table directly</span>
+<span class="n">arrow_table</span> <span class="o">=</span> <span class="n">pq</span><span class="o">.</span><span class="n">read_table</span><span class="p">(</span><span class="s1">&#39;data/medical_batch.parquet&#39;</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Arrow table schema:&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">arrow_table</span><span class="o">.</span><span class="n">schema</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Number of rows: </span><span class="si">{</span><span class="n">arrow_table</span><span class="o">.</span><span class="n">num_rows</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Number of columns: </span><span class="si">{</span><span class="n">arrow_table</span><span class="o">.</span><span class="n">num_columns</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+<span class="c1"># Show memory usage</span>
+<span class="n">memory_usage</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">array</span><span class="o">.</span><span class="n">nbytes</span> <span class="k">for</span> <span class="n">array</span> <span class="ow">in</span> <span class="n">arrow_table</span><span class="o">.</span><span class="n">columns</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Memory usage: </span><span class="si">{</span><span class="n">memory_usage</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mi">1024</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mi">1024</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2"> MB&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Arrow table schema:
+patient_id: string
+age: int64
+gender: string
+diagnosis_code: string
+systolic_bp: double
+diastolic_bp: double
+lab_value_glucose: double
+admission_date: timestamp[ns]
+-- schema metadata --
+pandas: &#39;{&quot;index_columns&quot;: [{&quot;kind&quot;: &quot;range&quot;, &quot;name&quot;: null, &quot;start&quot;: 0, &quot;&#39; + 1246
+
+Number of rows: 10000
+Number of columns: 8
+Memory usage: 0.61 MB
+</pre></div>
+</div>
+</div>
+</div>
+<p>Let’s perform some efficient filtering operations directly on the Arrow table. This demonstrates how columnar format enables fast analytical queries on medical data.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Efficient filtering with Arrow compute functions</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pyarrow.compute</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pc</span>
+
+<span class="c1"># Filter patients with high systolic blood pressure (&gt;150)</span>
+<span class="n">high_bp_mask</span> <span class="o">=</span> <span class="n">pc</span><span class="o">.</span><span class="n">greater</span><span class="p">(</span><span class="n">arrow_table</span><span class="p">[</span><span class="s1">&#39;systolic_bp&#39;</span><span class="p">],</span> <span class="mi">150</span><span class="p">)</span>
+<span class="n">high_bp_patients</span> <span class="o">=</span> <span class="n">arrow_table</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">high_bp_mask</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Patients with systolic BP &gt; 150: </span><span class="si">{</span><span class="n">high_bp_patients</span><span class="o">.</span><span class="n">num_rows</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+<span class="c1"># Filter by diagnosis code</span>
+<span class="n">diabetes_mask</span> <span class="o">=</span> <span class="n">pc</span><span class="o">.</span><span class="n">equal</span><span class="p">(</span><span class="n">arrow_table</span><span class="p">[</span><span class="s1">&#39;diagnosis_code&#39;</span><span class="p">],</span> <span class="s1">&#39;E11&#39;</span><span class="p">)</span>
+<span class="n">diabetes_patients</span> <span class="o">=</span> <span class="n">arrow_table</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">diabetes_mask</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Patients with diabetes (E11): </span><span class="si">{</span><span class="n">diabetes_patients</span><span class="o">.</span><span class="n">num_rows</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+<span class="c1"># Convert filtered results back to pandas for further analysis</span>
+<span class="n">diabetes_df</span> <span class="o">=</span> <span class="n">diabetes_patients</span><span class="o">.</span><span class="n">to_pandas</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Mean glucose level in diabetes patients: </span><span class="si">{</span><span class="n">diabetes_df</span><span class="p">[</span><span class="s1">&#39;lab_value_glucose&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Patients with systolic BP &gt; 150: 1574
+Patients with diabetes (E11): 1967
+
+Mean glucose level in diabetes patients: 99.42
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="best-practices-summary">
+<h2>Best Practices Summary<a class="headerlink" href="#best-practices-summary" title="Link to this heading">#</a></h2>
+<p>Let’s summarize the key considerations for choosing between batch and streaming approaches in medical data integration. The choice depends on data size, available memory, and processing requirements.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Clean up temporary files</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">shutil</span>
+<span class="n">shutil</span><span class="o">.</span><span class="n">rmtree</span><span class="p">(</span><span class="s1">&#39;data&#39;</span><span class="p">,</span> <span class="n">ignore_errors</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Best Practices Summary:&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">1. Use BATCH processing when:&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;   - Dataset fits comfortably in memory&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;   - Faster processing is priority&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;   - Simple one-time conversion&quot;</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">2. Use STREAMING processing when:&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;   - Dataset is larger than available memory&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;   - Memory efficiency is critical&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;   - Processing real-time data feeds&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;   - Want to minimize memory footprint&quot;</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">3. Parquet benefits for medical data:&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;   - Excellent compression (2-5x smaller files)&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;   - Fast analytical queries&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;   - Schema preservation&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;   - Cross-platform compatibility&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Best Practices Summary:
+
+1. Use BATCH processing when:
+   - Dataset fits comfortably in memory
+   - Faster processing is priority
+   - Simple one-time conversion
+
+2. Use STREAMING processing when:
+   - Dataset is larger than available memory
+   - Memory efficiency is critical
+   - Processing real-time data feeds
+   - Want to minimize memory footprint
+
+3. Parquet benefits for medical data:
+   - Excellent compression (2-5x smaller files)
+   - Fast analytical queries
+   - Schema preservation
+   - Cross-platform compatibility
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="exercise">
+<h2>Exercise<a class="headerlink" href="#exercise" title="Link to this heading">#</a></h2>
+<p>Create a medical data processing pipeline that:</p>
+<ol class="arabic simple">
+<li><p>Generate a synthetic dataset of 50,000 patient records with fields: patient_id, age, gender, BMI, blood_pressure_systolic, blood_pressure_diastolic, diagnosis_codes (as a list), and visit_date</p></li>
+<li><p>Save this data as both CSV and NDJSON formats</p></li>
+<li><p>Implement both batch and streaming conversion functions to convert these files to Parquet format</p></li>
+<li><p>Compare the performance, memory usage, and file sizes between the two approaches</p></li>
+<li><p>Use Arrow compute functions to filter patients with BMI &gt; 30 and systolic BP &gt; 140 (potential cardiovascular risk)</p></li>
+<li><p>Calculate and compare the processing time for this filtering operation on the original CSV vs. the Parquet format</p></li>
+</ol>
+<p>Bonus: Implement error handling for corrupted records in the NDJSON file and demonstrate how streaming processing can continue despite individual record failures.</p>
+</section>
+</section>
+
+    <script type="text/x-thebe-config">
+    {
+        requestKernel: true,
+        binderOptions: {
+            repo: "binder-examples/jupyter-stacks-datascience",
+            ref: "master",
+        },
+        codeMirrorConfig: {
+            theme: "abcdef",
+            mode: "python"
+        },
+        kernelOptions: {
+            name: "python3",
+            path: "./."
+        },
+        predefinedOutput: true
+    }
+    </script>
+    <script>kernelName = 'python3'</script>
+
+                </article>
+              
+
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="numpy-xarray-fundamentals-shapes-dtypes-chunking.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">NumPy/xarray Fundamentals: Shapes, Dtypes, and Chunking</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="longitudinal_data_preprocessing.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">Unit Normalization, Time Alignment, Resampling, and Windowing for Longitudinal Data</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+  <div class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> Contents
+  </div>
+  <nav class="bd-toc-nav page-toc">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#batch-processing-approach">Batch Processing Approach</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#streaming-processing-approach">Streaming Processing Approach</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#performance-comparison-and-memory-usage">Performance Comparison and Memory Usage</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#working-with-arrow-format-in-memory">Working with Arrow Format In-Memory</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#best-practices-summary">Best Practices Summary</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#exercise">Exercise</a></li>
+</ul>
+  </nav></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+<p class="component-author">
+By AI Generated Content
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+
+  </div>
+  
+  <div class="footer-item">
+    <p class="last-updated">
+  Last updated on Sep 13, 2025.
+  <br/>
+</p>
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+</div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b"></script>
+<script src="_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+  <footer class="bd-footer">
+  </footer>
+  </body>
+</html>

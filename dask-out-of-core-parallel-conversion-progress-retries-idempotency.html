@@ -1,0 +1,1654 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="./" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Out-of-core/Parallel Conversion with Dask: Progress, Retries, and Idempotency &#8212; Foundations of Medical Data Integration</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="_static/styles/theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="_static/styles/bootstrap.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="_static/styles/pydata-sphinx-theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+
+  
+  <link href="_static/vendor/fontawesome/6.5.2/css/all.min.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.5.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.5.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.5.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="_static/styles/sphinx-book-theme.css?v=eba8b062" />
+    <link rel="stylesheet" type="text/css" href="_static/togglebutton.css?v=13237357" />
+    <link rel="stylesheet" type="text/css" href="_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="_static/mystnb.8ecb98da25f57f5357bf6f572d296f466b2cfe2517ffebfabe82451661e28f02.css" />
+    <link rel="stylesheet" type="text/css" href="_static/sphinx-thebe.css?v=4fa983c6" />
+    <link rel="stylesheet" type="text/css" href="_static/sphinx-design.min.css?v=95c83b7e" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b" />
+<link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
+  <script src="_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+    <script src="_static/documentation_options.js?v=9eb32ce0"></script>
+    <script src="_static/doctools.js?v=9a2dae69"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="_static/copybutton.js?v=f281be69"></script>
+    <script src="_static/scripts/sphinx-book-theme.js?v=887ef09a"></script>
+    <script>let toggleHintShow = 'Click to show';</script>
+    <script>let toggleHintHide = 'Click to hide';</script>
+    <script>let toggleOpenOnPrint = 'true';</script>
+    <script src="_static/togglebutton.js?v=4a39c7ea"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script src="_static/design-tabs.js?v=f930bc37"></script>
+    <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"; const thebe_selector = ".thebe,.cell"; const thebe_selector_input = "pre"; const thebe_selector_output = ".output, .cell_output"</script>
+    <script async="async" src="_static/sphinx-thebe.js?v=c100c467"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"; const thebe_selector = ".thebe,.cell"; const thebe_selector_input = "pre"; const thebe_selector_output = ".output, .cell_output"</script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'dask-out-of-core-parallel-conversion-progress-retries-idempotency';</script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="Unit Normalization, Time Alignment, Resampling, and Windowing for Longitudinal Data" href="longitudinal_data_preprocessing.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+    <meta name="docbuild:last-update" content="Sep 13, 2025"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-primary-sidebar-checkbox"/>
+  <label class="overlay overlay-primary" for="pst-primary-sidebar-checkbox"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-secondary-sidebar-checkbox"/>
+  <label class="overlay overlay-secondary" for="pst-secondary-sidebar-checkbox"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search this book..."
+         aria-label="Search this book..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="intro.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="_static/logo.png" class="logo__image only-light" alt="Foundations of Medical Data Integration - Home"/>
+    <script>document.write(`<img src="_static/logo.png" class="logo__image only-dark" alt="Foundations of Medical Data Integration - Home"/>`);</script>
+  
+  
+</a></div>
+        <div class="sidebar-primary-item">
+
+ <script>
+ document.write(`
+   <button class="btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script></div>
+        <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        <p aria-level="2" class="caption" role="heading"><span class="caption-text">Working with files and folders</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="files_folders_filesystems.html">Files, Folders, and Filesystems in Medical Data Integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="path_handling_portable_io_pathlib.html">Path Handling and Portable I/O with pathlib</a></li>
+<li class="toctree-l1"><a class="reference internal" href="sidecar_metadata_data_dictionaries.html">Sidecar Metadata (JSON/YAML) and Data Dictionaries</a></li>
+<li class="toctree-l1"><a class="reference internal" href="fsspec_cloud_storage_streaming_io.html">Local and Cloud Storage with fsspec (s3fs/gcsfs/adlfs), Streaming I/O</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">File formats</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="integrity_checks_hashing_file_strategies.html">Integrity Checks (Hashing) and Small-to-Large File Strategies</a></li>
+<li class="toctree-l1"><a class="reference internal" href="data_io_csv_ndjson_pandas_polars_dtypes_missing.html">Reading and Writing Medical Data: CSV and NDJSON with Pandas and Polars</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pandera_schemas_validation_coercion_constraints.html">Schemas and Validation with Pandera</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Wrangling data</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="joins-grouping-windowing-duckdb-sql.html">Joins/Merges, Grouping, and Windowing with DuckDB</a></li>
+<li class="toctree-l1"><a class="reference internal" href="export_patterns_subsets_snapshots_reproducible_filters.html">Export Patterns: Subsets, Snapshots, Reproducible Filters</a></li>
+<li class="toctree-l1"><a class="reference internal" href="numpy-xarray-fundamentals-shapes-dtypes-chunking.html">NumPy/xarray Fundamentals: Shapes, Dtypes, and Chunking</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Data conversion</span></p>
+<ul class="current nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="csv-excel-ndjson-to-parquet-arrow-batch-vs-streaming.html">CSV/Excel/NDJSON → Parquet/Arrow: Batch vs Streaming</a></li>
+<li class="toctree-l1"><a class="reference internal" href="longitudinal_data_preprocessing.html">Unit Normalization, Time Alignment, Resampling, and Windowing for Longitudinal Data</a></li>
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">Out-of-core/Parallel Conversion with Dask: Progress, Retries, and Idempotency</a></li>
+</ul>
+
+    </div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><button class="sidebar-toggle primary-toggle btn btn-sm" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</button></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<div class="article-header-buttons">
+
+
+
+
+
+<div class="dropdown dropdown-launch-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Launch interactive content">
+    <i class="fas fa-rocket"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="https://mybinder.org/v2/gh/generated-books/medical-data-integration/main?urlpath=lab/tree/dask-out-of-core-parallel-conversion-progress-retries-idempotency.ipynb" target="_blank"
+   class="btn btn-sm dropdown-item"
+   title="Launch on Binder"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  
+    <img alt="Binder logo" src="_static/images/logo_binder.svg">
+  </span>
+<span class="btn__text-container">Binder</span>
+</a>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+
+
+<div class="dropdown dropdown-source-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Source repositories">
+    <i class="fab fa-github"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="https://github.com/generated-books/medical-data-integration" target="_blank"
+   class="btn btn-sm btn-source-repository-button dropdown-item"
+   title="Source repository"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fab fa-github"></i>
+  </span>
+<span class="btn__text-container">Repository</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li><a href="https://github.com/generated-books/medical-data-integration/edit/main/dask-out-of-core-parallel-conversion-progress-retries-idempotency.ipynb" target="_blank"
+   class="btn btn-sm btn-source-edit-button dropdown-item"
+   title="Suggest edit"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-pencil-alt"></i>
+  </span>
+<span class="btn__text-container">Suggest edit</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li><a href="https://github.com/generated-books/medical-data-integration/issues/new?title=Issue%20on%20page%20%2Fdask-out-of-core-parallel-conversion-progress-retries-idempotency.html&body=Your%20issue%20content%20here." target="_blank"
+   class="btn btn-sm btn-source-issues-button dropdown-item"
+   title="Open an issue"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-lightbulb"></i>
+  </span>
+<span class="btn__text-container">Open issue</span>
+</a>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+
+
+<div class="dropdown dropdown-download-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Download this page">
+    <i class="fas fa-download"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="_sources/dask-out-of-core-parallel-conversion-progress-retries-idempotency.ipynb" target="_blank"
+   class="btn btn-sm btn-download-source-button dropdown-item"
+   title="Download source file"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file"></i>
+  </span>
+<span class="btn__text-container">.ipynb</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li>
+<button onclick="window.print()"
+  class="btn btn-sm btn-download-pdf-button dropdown-item"
+  title="Print to PDF"
+  data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file-pdf"></i>
+  </span>
+<span class="btn__text-container">.pdf</span>
+</button>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+<button onclick="toggleFullScreen()"
+  class="btn btn-sm btn-fullscreen-button"
+  title="Fullscreen mode"
+  data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-expand"></i>
+  </span>
+
+</button>
+
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"></i>
+  </button>
+`);
+</script>
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm pst-navbar-icon search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+  </button>
+`);
+</script>
+<button class="sidebar-toggle secondary-toggle btn btn-sm" title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="fa-solid fa-list"></span>
+</button>
+</div></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1>Out-of-core/Parallel Conversion with Dask: Progress, Retries, and Idempotency</h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+            <div>
+                <h2> Contents </h2>
+            </div>
+            <nav aria-label="Page">
+                <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#setting-up-the-environment">Setting Up the Environment</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#creating-sample-medical-data">Creating Sample Medical Data</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#implementing-idempotent-operations">Implementing Idempotent Operations</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#implementing-retry-logic">Implementing Retry Logic</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#defining-medical-data-processing-functions">Defining Medical Data Processing Functions</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#loading-data-with-dask-for-out-of-core-processing">Loading Data with Dask for Out-of-Core Processing</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#creating-delayed-operations-for-progress-tracking">Creating Delayed Operations for Progress Tracking</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#executing-tasks-with-progress-monitoring">Executing Tasks with Progress Monitoring</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#implementing-batch-processing-with-error-handling">Implementing Batch Processing with Error Handling</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#monitoring-resource-usage-and-performance">Monitoring Resource Usage and Performance</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#saving-results-with-idempotency">Saving Results with Idempotency</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#cleanup-and-resource-management">Cleanup and Resource Management</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#summary">Summary</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#exercise">Exercise</a></li>
+</ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section class="tex2jax_ignore mathjax_ignore" id="out-of-core-parallel-conversion-with-dask-progress-retries-and-idempotency">
+<h1>Out-of-core/Parallel Conversion with Dask: Progress, Retries, and Idempotency<a class="headerlink" href="#out-of-core-parallel-conversion-with-dask-progress-retries-and-idempotency" title="Link to this heading">#</a></h1>
+<p>In medical data integration, we often work with large datasets that don’t fit in memory or require substantial processing time. This notebook demonstrates how to use Dask for out-of-core parallel processing while implementing robust error handling, progress tracking, and idempotent operations for medical data workflows.</p>
+<section id="setting-up-the-environment">
+<h2>Setting Up the Environment<a class="headerlink" href="#setting-up-the-environment" title="Link to this heading">#</a></h2>
+<p>We’ll start by importing the necessary libraries and setting up our Dask environment. Dask provides parallel computing capabilities that are essential for large-scale medical data processing.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">dask</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">dask.dataframe</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">dd</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">dask.bag</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">db</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">dask.distributed</span><span class="w"> </span><span class="kn">import</span> <span class="n">Client</span><span class="p">,</span> <span class="n">as_completed</span><span class="p">,</span> <span class="n">progress</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">dask.delayed</span><span class="w"> </span><span class="kn">import</span> <span class="n">delayed</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">time</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">hashlib</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">functools</span><span class="w"> </span><span class="kn">import</span> <span class="n">wraps</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output traceback highlight-ipythontb notranslate"><div class="highlight"><pre><span></span><span class="gt">---------------------------------------------------------------------------</span>
+<span class="ne">ModuleNotFoundError</span><span class="g g-Whitespace">                       </span>Traceback (most recent call last)
+<span class="n">File</span> <span class="o">/</span><span class="n">opt</span><span class="o">/</span><span class="n">hostedtoolcache</span><span class="o">/</span><span class="n">Python</span><span class="o">/</span><span class="mf">3.11.13</span><span class="o">/</span><span class="n">x64</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">python3</span><span class="mf">.11</span><span class="o">/</span><span class="n">site</span><span class="o">-</span><span class="n">packages</span><span class="o">/</span><span class="n">dask</span><span class="o">/</span><span class="n">distributed</span><span class="o">.</span><span class="n">py</span><span class="p">:</span><span class="mi">13</span>
+<span class="g g-Whitespace">     </span><span class="mi">12</span> <span class="k">try</span><span class="p">:</span>
+<span class="ne">---&gt; </span><span class="mi">13</span>     <span class="kn">from</span><span class="w"> </span><span class="nn">distributed</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
+<span class="g g-Whitespace">     </span><span class="mi">14</span> <span class="k">except</span> <span class="ne">ImportError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+
+<span class="ne">ModuleNotFoundError</span>: No module named &#39;distributed&#39;
+
+<span class="n">The</span> <span class="n">above</span> <span class="n">exception</span> <span class="n">was</span> <span class="n">the</span> <span class="n">direct</span> <span class="n">cause</span> <span class="n">of</span> <span class="n">the</span> <span class="n">following</span> <span class="n">exception</span><span class="p">:</span>
+
+<span class="ne">ImportError</span><span class="g g-Whitespace">                               </span>Traceback (most recent call last)
+<span class="n">Cell</span> <span class="n">In</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">line</span> <span class="mi">4</span>
+<span class="g g-Whitespace">      </span><span class="mi">2</span> <span class="kn">import</span><span class="w"> </span><span class="nn">dask.dataframe</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">dd</span>
+<span class="g g-Whitespace">      </span><span class="mi">3</span> <span class="kn">import</span><span class="w"> </span><span class="nn">dask.bag</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">db</span>
+<span class="ne">----&gt; </span><span class="mi">4</span> <span class="kn">from</span><span class="w"> </span><span class="nn">dask.distributed</span><span class="w"> </span><span class="kn">import</span> <span class="n">Client</span><span class="p">,</span> <span class="n">as_completed</span><span class="p">,</span> <span class="n">progress</span>
+<span class="g g-Whitespace">      </span><span class="mi">5</span> <span class="kn">from</span><span class="w"> </span><span class="nn">dask.delayed</span><span class="w"> </span><span class="kn">import</span> <span class="n">delayed</span>
+<span class="g g-Whitespace">      </span><span class="mi">6</span> <span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+
+<span class="n">File</span> <span class="o">/</span><span class="n">opt</span><span class="o">/</span><span class="n">hostedtoolcache</span><span class="o">/</span><span class="n">Python</span><span class="o">/</span><span class="mf">3.11.13</span><span class="o">/</span><span class="n">x64</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">python3</span><span class="mf">.11</span><span class="o">/</span><span class="n">site</span><span class="o">-</span><span class="n">packages</span><span class="o">/</span><span class="n">dask</span><span class="o">/</span><span class="n">distributed</span><span class="o">.</span><span class="n">py</span><span class="p">:</span><span class="mi">16</span>
+<span class="g g-Whitespace">     </span><span class="mi">14</span> <span class="k">except</span> <span class="ne">ImportError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+<span class="g g-Whitespace">     </span><span class="mi">15</span>     <span class="k">if</span> <span class="n">e</span><span class="o">.</span><span class="n">msg</span> <span class="o">==</span> <span class="s2">&quot;No module named &#39;distributed&#39;&quot;</span><span class="p">:</span>
+<span class="ne">---&gt; </span><span class="mi">16</span>         <span class="k">raise</span> <span class="ne">ImportError</span><span class="p">(</span><span class="n">_import_error_message</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">e</span>
+<span class="g g-Whitespace">     </span><span class="mi">17</span>     <span class="k">else</span><span class="p">:</span>
+<span class="g g-Whitespace">     </span><span class="mi">18</span>         <span class="k">raise</span>
+
+<span class="ne">ImportError</span>: dask.distributed is not installed.
+
+<span class="n">Please</span> <span class="n">either</span> <span class="n">conda</span> <span class="ow">or</span> <span class="n">pip</span> <span class="n">install</span> <span class="n">distributed</span><span class="p">:</span>
+
+  <span class="n">conda</span> <span class="n">install</span> <span class="n">dask</span> <span class="n">distributed</span>             <span class="c1"># either conda install</span>
+  <span class="n">python</span> <span class="o">-</span><span class="n">m</span> <span class="n">pip</span> <span class="n">install</span> <span class="s2">&quot;dask[distributed]&quot;</span> <span class="o">--</span><span class="n">upgrade</span>    <span class="c1"># or pip install</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>Let’s create a local Dask client to manage our parallel computations. This will give us a dashboard to monitor our tasks in real-time.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">client</span> <span class="o">=</span> <span class="n">Client</span><span class="p">(</span><span class="n">n_workers</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">threads_per_worker</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">memory_limit</span><span class="o">=</span><span class="s1">&#39;2GB&#39;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Dashboard available at: </span><span class="si">{</span><span class="n">client</span><span class="o">.</span><span class="n">dashboard_link</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="n">client</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Dashboard available at: http://127.0.0.1:8787/status
+</pre></div>
+</div>
+<div class="output text_html"><div>
+    <div style="width: 24px; height: 24px; background-color: #e1e1e1; border: 3px solid #9D9D9D; border-radius: 5px; position: absolute;"> </div>
+    <div style="margin-left: 48px;">
+        <h3 style="margin-bottom: 0px;">Client</h3>
+        <p style="color: #9D9D9D; margin-bottom: 0px;">Client-346231f2-90bb-11f0-9fd8-4c82a98a2472</p>
+        <table style="width: 100%; text-align: left;">
+
+        <tr>
+        
+            <td style="text-align: left;"><strong>Connection method:</strong> Cluster object</td>
+            <td style="text-align: left;"><strong>Cluster type:</strong> distributed.LocalCluster</td>
+        
+        </tr>
+
+        
+            <tr>
+                <td style="text-align: left;">
+                    <strong>Dashboard: </strong> <a href="http://127.0.0.1:8787/status" target="_blank">http://127.0.0.1:8787/status</a>
+                </td>
+                <td style="text-align: left;"></td>
+            </tr>
+        
+
+        </table>
+
+        
+
+        
+            <details>
+            <summary style="margin-bottom: 20px;"><h3 style="display: inline;">Cluster Info</h3></summary>
+            <div class="jp-RenderedHTMLCommon jp-RenderedHTML jp-mod-trusted jp-OutputArea-output">
+    <div style="width: 24px; height: 24px; background-color: #e1e1e1; border: 3px solid #9D9D9D; border-radius: 5px; position: absolute;">
+    </div>
+    <div style="margin-left: 48px;">
+        <h3 style="margin-bottom: 0px; margin-top: 0px;">LocalCluster</h3>
+        <p style="color: #9D9D9D; margin-bottom: 0px;">d1aced15</p>
+        <table style="width: 100%; text-align: left;">
+            <tr>
+                <td style="text-align: left;">
+                    <strong>Dashboard:</strong> <a href="http://127.0.0.1:8787/status" target="_blank">http://127.0.0.1:8787/status</a>
+                </td>
+                <td style="text-align: left;">
+                    <strong>Workers:</strong> 4
+                </td>
+            </tr>
+            <tr>
+                <td style="text-align: left;">
+                    <strong>Total threads:</strong> 8
+                </td>
+                <td style="text-align: left;">
+                    <strong>Total memory:</strong> 7.45 GiB
+                </td>
+            </tr>
+            
+            <tr>
+    <td style="text-align: left;"><strong>Status:</strong> running</td>
+    <td style="text-align: left;"><strong>Using processes:</strong> True</td>
+</tr>
+
+            
+        </table>
+
+        <details>
+            <summary style="margin-bottom: 20px;">
+                <h3 style="display: inline;">Scheduler Info</h3>
+            </summary>
+
+            <div style="">
+    <div>
+        <div style="width: 24px; height: 24px; background-color: #FFF7E5; border: 3px solid #FF6132; border-radius: 5px; position: absolute;"> </div>
+        <div style="margin-left: 48px;">
+            <h3 style="margin-bottom: 0px;">Scheduler</h3>
+            <p style="color: #9D9D9D; margin-bottom: 0px;">Scheduler-cc7dc8d1-20cf-460a-8c56-d18d2da0a4b7</p>
+            <table style="width: 100%; text-align: left;">
+                <tr>
+                    <td style="text-align: left;">
+                        <strong>Comm:</strong> tcp://127.0.0.1:53791
+                    </td>
+                    <td style="text-align: left;">
+                        <strong>Workers:</strong> 0 
+                    </td>
+                </tr>
+                <tr>
+                    <td style="text-align: left;">
+                        <strong>Dashboard:</strong> <a href="http://127.0.0.1:8787/status" target="_blank">http://127.0.0.1:8787/status</a>
+                    </td>
+                    <td style="text-align: left;">
+                        <strong>Total threads:</strong> 0
+                    </td>
+                </tr>
+                <tr>
+                    <td style="text-align: left;">
+                        <strong>Started:</strong> Just now
+                    </td>
+                    <td style="text-align: left;">
+                        <strong>Total memory:</strong> 0 B
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </div>
+
+    <details style="margin-left: 48px;">
+        <summary style="margin-bottom: 20px;">
+            <h3 style="display: inline;">Workers</h3>
+        </summary>
+
+        
+        <div style="margin-bottom: 20px;">
+            <div style="width: 24px; height: 24px; background-color: #DBF5FF; border: 3px solid #4CC9FF; border-radius: 5px; position: absolute;"> </div>
+            <div style="margin-left: 48px;">
+            <details>
+                <summary>
+                    <h4 style="margin-bottom: 0px; display: inline;">Worker: 0</h4>
+                </summary>
+                <table style="width: 100%; text-align: left;">
+                    <tr>
+                        <td style="text-align: left;">
+                            <strong>Comm: </strong> tcp://127.0.0.1:53815
+                        </td>
+                        <td style="text-align: left;">
+                            <strong>Total threads: </strong> 2
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="text-align: left;">
+                            <strong>Dashboard: </strong> <a href="http://127.0.0.1:53816/status" target="_blank">http://127.0.0.1:53816/status</a>
+                        </td>
+                        <td style="text-align: left;">
+                            <strong>Memory: </strong> 1.86 GiB
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="text-align: left;">
+                            <strong>Nanny: </strong> tcp://127.0.0.1:53798
+                        </td>
+                        <td style="text-align: left;"></td>
+                    </tr>
+                    <tr>
+                        <td colspan="2" style="text-align: left;">
+                            <strong>Local directory: </strong> C:\Users\rober\AppData\Local\Temp\dask-scratch-space\worker-1dedfgzf
+                        </td>
+                    </tr>
+
+                    
+
+                    
+
+                </table>
+            </details>
+            </div>
+        </div>
+        
+        <div style="margin-bottom: 20px;">
+            <div style="width: 24px; height: 24px; background-color: #DBF5FF; border: 3px solid #4CC9FF; border-radius: 5px; position: absolute;"> </div>
+            <div style="margin-left: 48px;">
+            <details>
+                <summary>
+                    <h4 style="margin-bottom: 0px; display: inline;">Worker: 1</h4>
+                </summary>
+                <table style="width: 100%; text-align: left;">
+                    <tr>
+                        <td style="text-align: left;">
+                            <strong>Comm: </strong> tcp://127.0.0.1:53820
+                        </td>
+                        <td style="text-align: left;">
+                            <strong>Total threads: </strong> 2
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="text-align: left;">
+                            <strong>Dashboard: </strong> <a href="http://127.0.0.1:53822/status" target="_blank">http://127.0.0.1:53822/status</a>
+                        </td>
+                        <td style="text-align: left;">
+                            <strong>Memory: </strong> 1.86 GiB
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="text-align: left;">
+                            <strong>Nanny: </strong> tcp://127.0.0.1:53800
+                        </td>
+                        <td style="text-align: left;"></td>
+                    </tr>
+                    <tr>
+                        <td colspan="2" style="text-align: left;">
+                            <strong>Local directory: </strong> C:\Users\rober\AppData\Local\Temp\dask-scratch-space\worker-5ykyhsq7
+                        </td>
+                    </tr>
+
+                    
+
+                    
+
+                </table>
+            </details>
+            </div>
+        </div>
+        
+        <div style="margin-bottom: 20px;">
+            <div style="width: 24px; height: 24px; background-color: #DBF5FF; border: 3px solid #4CC9FF; border-radius: 5px; position: absolute;"> </div>
+            <div style="margin-left: 48px;">
+            <details>
+                <summary>
+                    <h4 style="margin-bottom: 0px; display: inline;">Worker: 2</h4>
+                </summary>
+                <table style="width: 100%; text-align: left;">
+                    <tr>
+                        <td style="text-align: left;">
+                            <strong>Comm: </strong> tcp://127.0.0.1:53821
+                        </td>
+                        <td style="text-align: left;">
+                            <strong>Total threads: </strong> 2
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="text-align: left;">
+                            <strong>Dashboard: </strong> <a href="http://127.0.0.1:53824/status" target="_blank">http://127.0.0.1:53824/status</a>
+                        </td>
+                        <td style="text-align: left;">
+                            <strong>Memory: </strong> 1.86 GiB
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="text-align: left;">
+                            <strong>Nanny: </strong> tcp://127.0.0.1:53802
+                        </td>
+                        <td style="text-align: left;"></td>
+                    </tr>
+                    <tr>
+                        <td colspan="2" style="text-align: left;">
+                            <strong>Local directory: </strong> C:\Users\rober\AppData\Local\Temp\dask-scratch-space\worker-5ak4z0zx
+                        </td>
+                    </tr>
+
+                    
+
+                    
+
+                </table>
+            </details>
+            </div>
+        </div>
+        
+        <div style="margin-bottom: 20px;">
+            <div style="width: 24px; height: 24px; background-color: #DBF5FF; border: 3px solid #4CC9FF; border-radius: 5px; position: absolute;"> </div>
+            <div style="margin-left: 48px;">
+            <details>
+                <summary>
+                    <h4 style="margin-bottom: 0px; display: inline;">Worker: 3</h4>
+                </summary>
+                <table style="width: 100%; text-align: left;">
+                    <tr>
+                        <td style="text-align: left;">
+                            <strong>Comm: </strong> tcp://127.0.0.1:53814
+                        </td>
+                        <td style="text-align: left;">
+                            <strong>Total threads: </strong> 2
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="text-align: left;">
+                            <strong>Dashboard: </strong> <a href="http://127.0.0.1:53817/status" target="_blank">http://127.0.0.1:53817/status</a>
+                        </td>
+                        <td style="text-align: left;">
+                            <strong>Memory: </strong> 1.86 GiB
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="text-align: left;">
+                            <strong>Nanny: </strong> tcp://127.0.0.1:53804
+                        </td>
+                        <td style="text-align: left;"></td>
+                    </tr>
+                    <tr>
+                        <td colspan="2" style="text-align: left;">
+                            <strong>Local directory: </strong> C:\Users\rober\AppData\Local\Temp\dask-scratch-space\worker-sdctv9_g
+                        </td>
+                    </tr>
+
+                    
+
+                    
+
+                </table>
+            </details>
+            </div>
+        </div>
+        
+
+    </details>
+</div>
+
+        </details>
+    </div>
+</div>
+            </details>
+        
+
+    </div>
+</div></div></div>
+</div>
+</section>
+<section id="creating-sample-medical-data">
+<h2>Creating Sample Medical Data<a class="headerlink" href="#creating-sample-medical-data" title="Link to this heading">#</a></h2>
+<p>We’ll generate synthetic medical data that simulates patient records, lab results, and imaging metadata. This data will be large enough to demonstrate out-of-core processing techniques.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">generate_patient_data</span><span class="p">(</span><span class="n">n_patients</span><span class="o">=</span><span class="mi">10000</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Generate synthetic patient data&quot;&quot;&quot;</span>
+    <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="mi">42</span><span class="p">)</span>
+    
+    <span class="n">data</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">&#39;patient_id&#39;</span><span class="p">:</span> <span class="p">[</span><span class="sa">f</span><span class="s1">&#39;PAT_</span><span class="si">{</span><span class="n">i</span><span class="si">:</span><span class="s1">06d</span><span class="si">}</span><span class="s1">&#39;</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_patients</span><span class="p">)],</span>
+        <span class="s1">&#39;age&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mi">45</span><span class="p">,</span> <span class="mi">15</span><span class="p">,</span> <span class="n">n_patients</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">),</span>
+        <span class="s1">&#39;gender&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">([</span><span class="s1">&#39;M&#39;</span><span class="p">,</span> <span class="s1">&#39;F&#39;</span><span class="p">],</span> <span class="n">n_patients</span><span class="p">),</span>
+        <span class="s1">&#39;blood_pressure_systolic&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mi">120</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="n">n_patients</span><span class="p">),</span>
+        <span class="s1">&#39;blood_pressure_diastolic&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mi">80</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="n">n_patients</span><span class="p">),</span>
+        <span class="s1">&#39;cholesterol&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mi">200</span><span class="p">,</span> <span class="mi">40</span><span class="p">,</span> <span class="n">n_patients</span><span class="p">),</span>
+        <span class="s1">&#39;glucose&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mi">100</span><span class="p">,</span> <span class="mi">25</span><span class="p">,</span> <span class="n">n_patients</span><span class="p">),</span>
+        <span class="s1">&#39;diagnosis_code&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">([</span><span class="s1">&#39;I10&#39;</span><span class="p">,</span> <span class="s1">&#39;E11&#39;</span><span class="p">,</span> <span class="s1">&#39;J44&#39;</span><span class="p">,</span> <span class="s1">&#39;N18&#39;</span><span class="p">,</span> <span class="s1">&#39;F32&#39;</span><span class="p">],</span> <span class="n">n_patients</span><span class="p">)</span>
+    <span class="p">}</span>
+    
+    <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+
+<span class="c1"># Generate and save sample data</span>
+<span class="n">sample_data</span> <span class="o">=</span> <span class="n">generate_patient_data</span><span class="p">(</span><span class="mi">50000</span><span class="p">)</span>
+<span class="n">sample_data</span><span class="o">.</span><span class="n">to_parquet</span><span class="p">(</span><span class="s1">&#39;patient_data.parquet&#39;</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Generated </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">sample_data</span><span class="p">)</span><span class="si">}</span><span class="s2"> patient records&quot;</span><span class="p">)</span>
+<span class="n">sample_data</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Generated 50000 patient records
+</pre></div>
+</div>
+<div class="output text_html"><div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>patient_id</th>
+      <th>age</th>
+      <th>gender</th>
+      <th>blood_pressure_systolic</th>
+      <th>blood_pressure_diastolic</th>
+      <th>cholesterol</th>
+      <th>glucose</th>
+      <th>diagnosis_code</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>PAT_000000</td>
+      <td>52</td>
+      <td>F</td>
+      <td>104.670376</td>
+      <td>73.827472</td>
+      <td>241.369531</td>
+      <td>108.155472</td>
+      <td>F32</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>PAT_000001</td>
+      <td>42</td>
+      <td>M</td>
+      <td>114.568068</td>
+      <td>64.995310</td>
+      <td>234.934741</td>
+      <td>110.542600</td>
+      <td>N18</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>PAT_000002</td>
+      <td>54</td>
+      <td>F</td>
+      <td>134.880760</td>
+      <td>93.075100</td>
+      <td>233.232742</td>
+      <td>92.089789</td>
+      <td>F32</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>PAT_000003</td>
+      <td>67</td>
+      <td>M</td>
+      <td>126.921620</td>
+      <td>71.918336</td>
+      <td>160.387754</td>
+      <td>80.155702</td>
+      <td>I10</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>PAT_000004</td>
+      <td>41</td>
+      <td>F</td>
+      <td>92.933328</td>
+      <td>84.259369</td>
+      <td>210.757392</td>
+      <td>108.522527</td>
+      <td>N18</td>
+    </tr>
+  </tbody>
+</table>
+</div></div></div>
+</div>
+</section>
+<section id="implementing-idempotent-operations">
+<h2>Implementing Idempotent Operations<a class="headerlink" href="#implementing-idempotent-operations" title="Link to this heading">#</a></h2>
+<p>Idempotency ensures that operations can be safely repeated without changing the result. This is crucial in medical data processing where partial failures might require rerunning computations.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">create_checksum</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Create a checksum for data to ensure idempotency&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">):</span>
+        <span class="n">data_str</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">to_string</span><span class="p">()</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">data_str</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">hashlib</span><span class="o">.</span><span class="n">md5</span><span class="p">(</span><span class="n">data_str</span><span class="o">.</span><span class="n">encode</span><span class="p">())</span><span class="o">.</span><span class="n">hexdigest</span><span class="p">()</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">idempotent_operation</span><span class="p">(</span><span class="n">func</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Decorator to make operations idempotent&quot;&quot;&quot;</span>
+    <span class="nd">@wraps</span><span class="p">(</span><span class="n">func</span><span class="p">)</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">wrapper</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="c1"># Create unique identifier for this operation</span>
+        <span class="n">op_id</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">func</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">create_checksum</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">args</span><span class="p">)</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="nb">str</span><span class="p">(</span><span class="n">kwargs</span><span class="p">))[:</span><span class="mi">8</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="n">output_file</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;cache/</span><span class="si">{</span><span class="n">op_id</span><span class="si">}</span><span class="s2">.parquet&quot;</span>
+        
+        <span class="c1"># Check if result already exists</span>
+        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">output_file</span><span class="p">):</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Loading cached result for </span><span class="si">{</span><span class="n">op_id</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_parquet</span><span class="p">(</span><span class="n">output_file</span><span class="p">)</span>
+        
+        <span class="c1"># Execute function and cache result</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="s1">&#39;cache&#39;</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">func</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">):</span>
+            <span class="n">result</span><span class="o">.</span><span class="n">to_parquet</span><span class="p">(</span><span class="n">output_file</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Cached result for </span><span class="si">{</span><span class="n">op_id</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">result</span>
+    
+    <span class="k">return</span> <span class="n">wrapper</span>
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="implementing-retry-logic">
+<h2>Implementing Retry Logic<a class="headerlink" href="#implementing-retry-logic" title="Link to this heading">#</a></h2>
+<p>Medical data processing can fail due to network issues, temporary resource constraints, or data quality problems. Implementing robust retry logic helps ensure our pipelines complete successfully.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">retry_on_failure</span><span class="p">(</span><span class="n">max_retries</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">delay</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Decorator to retry failed operations&quot;&quot;&quot;</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">decorator</span><span class="p">(</span><span class="n">func</span><span class="p">):</span>
+        <span class="nd">@wraps</span><span class="p">(</span><span class="n">func</span><span class="p">)</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">wrapper</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+            <span class="n">last_exception</span> <span class="o">=</span> <span class="kc">None</span>
+            
+            <span class="k">for</span> <span class="n">attempt</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">max_retries</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="k">return</span> <span class="n">func</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                    <span class="n">last_exception</span> <span class="o">=</span> <span class="n">e</span>
+                    <span class="k">if</span> <span class="n">attempt</span> <span class="o">&lt;</span> <span class="n">max_retries</span><span class="p">:</span>
+                        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Attempt </span><span class="si">{</span><span class="n">attempt</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s2"> failed: </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="si">}</span><span class="s2">. Retrying in </span><span class="si">{</span><span class="n">delay</span><span class="si">}</span><span class="s2"> seconds...&quot;</span><span class="p">)</span>
+                        <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="n">delay</span> <span class="o">*</span> <span class="p">(</span><span class="mi">2</span> <span class="o">**</span> <span class="n">attempt</span><span class="p">))</span>  <span class="c1"># Exponential backoff</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;All </span><span class="si">{</span><span class="n">max_retries</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s2"> attempts failed&quot;</span><span class="p">)</span>
+            
+            <span class="k">raise</span> <span class="n">last_exception</span>
+        <span class="k">return</span> <span class="n">wrapper</span>
+    <span class="k">return</span> <span class="n">decorator</span>
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="defining-medical-data-processing-functions">
+<h2>Defining Medical Data Processing Functions<a class="headerlink" href="#defining-medical-data-processing-functions" title="Link to this heading">#</a></h2>
+<p>We’ll create several data processing functions that simulate common medical data transformations. These functions will incorporate our idempotency and retry mechanisms.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nd">@idempotent_operation</span>
+<span class="nd">@retry_on_failure</span><span class="p">(</span><span class="n">max_retries</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">calculate_cardiovascular_risk</span><span class="p">(</span><span class="n">df_chunk</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Calculate cardiovascular risk score for a chunk of patients&quot;&quot;&quot;</span>
+    <span class="c1"># Simulate processing time</span>
+    <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mf">0.1</span><span class="p">)</span>
+    
+    <span class="c1"># Calculate risk score based on multiple factors</span>
+    <span class="n">risk_score</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="p">(</span><span class="n">df_chunk</span><span class="p">[</span><span class="s1">&#39;age&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="mf">0.02</span><span class="p">)</span> <span class="o">+</span>
+        <span class="p">(</span><span class="n">df_chunk</span><span class="p">[</span><span class="s1">&#39;blood_pressure_systolic&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="mf">0.01</span><span class="p">)</span> <span class="o">+</span>
+        <span class="p">(</span><span class="n">df_chunk</span><span class="p">[</span><span class="s1">&#39;cholesterol&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="mf">0.005</span><span class="p">)</span> <span class="o">+</span>
+        <span class="p">(</span><span class="n">df_chunk</span><span class="p">[</span><span class="s1">&#39;glucose&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="mf">0.003</span><span class="p">)</span>
+    <span class="p">)</span>
+    
+    <span class="n">df_result</span> <span class="o">=</span> <span class="n">df_chunk</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    <span class="n">df_result</span><span class="p">[</span><span class="s1">&#39;cv_risk_score&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">risk_score</span>
+    <span class="n">df_result</span><span class="p">[</span><span class="s1">&#39;risk_category&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">cut</span><span class="p">(</span><span class="n">risk_score</span><span class="p">,</span> 
+                                       <span class="n">bins</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">15</span><span class="p">,</span> <span class="nb">float</span><span class="p">(</span><span class="s1">&#39;inf&#39;</span><span class="p">)],</span>
+                                       <span class="n">labels</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;Low&#39;</span><span class="p">,</span> <span class="s1">&#39;Medium&#39;</span><span class="p">,</span> <span class="s1">&#39;High&#39;</span><span class="p">,</span> <span class="s1">&#39;Very High&#39;</span><span class="p">])</span>
+    
+    <span class="k">return</span> <span class="n">df_result</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>Let’s create another processing function that performs data quality checks. This demonstrates how to handle potential data issues in medical datasets.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nd">@idempotent_operation</span>
+<span class="nd">@retry_on_failure</span><span class="p">(</span><span class="n">max_retries</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">perform_data_quality_check</span><span class="p">(</span><span class="n">df_chunk</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Perform data quality checks on patient data&quot;&quot;&quot;</span>
+    <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mf">0.05</span><span class="p">)</span>
+    
+    <span class="n">df_result</span> <span class="o">=</span> <span class="n">df_chunk</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    
+    <span class="c1"># Flag abnormal values</span>
+    <span class="n">df_result</span><span class="p">[</span><span class="s1">&#39;age_valid&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df_chunk</span><span class="p">[</span><span class="s1">&#39;age&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">between</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">120</span><span class="p">)</span>
+    <span class="n">df_result</span><span class="p">[</span><span class="s1">&#39;bp_valid&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">df_chunk</span><span class="p">[</span><span class="s1">&#39;blood_pressure_systolic&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">between</span><span class="p">(</span><span class="mi">70</span><span class="p">,</span> <span class="mi">250</span><span class="p">)</span> <span class="o">&amp;</span> 
+        <span class="n">df_chunk</span><span class="p">[</span><span class="s1">&#39;blood_pressure_diastolic&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">between</span><span class="p">(</span><span class="mi">40</span><span class="p">,</span> <span class="mi">150</span><span class="p">)</span>
+    <span class="p">)</span>
+    <span class="n">df_result</span><span class="p">[</span><span class="s1">&#39;cholesterol_valid&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df_chunk</span><span class="p">[</span><span class="s1">&#39;cholesterol&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">between</span><span class="p">(</span><span class="mi">100</span><span class="p">,</span> <span class="mi">400</span><span class="p">)</span>
+    <span class="n">df_result</span><span class="p">[</span><span class="s1">&#39;glucose_valid&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df_chunk</span><span class="p">[</span><span class="s1">&#39;glucose&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">between</span><span class="p">(</span><span class="mi">50</span><span class="p">,</span> <span class="mi">300</span><span class="p">)</span>
+    
+    <span class="c1"># Overall data quality score</span>
+    <span class="n">quality_columns</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;age_valid&#39;</span><span class="p">,</span> <span class="s1">&#39;bp_valid&#39;</span><span class="p">,</span> <span class="s1">&#39;cholesterol_valid&#39;</span><span class="p">,</span> <span class="s1">&#39;glucose_valid&#39;</span><span class="p">]</span>
+    <span class="n">df_result</span><span class="p">[</span><span class="s1">&#39;data_quality_score&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df_result</span><span class="p">[</span><span class="n">quality_columns</span><span class="p">]</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">quality_columns</span><span class="p">)</span>
+    
+    <span class="k">return</span> <span class="n">df_result</span>
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="loading-data-with-dask-for-out-of-core-processing">
+<h2>Loading Data with Dask for Out-of-Core Processing<a class="headerlink" href="#loading-data-with-dask-for-out-of-core-processing" title="Link to this heading">#</a></h2>
+<p>We’ll load our patient data using Dask DataFrame, which allows us to work with datasets larger than memory. The data will be automatically partitioned across multiple cores.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Load data with Dask</span>
+<span class="n">ddf</span> <span class="o">=</span> <span class="n">dd</span><span class="o">.</span><span class="n">read_parquet</span><span class="p">(</span><span class="s1">&#39;patient_data.parquet&#39;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Loaded Dask DataFrame with </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">ddf</span><span class="p">)</span><span class="si">}</span><span class="s2"> rows and </span><span class="si">{</span><span class="n">ddf</span><span class="o">.</span><span class="n">npartitions</span><span class="si">}</span><span class="s2"> partitions&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Memory usage per partition: ~</span><span class="si">{</span><span class="n">ddf</span><span class="o">.</span><span class="n">memory_usage</span><span class="p">(</span><span class="n">deep</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="o">.</span><span class="n">compute</span><span class="p">()</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">ddf</span><span class="o">.</span><span class="n">npartitions</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mi">1024</span><span class="o">**</span><span class="mi">2</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2"> MB&quot;</span><span class="p">)</span>
+<span class="n">ddf</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Loaded Dask DataFrame with 50000 rows and 1 partitions
+Memory usage per partition: ~3.72 MB
+</pre></div>
+</div>
+<div class="output text_html"><div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>patient_id</th>
+      <th>age</th>
+      <th>gender</th>
+      <th>blood_pressure_systolic</th>
+      <th>blood_pressure_diastolic</th>
+      <th>cholesterol</th>
+      <th>glucose</th>
+      <th>diagnosis_code</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>PAT_000000</td>
+      <td>52</td>
+      <td>F</td>
+      <td>104.670376</td>
+      <td>73.827472</td>
+      <td>241.369531</td>
+      <td>108.155472</td>
+      <td>F32</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>PAT_000001</td>
+      <td>42</td>
+      <td>M</td>
+      <td>114.568068</td>
+      <td>64.995310</td>
+      <td>234.934741</td>
+      <td>110.542600</td>
+      <td>N18</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>PAT_000002</td>
+      <td>54</td>
+      <td>F</td>
+      <td>134.880760</td>
+      <td>93.075100</td>
+      <td>233.232742</td>
+      <td>92.089789</td>
+      <td>F32</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>PAT_000003</td>
+      <td>67</td>
+      <td>M</td>
+      <td>126.921620</td>
+      <td>71.918336</td>
+      <td>160.387754</td>
+      <td>80.155702</td>
+      <td>I10</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>PAT_000004</td>
+      <td>41</td>
+      <td>F</td>
+      <td>92.933328</td>
+      <td>84.259369</td>
+      <td>210.757392</td>
+      <td>108.522527</td>
+      <td>N18</td>
+    </tr>
+  </tbody>
+</table>
+</div></div></div>
+</div>
+</section>
+<section id="creating-delayed-operations-for-progress-tracking">
+<h2>Creating Delayed Operations for Progress Tracking<a class="headerlink" href="#creating-delayed-operations-for-progress-tracking" title="Link to this heading">#</a></h2>
+<p>We’ll use Dask’s delayed operations to create a computation graph that we can monitor. This approach allows us to track progress and handle failures gracefully.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Convert partitions to delayed operations</span>
+<span class="n">partitions</span> <span class="o">=</span> <span class="n">ddf</span><span class="o">.</span><span class="n">to_delayed</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Created </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">partitions</span><span class="p">)</span><span class="si">}</span><span class="s2"> delayed partitions&quot;</span><span class="p">)</span>
+
+<span class="c1"># Create delayed computation graph for cardiovascular risk calculation</span>
+<span class="n">cv_risk_tasks</span> <span class="o">=</span> <span class="p">[</span><span class="n">delayed</span><span class="p">(</span><span class="n">calculate_cardiovascular_risk</span><span class="p">)(</span><span class="n">partition</span><span class="p">)</span> <span class="k">for</span> <span class="n">partition</span> <span class="ow">in</span> <span class="n">partitions</span><span class="p">]</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Created </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">cv_risk_tasks</span><span class="p">)</span><span class="si">}</span><span class="s2"> cardiovascular risk calculation tasks&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Created 1 delayed partitions
+Created 1 cardiovascular risk calculation tasks
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="executing-tasks-with-progress-monitoring">
+<h2>Executing Tasks with Progress Monitoring<a class="headerlink" href="#executing-tasks-with-progress-monitoring" title="Link to this heading">#</a></h2>
+<p>We’ll execute our delayed tasks while monitoring progress in real-time. This is essential for long-running medical data processing jobs where we need visibility into the processing status.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Execute with progress tracking</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Starting cardiovascular risk calculation...&quot;</span><span class="p">)</span>
+<span class="n">start_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+
+<span class="c1"># Compute with progress bar</span>
+<span class="n">cv_results</span> <span class="o">=</span> <span class="n">dask</span><span class="o">.</span><span class="n">compute</span><span class="p">(</span><span class="o">*</span><span class="n">cv_risk_tasks</span><span class="p">)</span>
+
+<span class="n">end_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Completed in </span><span class="si">{</span><span class="n">end_time</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">start_time</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2"> seconds&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Processed </span><span class="si">{</span><span class="nb">sum</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">result</span><span class="p">)</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">result</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">cv_results</span><span class="p">)</span><span class="si">}</span><span class="s2"> patient records&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Starting cardiovascular risk calculation...
+Completed in 0.26 seconds
+Processed 50000 patient records
+</pre></div>
+</div>
+</div>
+</div>
+<p>Let’s combine the results and examine the cardiovascular risk distribution. This demonstrates how to aggregate results from parallel processing operations.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Combine results</span>
+<span class="n">combined_cv_results</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">cv_results</span><span class="p">,</span> <span class="n">ignore_index</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Cardiovascular Risk Distribution:&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">combined_cv_results</span><span class="p">[</span><span class="s1">&#39;risk_category&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value_counts</span><span class="p">())</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Mean CV Risk Score: </span><span class="si">{</span><span class="n">combined_cv_results</span><span class="p">[</span><span class="s1">&#39;cv_risk_score&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Standard Deviation: </span><span class="si">{</span><span class="n">combined_cv_results</span><span class="p">[</span><span class="s1">&#39;cv_risk_score&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">std</span><span class="p">()</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Cardiovascular Risk Distribution:
+risk_category
+Low          49999
+Medium           1
+High             0
+Very High        0
+Name: count, dtype: int64
+
+Mean CV Risk Score: 3.39
+Standard Deviation: 0.42
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="implementing-batch-processing-with-error-handling">
+<h2>Implementing Batch Processing with Error Handling<a class="headerlink" href="#implementing-batch-processing-with-error-handling" title="Link to this heading">#</a></h2>
+<p>For more complex scenarios, we’ll implement a batch processing system that can handle failures gracefully and provide detailed progress information.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">process_medical_data_batch</span><span class="p">(</span><span class="n">partitions</span><span class="p">,</span> <span class="n">processing_func</span><span class="p">,</span> <span class="n">batch_name</span><span class="o">=</span><span class="s2">&quot;Processing&quot;</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Process partitions in batches with progress tracking and error handling&quot;&quot;&quot;</span>
+    
+    <span class="c1"># Create delayed tasks</span>
+    <span class="n">tasks</span> <span class="o">=</span> <span class="p">[</span><span class="n">delayed</span><span class="p">(</span><span class="n">processing_func</span><span class="p">)(</span><span class="n">partition</span><span class="p">)</span> <span class="k">for</span> <span class="n">partition</span> <span class="ow">in</span> <span class="n">partitions</span><span class="p">]</span>
+    
+    <span class="c1"># Submit tasks and track completion</span>
+    <span class="n">futures</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">compute</span><span class="p">(</span><span class="n">tasks</span><span class="p">)</span>
+    
+    <span class="n">results</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">failed_tasks</span> <span class="o">=</span> <span class="p">[]</span>
+    
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Starting </span><span class="si">{</span><span class="n">batch_name</span><span class="si">}</span><span class="s2"> for </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">futures</span><span class="p">)</span><span class="si">}</span><span class="s2"> partitions...&quot;</span><span class="p">)</span>
+    
+    <span class="c1"># Process completed tasks as they finish</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">future</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">as_completed</span><span class="p">(</span><span class="n">futures</span><span class="p">)):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="n">future</span><span class="o">.</span><span class="n">result</span><span class="p">()</span>
+            <span class="n">results</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;✓ Completed partition </span><span class="si">{</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">futures</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;✗ Failed partition </span><span class="si">{</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">futures</span><span class="p">)</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="n">failed_tasks</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">i</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)))</span>
+    
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="si">{</span><span class="n">batch_name</span><span class="si">}</span><span class="s2"> Summary:&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  Successful: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">results</span><span class="p">)</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">futures</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  Failed: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">failed_tasks</span><span class="p">)</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">futures</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    
+    <span class="k">return</span> <span class="n">results</span><span class="p">,</span> <span class="n">failed_tasks</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>Now let’s use our batch processing function to perform data quality checks. This demonstrates how to handle multiple processing steps in a robust medical data pipeline.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Perform data quality checks</span>
+<span class="n">quality_results</span><span class="p">,</span> <span class="n">quality_failures</span> <span class="o">=</span> <span class="n">process_medical_data_batch</span><span class="p">(</span>
+    <span class="n">partitions</span><span class="p">,</span> 
+    <span class="n">perform_data_quality_check</span><span class="p">,</span> 
+    <span class="s2">&quot;Data Quality Assessment&quot;</span>
+<span class="p">)</span>
+
+<span class="c1"># Analyze quality results if successful</span>
+<span class="k">if</span> <span class="n">quality_results</span><span class="p">:</span>
+    <span class="n">combined_quality_results</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">quality_results</span><span class="p">,</span> <span class="n">ignore_index</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Data Quality Summary:&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Mean data quality score: </span><span class="si">{</span><span class="n">combined_quality_results</span><span class="p">[</span><span class="s1">&#39;data_quality_score&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Records with perfect quality: </span><span class="si">{</span><span class="p">(</span><span class="n">combined_quality_results</span><span class="p">[</span><span class="s1">&#39;data_quality_score&#39;</span><span class="p">]</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mf">1.0</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Records requiring attention: </span><span class="si">{</span><span class="p">(</span><span class="n">combined_quality_results</span><span class="p">[</span><span class="s1">&#39;data_quality_score&#39;</span><span class="p">]</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mf">0.8</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Starting Data Quality Assessment for 1 partitions...
+✓ Completed partition 1/1
+
+Data Quality Assessment Summary:
+  Successful: 1/1
+  Failed: 0/1
+
+Data Quality Summary:
+Mean data quality score: 0.991
+Records with perfect quality: 48202
+Records requiring attention: 1798
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="monitoring-resource-usage-and-performance">
+<h2>Monitoring Resource Usage and Performance<a class="headerlink" href="#monitoring-resource-usage-and-performance" title="Link to this heading">#</a></h2>
+<p>Understanding resource usage is crucial for optimizing medical data processing workflows. Let’s examine how our tasks performed and identify potential bottlenecks.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Get performance metrics from Dask client</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_performance_summary</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Get summary of Dask cluster performance&quot;&quot;&quot;</span>
+    
+    <span class="c1"># Get worker information</span>
+    <span class="n">workers_info</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">scheduler_info</span><span class="p">()[</span><span class="s1">&#39;workers&#39;</span><span class="p">]</span>
+    
+    <span class="n">total_cores</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">info</span><span class="p">[</span><span class="s1">&#39;nthreads&#39;</span><span class="p">]</span> <span class="k">for</span> <span class="n">info</span> <span class="ow">in</span> <span class="n">workers_info</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+    <span class="n">total_memory</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">info</span><span class="p">[</span><span class="s1">&#39;memory_limit&#39;</span><span class="p">]</span> <span class="k">for</span> <span class="n">info</span> <span class="ow">in</span> <span class="n">workers_info</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+    
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Cluster Performance Summary:&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  Workers: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">workers_info</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  Total cores: </span><span class="si">{</span><span class="n">total_cores</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  Total memory: </span><span class="si">{</span><span class="n">total_memory</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mi">1024</span><span class="o">**</span><span class="mi">3</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2"> GB&quot;</span><span class="p">)</span>
+    
+    <span class="c1"># Get task information</span>
+    <span class="n">processing_info</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">processing</span><span class="p">()</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  Currently processing: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">processing_info</span><span class="p">)</span><span class="si">}</span><span class="s2"> tasks&quot;</span><span class="p">)</span>
+    
+    <span class="k">return</span> <span class="p">{</span>
+        <span class="s1">&#39;workers&#39;</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">workers_info</span><span class="p">),</span>
+        <span class="s1">&#39;cores&#39;</span><span class="p">:</span> <span class="n">total_cores</span><span class="p">,</span>
+        <span class="s1">&#39;memory_gb&#39;</span><span class="p">:</span> <span class="n">total_memory</span> <span class="o">/</span> <span class="mi">1024</span><span class="o">**</span><span class="mi">3</span><span class="p">,</span>
+        <span class="s1">&#39;active_tasks&#39;</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">processing_info</span><span class="p">)</span>
+    <span class="p">}</span>
+
+<span class="n">performance_summary</span> <span class="o">=</span> <span class="n">get_performance_summary</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Cluster Performance Summary:
+  Workers: 4
+  Total cores: 8
+  Total memory: 7.45 GB
+  Currently processing: 4 tasks
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="saving-results-with-idempotency">
+<h2>Saving Results with Idempotency<a class="headerlink" href="#saving-results-with-idempotency" title="Link to this heading">#</a></h2>
+<p>Finally, we’ll save our processed results in a way that ensures idempotency. This allows us to safely rerun our pipeline without duplicating or corrupting our output data.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">save_results_idempotent</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="n">metadata</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Save results with idempotency checks&quot;&quot;&quot;</span>
+    
+    <span class="c1"># Create metadata file path</span>
+    <span class="n">metadata_file</span> <span class="o">=</span> <span class="n">filename</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;.parquet&#39;</span><span class="p">,</span> <span class="s1">&#39;_metadata.json&#39;</span><span class="p">)</span>
+    
+    <span class="c1"># Generate data checksum</span>
+    <span class="n">data_checksum</span> <span class="o">=</span> <span class="n">create_checksum</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+    
+    <span class="c1"># Check if file exists and has same checksum</span>
+    <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span> <span class="ow">and</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">metadata_file</span><span class="p">):</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">metadata_file</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="n">existing_metadata</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+        
+        <span class="k">if</span> <span class="n">existing_metadata</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;checksum&#39;</span><span class="p">)</span> <span class="o">==</span> <span class="n">data_checksum</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;File </span><span class="si">{</span><span class="n">filename</span><span class="si">}</span><span class="s2"> already exists with same data. Skipping save.&quot;</span><span class="p">)</span>
+            <span class="k">return</span>
+    
+    <span class="c1"># Save data</span>
+    <span class="n">data</span><span class="o">.</span><span class="n">to_parquet</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    
+    <span class="c1"># Save metadata</span>
+    <span class="n">save_metadata</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">&#39;checksum&#39;</span><span class="p">:</span> <span class="n">data_checksum</span><span class="p">,</span>
+        <span class="s1">&#39;rows&#39;</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">),</span>
+        <span class="s1">&#39;columns&#39;</span><span class="p">:</span> <span class="nb">list</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">columns</span><span class="p">),</span>
+        <span class="s1">&#39;created_at&#39;</span><span class="p">:</span> <span class="n">time</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s1">&#39;%Y-%m-</span><span class="si">%d</span><span class="s1"> %H:%M:%S&#39;</span><span class="p">),</span>
+        <span class="o">**</span><span class="p">(</span><span class="n">metadata</span> <span class="ow">or</span> <span class="p">{})</span>
+    <span class="p">}</span>
+    
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">metadata_file</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">save_metadata</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+    
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Saved </span><span class="si">{</span><span class="n">filename</span><span class="si">}</span><span class="s2"> with </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span><span class="si">}</span><span class="s2"> records&quot;</span><span class="p">)</span>
+
+<span class="c1"># Save processed results</span>
+<span class="n">save_results_idempotent</span><span class="p">(</span>
+    <span class="n">combined_cv_results</span><span class="p">,</span> 
+    <span class="s1">&#39;processed_cv_risk_data.parquet&#39;</span><span class="p">,</span>
+    <span class="n">metadata</span><span class="o">=</span><span class="p">{</span>
+        <span class="s1">&#39;processing_type&#39;</span><span class="p">:</span> <span class="s1">&#39;cardiovascular_risk_assessment&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;performance&#39;</span><span class="p">:</span> <span class="n">performance_summary</span>
+    <span class="p">}</span>
+<span class="p">)</span>
+
+<span class="k">if</span> <span class="n">quality_results</span><span class="p">:</span>
+    <span class="n">save_results_idempotent</span><span class="p">(</span>
+        <span class="n">combined_quality_results</span><span class="p">,</span>
+        <span class="s1">&#39;data_quality_results.parquet&#39;</span><span class="p">,</span>
+        <span class="n">metadata</span><span class="o">=</span><span class="p">{</span>
+            <span class="s1">&#39;processing_type&#39;</span><span class="p">:</span> <span class="s1">&#39;data_quality_assessment&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;failed_partitions&#39;</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">quality_failures</span><span class="p">)</span>
+        <span class="p">}</span>
+    <span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Saved processed_cv_risk_data.parquet with 50000 records
+Saved data_quality_results.parquet with 50000 records
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="cleanup-and-resource-management">
+<h2>Cleanup and Resource Management<a class="headerlink" href="#cleanup-and-resource-management" title="Link to this heading">#</a></h2>
+<p>Proper cleanup is important in medical data processing environments. We’ll close our Dask client and clean up temporary files while preserving our processed results.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Clean up temporary cache files (optional)</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">shutil</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Cleaning up temporary files...&quot;</span><span class="p">)</span>
+<span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="s1">&#39;cache&#39;</span><span class="p">):</span>
+    <span class="n">cache_size</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">getsize</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s1">&#39;cache&#39;</span><span class="p">,</span> <span class="n">f</span><span class="p">))</span> 
+                    <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="s1">&#39;cache&#39;</span><span class="p">))</span> <span class="o">/</span> <span class="mi">1024</span><span class="o">**</span><span class="mi">2</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Cache directory size: </span><span class="si">{</span><span class="n">cache_size</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2"> MB&quot;</span><span class="p">)</span>
+    
+    <span class="c1"># Uncomment the next line to actually remove cache</span>
+    <span class="c1"># shutil.rmtree(&#39;cache&#39;)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Cache preserved for demonstration&quot;</span><span class="p">)</span>
+
+<span class="c1"># Close Dask client</span>
+<span class="n">client</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Dask client closed successfully&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Cleaning up temporary files...
+Cache directory size: 5.11 MB
+Cache preserved for demonstration
+Dask client closed successfully
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="summary">
+<h2>Summary<a class="headerlink" href="#summary" title="Link to this heading">#</a></h2>
+<p>In this notebook, we demonstrated key concepts for robust medical data processing:</p>
+<ol class="arabic simple">
+<li><p><strong>Out-of-core Processing</strong>: Using Dask to handle datasets larger than memory</p></li>
+<li><p><strong>Parallel Computing</strong>: Distributing work across multiple cores for faster processing</p></li>
+<li><p><strong>Idempotency</strong>: Ensuring operations can be safely repeated without side effects</p></li>
+<li><p><strong>Retry Logic</strong>: Handling failures gracefully with exponential backoff</p></li>
+<li><p><strong>Progress Monitoring</strong>: Tracking long-running operations in real-time</p></li>
+<li><p><strong>Resource Management</strong>: Monitoring and optimizing computational resources</p></li>
+</ol>
+<p>These techniques are essential for building robust, scalable medical data integration pipelines that can handle the volume and complexity of real-world healthcare data.</p>
+</section>
+<section id="exercise">
+<h2>Exercise<a class="headerlink" href="#exercise" title="Link to this heading">#</a></h2>
+<p>Create a robust medical data processing pipeline that:</p>
+<ol class="arabic simple">
+<li><p><strong>Generate a larger dataset</strong>: Create 100,000 patient records with additional fields (BMI, smoking status, family history)</p></li>
+<li><p><strong>Implement a new processing function</strong>: Create a diabetes risk assessment function that incorporates idempotency and retry logic</p></li>
+<li><p><strong>Add progress tracking</strong>: Implement a custom progress tracker that saves intermediate results every 25% completion</p></li>
+<li><p><strong>Handle deliberate failures</strong>: Modify one of your processing functions to randomly fail 10% of the time and demonstrate how your retry logic handles these failures</p></li>
+<li><p><strong>Performance optimization</strong>: Experiment with different numbers of Dask workers and partitions, and measure the impact on processing time</p></li>
+<li><p><strong>Create a summary report</strong>: Generate a final report that includes processing statistics, data quality metrics, and performance benchmarks</p></li>
+</ol>
+<p>Your solution should demonstrate all the concepts covered in this notebook and be robust enough to handle real-world medical data processing challenges.</p>
+</section>
+</section>
+
+    <script type="text/x-thebe-config">
+    {
+        requestKernel: true,
+        binderOptions: {
+            repo: "binder-examples/jupyter-stacks-datascience",
+            ref: "master",
+        },
+        codeMirrorConfig: {
+            theme: "abcdef",
+            mode: "python"
+        },
+        kernelOptions: {
+            name: "python3",
+            path: "./."
+        },
+        predefinedOutput: true
+    }
+    </script>
+    <script>kernelName = 'python3'</script>
+
+                </article>
+              
+
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="longitudinal_data_preprocessing.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">Unit Normalization, Time Alignment, Resampling, and Windowing for Longitudinal Data</p>
+      </div>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+  <div class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> Contents
+  </div>
+  <nav class="bd-toc-nav page-toc">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#setting-up-the-environment">Setting Up the Environment</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#creating-sample-medical-data">Creating Sample Medical Data</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#implementing-idempotent-operations">Implementing Idempotent Operations</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#implementing-retry-logic">Implementing Retry Logic</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#defining-medical-data-processing-functions">Defining Medical Data Processing Functions</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#loading-data-with-dask-for-out-of-core-processing">Loading Data with Dask for Out-of-Core Processing</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#creating-delayed-operations-for-progress-tracking">Creating Delayed Operations for Progress Tracking</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#executing-tasks-with-progress-monitoring">Executing Tasks with Progress Monitoring</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#implementing-batch-processing-with-error-handling">Implementing Batch Processing with Error Handling</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#monitoring-resource-usage-and-performance">Monitoring Resource Usage and Performance</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#saving-results-with-idempotency">Saving Results with Idempotency</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#cleanup-and-resource-management">Cleanup and Resource Management</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#summary">Summary</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#exercise">Exercise</a></li>
+</ul>
+  </nav></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+<p class="component-author">
+By AI Generated Content
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+
+  </div>
+  
+  <div class="footer-item">
+    <p class="last-updated">
+  Last updated on Sep 13, 2025.
+  <br/>
+</p>
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+</div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b"></script>
+<script src="_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+  <footer class="bd-footer">
+  </footer>
+  </body>
+</html>

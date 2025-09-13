@@ -1,0 +1,1711 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="./" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Unit Normalization, Time Alignment, Resampling, and Windowing for Longitudinal Data &#8212; Foundations of Medical Data Integration</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="_static/styles/theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="_static/styles/bootstrap.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="_static/styles/pydata-sphinx-theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+
+  
+  <link href="_static/vendor/fontawesome/6.5.2/css/all.min.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.5.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.5.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.5.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="_static/styles/sphinx-book-theme.css?v=eba8b062" />
+    <link rel="stylesheet" type="text/css" href="_static/togglebutton.css?v=13237357" />
+    <link rel="stylesheet" type="text/css" href="_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="_static/mystnb.8ecb98da25f57f5357bf6f572d296f466b2cfe2517ffebfabe82451661e28f02.css" />
+    <link rel="stylesheet" type="text/css" href="_static/sphinx-thebe.css?v=4fa983c6" />
+    <link rel="stylesheet" type="text/css" href="_static/sphinx-design.min.css?v=95c83b7e" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b" />
+<link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
+  <script src="_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+    <script src="_static/documentation_options.js?v=9eb32ce0"></script>
+    <script src="_static/doctools.js?v=9a2dae69"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="_static/copybutton.js?v=f281be69"></script>
+    <script src="_static/scripts/sphinx-book-theme.js?v=887ef09a"></script>
+    <script>let toggleHintShow = 'Click to show';</script>
+    <script>let toggleHintHide = 'Click to hide';</script>
+    <script>let toggleOpenOnPrint = 'true';</script>
+    <script src="_static/togglebutton.js?v=4a39c7ea"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script src="_static/design-tabs.js?v=f930bc37"></script>
+    <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"; const thebe_selector = ".thebe,.cell"; const thebe_selector_input = "pre"; const thebe_selector_output = ".output, .cell_output"</script>
+    <script async="async" src="_static/sphinx-thebe.js?v=c100c467"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"; const thebe_selector = ".thebe,.cell"; const thebe_selector_input = "pre"; const thebe_selector_output = ".output, .cell_output"</script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'longitudinal_data_preprocessing';</script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Out-of-core/Parallel Conversion with Dask: Progress, Retries, and Idempotency" href="dask-out-of-core-parallel-conversion-progress-retries-idempotency.html" />
+    <link rel="prev" title="CSV/Excel/NDJSON → Parquet/Arrow: Batch vs Streaming" href="csv-excel-ndjson-to-parquet-arrow-batch-vs-streaming.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+    <meta name="docbuild:last-update" content="Sep 13, 2025"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-primary-sidebar-checkbox"/>
+  <label class="overlay overlay-primary" for="pst-primary-sidebar-checkbox"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-secondary-sidebar-checkbox"/>
+  <label class="overlay overlay-secondary" for="pst-secondary-sidebar-checkbox"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search this book..."
+         aria-label="Search this book..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="intro.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="_static/logo.png" class="logo__image only-light" alt="Foundations of Medical Data Integration - Home"/>
+    <script>document.write(`<img src="_static/logo.png" class="logo__image only-dark" alt="Foundations of Medical Data Integration - Home"/>`);</script>
+  
+  
+</a></div>
+        <div class="sidebar-primary-item">
+
+ <script>
+ document.write(`
+   <button class="btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script></div>
+        <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        <p aria-level="2" class="caption" role="heading"><span class="caption-text">Working with files and folders</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="files_folders_filesystems.html">Files, Folders, and Filesystems in Medical Data Integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="path_handling_portable_io_pathlib.html">Path Handling and Portable I/O with pathlib</a></li>
+<li class="toctree-l1"><a class="reference internal" href="sidecar_metadata_data_dictionaries.html">Sidecar Metadata (JSON/YAML) and Data Dictionaries</a></li>
+<li class="toctree-l1"><a class="reference internal" href="fsspec_cloud_storage_streaming_io.html">Local and Cloud Storage with fsspec (s3fs/gcsfs/adlfs), Streaming I/O</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">File formats</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="integrity_checks_hashing_file_strategies.html">Integrity Checks (Hashing) and Small-to-Large File Strategies</a></li>
+<li class="toctree-l1"><a class="reference internal" href="data_io_csv_ndjson_pandas_polars_dtypes_missing.html">Reading and Writing Medical Data: CSV and NDJSON with Pandas and Polars</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pandera_schemas_validation_coercion_constraints.html">Schemas and Validation with Pandera</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Wrangling data</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="joins-grouping-windowing-duckdb-sql.html">Joins/Merges, Grouping, and Windowing with DuckDB</a></li>
+<li class="toctree-l1"><a class="reference internal" href="export_patterns_subsets_snapshots_reproducible_filters.html">Export Patterns: Subsets, Snapshots, Reproducible Filters</a></li>
+<li class="toctree-l1"><a class="reference internal" href="numpy-xarray-fundamentals-shapes-dtypes-chunking.html">NumPy/xarray Fundamentals: Shapes, Dtypes, and Chunking</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Data conversion</span></p>
+<ul class="current nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="csv-excel-ndjson-to-parquet-arrow-batch-vs-streaming.html">CSV/Excel/NDJSON → Parquet/Arrow: Batch vs Streaming</a></li>
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">Unit Normalization, Time Alignment, Resampling, and Windowing for Longitudinal Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dask-out-of-core-parallel-conversion-progress-retries-idempotency.html">Out-of-core/Parallel Conversion with Dask: Progress, Retries, and Idempotency</a></li>
+</ul>
+
+    </div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><button class="sidebar-toggle primary-toggle btn btn-sm" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</button></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<div class="article-header-buttons">
+
+
+
+
+
+<div class="dropdown dropdown-launch-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Launch interactive content">
+    <i class="fas fa-rocket"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="https://mybinder.org/v2/gh/generated-books/medical-data-integration/main?urlpath=lab/tree/longitudinal_data_preprocessing.ipynb" target="_blank"
+   class="btn btn-sm dropdown-item"
+   title="Launch on Binder"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  
+    <img alt="Binder logo" src="_static/images/logo_binder.svg">
+  </span>
+<span class="btn__text-container">Binder</span>
+</a>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+
+
+<div class="dropdown dropdown-source-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Source repositories">
+    <i class="fab fa-github"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="https://github.com/generated-books/medical-data-integration" target="_blank"
+   class="btn btn-sm btn-source-repository-button dropdown-item"
+   title="Source repository"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fab fa-github"></i>
+  </span>
+<span class="btn__text-container">Repository</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li><a href="https://github.com/generated-books/medical-data-integration/edit/main/longitudinal_data_preprocessing.ipynb" target="_blank"
+   class="btn btn-sm btn-source-edit-button dropdown-item"
+   title="Suggest edit"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-pencil-alt"></i>
+  </span>
+<span class="btn__text-container">Suggest edit</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li><a href="https://github.com/generated-books/medical-data-integration/issues/new?title=Issue%20on%20page%20%2Flongitudinal_data_preprocessing.html&body=Your%20issue%20content%20here." target="_blank"
+   class="btn btn-sm btn-source-issues-button dropdown-item"
+   title="Open an issue"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-lightbulb"></i>
+  </span>
+<span class="btn__text-container">Open issue</span>
+</a>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+
+
+<div class="dropdown dropdown-download-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Download this page">
+    <i class="fas fa-download"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="_sources/longitudinal_data_preprocessing.ipynb" target="_blank"
+   class="btn btn-sm btn-download-source-button dropdown-item"
+   title="Download source file"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file"></i>
+  </span>
+<span class="btn__text-container">.ipynb</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li>
+<button onclick="window.print()"
+  class="btn btn-sm btn-download-pdf-button dropdown-item"
+  title="Print to PDF"
+  data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file-pdf"></i>
+  </span>
+<span class="btn__text-container">.pdf</span>
+</button>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+<button onclick="toggleFullScreen()"
+  class="btn btn-sm btn-fullscreen-button"
+  title="Fullscreen mode"
+  data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-expand"></i>
+  </span>
+
+</button>
+
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"></i>
+  </button>
+`);
+</script>
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm pst-navbar-icon search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+  </button>
+`);
+</script>
+<button class="sidebar-toggle secondary-toggle btn btn-sm" title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="fa-solid fa-list"></span>
+</button>
+</div></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1>Unit Normalization, Time Alignment, Resampling, and Windowing for Longitudinal Data</h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+            <div>
+                <h2> Contents </h2>
+            </div>
+            <nav aria-label="Page">
+                <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#unit-normalization">1. Unit Normalization</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#time-alignment">2. Time Alignment</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#resampling">3. Resampling</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#windowing">4. Windowing</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#summary">Summary</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#exercise">Exercise</a></li>
+</ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section class="tex2jax_ignore mathjax_ignore" id="unit-normalization-time-alignment-resampling-and-windowing-for-longitudinal-data">
+<h1>Unit Normalization, Time Alignment, Resampling, and Windowing for Longitudinal Data<a class="headerlink" href="#unit-normalization-time-alignment-resampling-and-windowing-for-longitudinal-data" title="Link to this heading">#</a></h1>
+<p>This notebook covers essential preprocessing techniques for longitudinal medical data, including unit normalization, time alignment, resampling, and windowing. These techniques are crucial for preparing time-series medical data for analysis and integration across different sources and measurement systems.</p>
+<p>First, let’s import the necessary libraries for working with time-series data and create some synthetic longitudinal medical data to demonstrate the concepts.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">datetime</span><span class="w"> </span><span class="kn">import</span> <span class="n">datetime</span><span class="p">,</span> <span class="n">timedelta</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">scipy</span><span class="w"> </span><span class="kn">import</span> <span class="n">stats</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.preprocessing</span><span class="w"> </span><span class="kn">import</span> <span class="n">StandardScaler</span><span class="p">,</span> <span class="n">MinMaxScaler</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">warnings</span>
+<span class="n">warnings</span><span class="o">.</span><span class="n">filterwarnings</span><span class="p">(</span><span class="s1">&#39;ignore&#39;</span><span class="p">)</span>
+
+<span class="c1"># Set random seed for reproducibility</span>
+<span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="mi">42</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>Now we’ll create synthetic longitudinal medical data representing different patients with measurements taken at irregular intervals. This simulates real-world scenarios where data collection frequency varies.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Create synthetic longitudinal data for 3 patients</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">create_patient_data</span><span class="p">(</span><span class="n">patient_id</span><span class="p">,</span> <span class="n">start_date</span><span class="p">,</span> <span class="n">n_days</span><span class="p">,</span> <span class="n">measurement_frequency</span><span class="p">):</span>
+    <span class="n">dates</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">current_date</span> <span class="o">=</span> <span class="n">start_date</span>
+    
+    <span class="k">while</span> <span class="n">current_date</span> <span class="o">&lt;=</span> <span class="n">start_date</span> <span class="o">+</span> <span class="n">timedelta</span><span class="p">(</span><span class="n">days</span><span class="o">=</span><span class="n">n_days</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">random</span><span class="p">()</span> <span class="o">&lt;</span> <span class="n">measurement_frequency</span><span class="p">:</span>
+            <span class="n">dates</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">current_date</span><span class="p">)</span>
+        <span class="n">current_date</span> <span class="o">+=</span> <span class="n">timedelta</span><span class="p">(</span><span class="n">hours</span><span class="o">=</span><span class="mi">6</span><span class="p">)</span>  <span class="c1"># Check every 6 hours</span>
+    
+    <span class="n">n_measurements</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">dates</span><span class="p">)</span>
+    
+    <span class="c1"># Simulate different vital signs with different units and scales</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">&#39;patient_id&#39;</span><span class="p">:</span> <span class="p">[</span><span class="n">patient_id</span><span class="p">]</span> <span class="o">*</span> <span class="n">n_measurements</span><span class="p">,</span>
+        <span class="s1">&#39;timestamp&#39;</span><span class="p">:</span> <span class="n">dates</span><span class="p">,</span>
+        <span class="s1">&#39;heart_rate_bpm&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mi">70</span> <span class="o">+</span> <span class="n">patient_id</span> <span class="o">*</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="n">n_measurements</span><span class="p">),</span>
+        <span class="s1">&#39;blood_pressure_systolic_mmHg&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mi">120</span> <span class="o">+</span> <span class="n">patient_id</span> <span class="o">*</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">15</span><span class="p">,</span> <span class="n">n_measurements</span><span class="p">),</span>
+        <span class="s1">&#39;temperature_celsius&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mf">36.5</span> <span class="o">+</span> <span class="n">patient_id</span> <span class="o">*</span> <span class="mf">0.2</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="n">n_measurements</span><span class="p">),</span>
+        <span class="s1">&#39;weight_kg&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mi">70</span> <span class="o">+</span> <span class="n">patient_id</span> <span class="o">*</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">n_measurements</span><span class="p">)</span>
+    <span class="p">}</span>
+    
+    <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+
+<span class="c1"># Generate data for 3 patients</span>
+<span class="n">start_date</span> <span class="o">=</span> <span class="n">datetime</span><span class="p">(</span><span class="mi">2023</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+<span class="n">patients_data</span> <span class="o">=</span> <span class="p">[]</span>
+
+<span class="k">for</span> <span class="n">patient_id</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">4</span><span class="p">):</span>
+    <span class="n">patient_data</span> <span class="o">=</span> <span class="n">create_patient_data</span><span class="p">(</span><span class="n">patient_id</span><span class="p">,</span> <span class="n">start_date</span><span class="p">,</span> <span class="mi">30</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">)</span>
+    <span class="n">patients_data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">patient_data</span><span class="p">)</span>
+
+<span class="c1"># Combine all patient data</span>
+<span class="n">raw_data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">patients_data</span><span class="p">,</span> <span class="n">ignore_index</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Generated </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">raw_data</span><span class="p">)</span><span class="si">}</span><span class="s2"> measurements for </span><span class="si">{</span><span class="n">raw_data</span><span class="p">[</span><span class="s1">&#39;patient_id&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">nunique</span><span class="p">()</span><span class="si">}</span><span class="s2"> patients&quot;</span><span class="p">)</span>
+<span class="n">raw_data</span><span class="o">.</span><span class="n">head</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Generated 116 measurements for 3 patients
+</pre></div>
+</div>
+<div class="output text_html"><div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>patient_id</th>
+      <th>timestamp</th>
+      <th>heart_rate_bpm</th>
+      <th>blood_pressure_systolic_mmHg</th>
+      <th>temperature_celsius</th>
+      <th>weight_kg</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>1</td>
+      <td>2023-01-02 00:00:00</td>
+      <td>76.907115</td>
+      <td>138.847439</td>
+      <td>36.266179</td>
+      <td>76.743828</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>1</td>
+      <td>2023-01-02 06:00:00</td>
+      <td>86.731255</td>
+      <td>150.599074</td>
+      <td>36.772931</td>
+      <td>77.874713</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>1</td>
+      <td>2023-01-02 12:00:00</td>
+      <td>77.433698</td>
+      <td>138.103841</td>
+      <td>36.015064</td>
+      <td>75.014613</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>1</td>
+      <td>2023-01-03 12:00:00</td>
+      <td>76.321743</td>
+      <td>125.137165</td>
+      <td>36.314110</td>
+      <td>77.661763</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>1</td>
+      <td>2023-01-04 06:00:00</td>
+      <td>92.737336</td>
+      <td>119.516911</td>
+      <td>37.139337</td>
+      <td>76.976405</td>
+    </tr>
+    <tr>
+      <th>5</th>
+      <td>1</td>
+      <td>2023-01-04 12:00:00</td>
+      <td>77.080473</td>
+      <td>134.736301</td>
+      <td>36.580203</td>
+      <td>75.464592</td>
+    </tr>
+    <tr>
+      <th>6</th>
+      <td>1</td>
+      <td>2023-01-04 18:00:00</td>
+      <td>53.448240</td>
+      <td>106.656897</td>
+      <td>37.304691</td>
+      <td>75.352362</td>
+    </tr>
+    <tr>
+      <th>7</th>
+      <td>1</td>
+      <td>2023-01-05 18:00:00</td>
+      <td>83.455179</td>
+      <td>133.045040</td>
+      <td>36.968980</td>
+      <td>72.694869</td>
+    </tr>
+    <tr>
+      <th>8</th>
+      <td>1</td>
+      <td>2023-01-06 06:00:00</td>
+      <td>76.044835</td>
+      <td>111.279636</td>
+      <td>38.067211</td>
+      <td>71.998463</td>
+    </tr>
+    <tr>
+      <th>9</th>
+      <td>1</td>
+      <td>2023-01-06 12:00:00</td>
+      <td>77.108631</td>
+      <td>134.308223</td>
+      <td>36.746883</td>
+      <td>75.330046</td>
+    </tr>
+  </tbody>
+</table>
+</div></div></div>
+</div>
+<p>Let’s visualize the raw data to understand the irregular timing and different scales of measurements across patients.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Visualize the raw longitudinal data</span>
+<span class="n">fig</span><span class="p">,</span> <span class="n">axes</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">15</span><span class="p">,</span> <span class="mi">10</span><span class="p">))</span>
+<span class="n">axes</span> <span class="o">=</span> <span class="n">axes</span><span class="o">.</span><span class="n">ravel</span><span class="p">()</span>
+
+<span class="n">measurements</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;heart_rate_bpm&#39;</span><span class="p">,</span> <span class="s1">&#39;blood_pressure_systolic_mmHg&#39;</span><span class="p">,</span> <span class="s1">&#39;temperature_celsius&#39;</span><span class="p">,</span> <span class="s1">&#39;weight_kg&#39;</span><span class="p">]</span>
+
+<span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">measurement</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">measurements</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">patient_id</span> <span class="ow">in</span> <span class="n">raw_data</span><span class="p">[</span><span class="s1">&#39;patient_id&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">unique</span><span class="p">():</span>
+        <span class="n">patient_data</span> <span class="o">=</span> <span class="n">raw_data</span><span class="p">[</span><span class="n">raw_data</span><span class="p">[</span><span class="s1">&#39;patient_id&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="n">patient_id</span><span class="p">]</span>
+        <span class="n">axes</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">patient_data</span><span class="p">[</span><span class="s1">&#39;timestamp&#39;</span><span class="p">],</span> <span class="n">patient_data</span><span class="p">[</span><span class="n">measurement</span><span class="p">],</span> 
+                       <span class="n">label</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;Patient </span><span class="si">{</span><span class="n">patient_id</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.7</span><span class="p">)</span>
+    
+    <span class="n">axes</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="n">measurement</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">,</span> <span class="s1">&#39; &#39;</span><span class="p">)</span><span class="o">.</span><span class="n">title</span><span class="p">())</span>
+    <span class="n">axes</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+    <span class="n">axes</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">tick_params</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="n">rotation</span><span class="o">=</span><span class="mi">45</span><span class="p">)</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="_images/c0ae6a77646018ce9650ac88b2363c020b84c37122ed8c4cc4e231b9041aa19c.png" src="_images/c0ae6a77646018ce9650ac88b2363c020b84c37122ed8c4cc4e231b9041aa19c.png" />
+</div>
+</div>
+<section id="unit-normalization">
+<h2>1. Unit Normalization<a class="headerlink" href="#unit-normalization" title="Link to this heading">#</a></h2>
+<p>Unit normalization is essential when combining measurements with different scales and units. We’ll demonstrate both min-max normalization and z-score standardization.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Prepare data for normalization (excluding non-numeric columns)</span>
+<span class="n">numeric_columns</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;heart_rate_bpm&#39;</span><span class="p">,</span> <span class="s1">&#39;blood_pressure_systolic_mmHg&#39;</span><span class="p">,</span> <span class="s1">&#39;temperature_celsius&#39;</span><span class="p">,</span> <span class="s1">&#39;weight_kg&#39;</span><span class="p">]</span>
+<span class="n">normalization_data</span> <span class="o">=</span> <span class="n">raw_data</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Original data statistics:&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">normalization_data</span><span class="p">[</span><span class="n">numeric_columns</span><span class="p">]</span><span class="o">.</span><span class="n">describe</span><span class="p">())</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Original data statistics:
+       heart_rate_bpm  blood_pressure_systolic_mmHg  temperature_celsius  \
+count      116.000000                    116.000000           116.000000   
+mean        90.416624                    130.373233            36.876032   
+std         13.883255                     14.890955             0.497549   
+min         53.448240                     95.109730            35.866279   
+25%         80.586555                    119.431691            36.497485   
+50%         89.970396                    132.393936            36.853832   
+75%         99.811820                    139.675203            37.222712   
+max        126.435716                    173.548903            38.067211   
+
+        weight_kg  
+count  116.000000  
+mean    80.031644  
+std      4.640008  
+min     71.423007  
+25%     76.517937  
+50%     79.759754  
+75%     83.798081  
+max     89.310479  
+</pre></div>
+</div>
+</div>
+</div>
+<p>Let’s apply min-max normalization to scale all values between 0 and 1. This is useful when we want to preserve the relative relationships while ensuring all features have the same scale.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Apply Min-Max normalization</span>
+<span class="n">scaler_minmax</span> <span class="o">=</span> <span class="n">MinMaxScaler</span><span class="p">()</span>
+<span class="n">normalized_minmax</span> <span class="o">=</span> <span class="n">normalization_data</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+<span class="n">normalized_minmax</span><span class="p">[</span><span class="n">numeric_columns</span><span class="p">]</span> <span class="o">=</span> <span class="n">scaler_minmax</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">normalization_data</span><span class="p">[</span><span class="n">numeric_columns</span><span class="p">])</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Min-Max normalized data statistics:&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">normalized_minmax</span><span class="p">[</span><span class="n">numeric_columns</span><span class="p">]</span><span class="o">.</span><span class="n">describe</span><span class="p">())</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Min-Max normalized data statistics:
+       heart_rate_bpm  blood_pressure_systolic_mmHg  temperature_celsius  \
+count      116.000000                    116.000000           116.000000   
+mean         0.506503                      0.449565             0.458784   
+std          0.190214                      0.189841             0.226063   
+min          0.000000                      0.000000             0.000000   
+25%          0.371822                      0.310074             0.286790   
+50%          0.500389                      0.475326             0.448698   
+75%          0.635227                      0.568153             0.616300   
+max          1.000000                      1.000000             1.000000   
+
+        weight_kg  
+count  116.000000  
+mean     0.481266  
+std      0.259400  
+min      0.000000  
+25%      0.284832  
+50%      0.466066  
+75%      0.691829  
+max      1.000000  
+</pre></div>
+</div>
+</div>
+</div>
+<p>Now let’s apply z-score standardization, which transforms data to have zero mean and unit variance. This is particularly useful when dealing with normally distributed medical measurements.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Apply Z-score standardization</span>
+<span class="n">scaler_standard</span> <span class="o">=</span> <span class="n">StandardScaler</span><span class="p">()</span>
+<span class="n">normalized_zscore</span> <span class="o">=</span> <span class="n">normalization_data</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+<span class="n">normalized_zscore</span><span class="p">[</span><span class="n">numeric_columns</span><span class="p">]</span> <span class="o">=</span> <span class="n">scaler_standard</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">normalization_data</span><span class="p">[</span><span class="n">numeric_columns</span><span class="p">])</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Z-score standardized data statistics:&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">normalized_zscore</span><span class="p">[</span><span class="n">numeric_columns</span><span class="p">]</span><span class="o">.</span><span class="n">describe</span><span class="p">())</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Z-score standardized data statistics:
+       heart_rate_bpm  blood_pressure_systolic_mmHg  temperature_celsius  \
+count    1.160000e+02                  1.160000e+02         1.160000e+02   
+mean    -6.527346e-16                 -5.493690e-16         1.521496e-14   
+std      1.004338e+00                  1.004338e+00         1.004338e+00   
+min     -2.674356e+00                 -2.378390e+00        -2.038261e+00   
+25%     -7.111240e-01                 -7.379655e-01        -7.641252e-01   
+50%     -3.228088e-02                  1.362888e-01        -4.481218e-02   
+75%      6.796645e-01                  6.273826e-01         6.997994e-01   
+max      2.605683e+00                  2.912035e+00         2.404482e+00   
+
+          weight_kg  
+count  1.160000e+02  
+mean  -3.181363e-15  
+std    1.004338e+00  
+min   -1.863356e+00  
+25%   -7.605484e-01  
+50%   -5.885096e-02  
+75%    8.152524e-01  
+max    2.008421e+00  
+</pre></div>
+</div>
+</div>
+</div>
+<p>Let’s visualize the effect of different normalization techniques on our data distribution.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Compare normalization techniques</span>
+<span class="n">fig</span><span class="p">,</span> <span class="n">axes</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">18</span><span class="p">,</span> <span class="mi">5</span><span class="p">))</span>
+
+<span class="c1"># Original data</span>
+<span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">numeric_columns</span><span class="p">:</span>
+    <span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">hist</span><span class="p">(</span><span class="n">normalization_data</span><span class="p">[</span><span class="n">col</span><span class="p">],</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="n">col</span><span class="p">,</span> <span class="n">bins</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s1">&#39;Original Data&#39;</span><span class="p">)</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s1">&#39;Frequency&#39;</span><span class="p">)</span>
+
+<span class="c1"># Min-Max normalized</span>
+<span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">numeric_columns</span><span class="p">:</span>
+    <span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">hist</span><span class="p">(</span><span class="n">normalized_minmax</span><span class="p">[</span><span class="n">col</span><span class="p">],</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="n">col</span><span class="p">,</span> <span class="n">bins</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s1">&#39;Min-Max Normalized&#39;</span><span class="p">)</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+
+<span class="c1"># Z-score standardized</span>
+<span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">numeric_columns</span><span class="p">:</span>
+    <span class="n">axes</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">hist</span><span class="p">(</span><span class="n">normalized_zscore</span><span class="p">[</span><span class="n">col</span><span class="p">],</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="n">col</span><span class="p">,</span> <span class="n">bins</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s1">&#39;Z-score Standardized&#39;</span><span class="p">)</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="_images/929f63d4de24e2edddc6825b8a747215831692eb5541ac3558b7f87eb5db929f.png" src="_images/929f63d4de24e2edddc6825b8a747215831692eb5541ac3558b7f87eb5db929f.png" />
+</div>
+</div>
+</section>
+<section id="time-alignment">
+<h2>2. Time Alignment<a class="headerlink" href="#time-alignment" title="Link to this heading">#</a></h2>
+<p>Time alignment involves synchronizing measurements from different sources or patients to a common time reference. We’ll demonstrate aligning data to the earliest timestamp.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Time alignment - align all patients to a common time reference</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">align_timestamps</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">reference_time</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="n">aligned_data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    
+    <span class="k">if</span> <span class="n">reference_time</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">reference_time</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;timestamp&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">min</span><span class="p">()</span>
+    
+    <span class="c1"># Calculate time difference in hours from reference time</span>
+    <span class="n">aligned_data</span><span class="p">[</span><span class="s1">&#39;time_from_start_hours&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">aligned_data</span><span class="p">[</span><span class="s1">&#39;timestamp&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="n">reference_time</span><span class="p">)</span><span class="o">.</span><span class="n">dt</span><span class="o">.</span><span class="n">total_seconds</span><span class="p">()</span> <span class="o">/</span> <span class="mi">3600</span>
+    
+    <span class="k">return</span> <span class="n">aligned_data</span><span class="p">,</span> <span class="n">reference_time</span>
+
+<span class="n">aligned_data</span><span class="p">,</span> <span class="n">ref_time</span> <span class="o">=</span> <span class="n">align_timestamps</span><span class="p">(</span><span class="n">raw_data</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Reference time: </span><span class="si">{</span><span class="n">ref_time</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Time range: </span><span class="si">{</span><span class="n">aligned_data</span><span class="p">[</span><span class="s1">&#39;time_from_start_hours&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">min</span><span class="p">()</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2"> to </span><span class="si">{</span><span class="n">aligned_data</span><span class="p">[</span><span class="s1">&#39;time_from_start_hours&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">max</span><span class="p">()</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2"> hours&quot;</span><span class="p">)</span>
+<span class="n">aligned_data</span><span class="p">[[</span><span class="s1">&#39;patient_id&#39;</span><span class="p">,</span> <span class="s1">&#39;timestamp&#39;</span><span class="p">,</span> <span class="s1">&#39;time_from_start_hours&#39;</span><span class="p">,</span> <span class="s1">&#39;heart_rate_bpm&#39;</span><span class="p">]]</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Reference time: 2023-01-01 00:00:00
+Time range: 0.0 to 720.0 hours
+</pre></div>
+</div>
+<div class="output text_html"><div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>patient_id</th>
+      <th>timestamp</th>
+      <th>time_from_start_hours</th>
+      <th>heart_rate_bpm</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>1</td>
+      <td>2023-01-02 00:00:00</td>
+      <td>24.0</td>
+      <td>76.907115</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>1</td>
+      <td>2023-01-02 06:00:00</td>
+      <td>30.0</td>
+      <td>86.731255</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>1</td>
+      <td>2023-01-02 12:00:00</td>
+      <td>36.0</td>
+      <td>77.433698</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>1</td>
+      <td>2023-01-03 12:00:00</td>
+      <td>60.0</td>
+      <td>76.321743</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>1</td>
+      <td>2023-01-04 06:00:00</td>
+      <td>78.0</td>
+      <td>92.737336</td>
+    </tr>
+  </tbody>
+</table>
+</div></div></div>
+</div>
+<p>Let’s visualize how the time alignment affects our data representation, showing measurements as a function of time from the common reference point.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Visualize time-aligned data</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">12</span><span class="p">,</span> <span class="mi">6</span><span class="p">))</span>
+
+<span class="k">for</span> <span class="n">patient_id</span> <span class="ow">in</span> <span class="n">aligned_data</span><span class="p">[</span><span class="s1">&#39;patient_id&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">unique</span><span class="p">():</span>
+    <span class="n">patient_data</span> <span class="o">=</span> <span class="n">aligned_data</span><span class="p">[</span><span class="n">aligned_data</span><span class="p">[</span><span class="s1">&#39;patient_id&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="n">patient_id</span><span class="p">]</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">patient_data</span><span class="p">[</span><span class="s1">&#39;time_from_start_hours&#39;</span><span class="p">],</span> <span class="n">patient_data</span><span class="p">[</span><span class="s1">&#39;heart_rate_bpm&#39;</span><span class="p">],</span> 
+               <span class="n">label</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;Patient </span><span class="si">{</span><span class="n">patient_id</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.7</span><span class="p">)</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;Time from Start (hours)&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;Heart Rate (BPM)&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s1">&#39;Time-Aligned Heart Rate Measurements&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.3</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="_images/31db2013f4f7352fc7b00d7ebb9f16e349104852834829ea118402b67b04c95e.png" src="_images/31db2013f4f7352fc7b00d7ebb9f16e349104852834829ea118402b67b04c95e.png" />
+</div>
+</div>
+</section>
+<section id="resampling">
+<h2>3. Resampling<a class="headerlink" href="#resampling" title="Link to this heading">#</a></h2>
+<p>Resampling involves converting irregular time series data to regular intervals. We’ll demonstrate both upsampling (interpolation) and downsampling (aggregation) techniques.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Resampling - convert to regular intervals</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">resample_patient_data</span><span class="p">(</span><span class="n">patient_data</span><span class="p">,</span> <span class="n">freq</span><span class="o">=</span><span class="s1">&#39;6H&#39;</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;linear&#39;</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Resample patient data to regular intervals</span>
+<span class="sd">    freq: pandas frequency string (e.g., &#39;6H&#39; for 6 hours)</span>
+<span class="sd">    method: interpolation method (&#39;linear&#39;, &#39;nearest&#39;, &#39;cubic&#39;)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Set timestamp as index</span>
+    <span class="n">patient_data_indexed</span> <span class="o">=</span> <span class="n">patient_data</span><span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="s1">&#39;timestamp&#39;</span><span class="p">)</span>
+    
+    <span class="c1"># Resample to regular intervals and interpolate</span>
+    <span class="n">resampled</span> <span class="o">=</span> <span class="n">patient_data_indexed</span><span class="o">.</span><span class="n">resample</span><span class="p">(</span><span class="n">freq</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+    
+    <span class="c1"># Interpolate missing values</span>
+    <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">numeric_columns</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">resampled</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+            <span class="n">resampled</span><span class="p">[</span><span class="n">col</span><span class="p">]</span> <span class="o">=</span> <span class="n">resampled</span><span class="p">[</span><span class="n">col</span><span class="p">]</span><span class="o">.</span><span class="n">interpolate</span><span class="p">(</span><span class="n">method</span><span class="o">=</span><span class="n">method</span><span class="p">)</span>
+    
+    <span class="c1"># Reset index and add patient_id back</span>
+    <span class="n">resampled</span> <span class="o">=</span> <span class="n">resampled</span><span class="o">.</span><span class="n">reset_index</span><span class="p">()</span>
+    <span class="n">resampled</span><span class="p">[</span><span class="s1">&#39;patient_id&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">patient_data</span><span class="p">[</span><span class="s1">&#39;patient_id&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    
+    <span class="k">return</span> <span class="n">resampled</span>
+
+<span class="c1"># Resample data for each patient</span>
+<span class="n">resampled_data_list</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="k">for</span> <span class="n">patient_id</span> <span class="ow">in</span> <span class="n">aligned_data</span><span class="p">[</span><span class="s1">&#39;patient_id&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">unique</span><span class="p">():</span>
+    <span class="n">patient_data</span> <span class="o">=</span> <span class="n">aligned_data</span><span class="p">[</span><span class="n">aligned_data</span><span class="p">[</span><span class="s1">&#39;patient_id&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="n">patient_id</span><span class="p">]</span>
+    <span class="n">resampled_patient</span> <span class="o">=</span> <span class="n">resample_patient_data</span><span class="p">(</span><span class="n">patient_data</span><span class="p">,</span> <span class="n">freq</span><span class="o">=</span><span class="s1">&#39;6H&#39;</span><span class="p">)</span>
+    <span class="n">resampled_data_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">resampled_patient</span><span class="p">)</span>
+
+<span class="n">resampled_data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">resampled_data_list</span><span class="p">,</span> <span class="n">ignore_index</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Original data points: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">aligned_data</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Resampled data points: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">resampled_data</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="n">resampled_data</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Original data points: 116
+Resampled data points: 353
+</pre></div>
+</div>
+<div class="output text_html"><div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>timestamp</th>
+      <th>patient_id</th>
+      <th>heart_rate_bpm</th>
+      <th>blood_pressure_systolic_mmHg</th>
+      <th>temperature_celsius</th>
+      <th>weight_kg</th>
+      <th>time_from_start_hours</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>2023-01-02 00:00:00</td>
+      <td>1</td>
+      <td>76.907115</td>
+      <td>138.847439</td>
+      <td>36.266179</td>
+      <td>76.743828</td>
+      <td>24.0</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>2023-01-02 06:00:00</td>
+      <td>1</td>
+      <td>86.731255</td>
+      <td>150.599074</td>
+      <td>36.772931</td>
+      <td>77.874713</td>
+      <td>30.0</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>2023-01-02 12:00:00</td>
+      <td>1</td>
+      <td>77.433698</td>
+      <td>138.103841</td>
+      <td>36.015064</td>
+      <td>75.014613</td>
+      <td>36.0</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>2023-01-02 18:00:00</td>
+      <td>1</td>
+      <td>77.155709</td>
+      <td>134.862172</td>
+      <td>36.089826</td>
+      <td>75.676400</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>2023-01-03 00:00:00</td>
+      <td>1</td>
+      <td>76.877720</td>
+      <td>131.620503</td>
+      <td>36.164587</td>
+      <td>76.338188</td>
+      <td>NaN</td>
+    </tr>
+  </tbody>
+</table>
+</div></div></div>
+</div>
+<p>Let’s compare the original irregular data with the resampled regular interval data to see the effect of interpolation.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Compare original vs resampled data</span>
+<span class="n">fig</span><span class="p">,</span> <span class="n">axes</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">15</span><span class="p">,</span> <span class="mi">5</span><span class="p">))</span>
+
+<span class="c1"># Original irregular data</span>
+<span class="k">for</span> <span class="n">patient_id</span> <span class="ow">in</span> <span class="n">aligned_data</span><span class="p">[</span><span class="s1">&#39;patient_id&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">unique</span><span class="p">():</span>
+    <span class="n">patient_data</span> <span class="o">=</span> <span class="n">aligned_data</span><span class="p">[</span><span class="n">aligned_data</span><span class="p">[</span><span class="s1">&#39;patient_id&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="n">patient_id</span><span class="p">]</span>
+    <span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">patient_data</span><span class="p">[</span><span class="s1">&#39;timestamp&#39;</span><span class="p">],</span> <span class="n">patient_data</span><span class="p">[</span><span class="s1">&#39;heart_rate_bpm&#39;</span><span class="p">],</span> 
+                   <span class="n">label</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;Patient </span><span class="si">{</span><span class="n">patient_id</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.7</span><span class="p">)</span>
+
+<span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s1">&#39;Original Irregular Data&#39;</span><span class="p">)</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">tick_params</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="n">rotation</span><span class="o">=</span><span class="mi">45</span><span class="p">)</span>
+
+<span class="c1"># Resampled regular data</span>
+<span class="k">for</span> <span class="n">patient_id</span> <span class="ow">in</span> <span class="n">resampled_data</span><span class="p">[</span><span class="s1">&#39;patient_id&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">unique</span><span class="p">():</span>
+    <span class="n">patient_data</span> <span class="o">=</span> <span class="n">resampled_data</span><span class="p">[</span><span class="n">resampled_data</span><span class="p">[</span><span class="s1">&#39;patient_id&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="n">patient_id</span><span class="p">]</span>
+    <span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">patient_data</span><span class="p">[</span><span class="s1">&#39;timestamp&#39;</span><span class="p">],</span> <span class="n">patient_data</span><span class="p">[</span><span class="s1">&#39;heart_rate_bpm&#39;</span><span class="p">],</span> 
+                <span class="s1">&#39;o-&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;Patient </span><span class="si">{</span><span class="n">patient_id</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.7</span><span class="p">)</span>
+
+<span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s1">&#39;Resampled Regular Intervals (6H)&#39;</span><span class="p">)</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">tick_params</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="n">rotation</span><span class="o">=</span><span class="mi">45</span><span class="p">)</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="_images/774fa70b8ce72bb4c65c99c71f8e6720d373bea383e4a5e368991fe3d29a051d.png" src="_images/774fa70b8ce72bb4c65c99c71f8e6720d373bea383e4a5e368991fe3d29a051d.png" />
+</div>
+</div>
+</section>
+<section id="windowing">
+<h2>4. Windowing<a class="headerlink" href="#windowing" title="Link to this heading">#</a></h2>
+<p>Windowing involves creating overlapping or non-overlapping time windows for analysis. This is crucial for feature extraction and temporal pattern analysis in longitudinal data.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Windowing - create time windows for analysis</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">create_time_windows</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">window_size_hours</span><span class="o">=</span><span class="mi">24</span><span class="p">,</span> <span class="n">overlap_hours</span><span class="o">=</span><span class="mi">12</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Create overlapping time windows from longitudinal data</span>
+<span class="sd">    window_size_hours: size of each window in hours</span>
+<span class="sd">    overlap_hours: overlap between consecutive windows in hours</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">windows</span> <span class="o">=</span> <span class="p">[]</span>
+    
+    <span class="k">for</span> <span class="n">patient_id</span> <span class="ow">in</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;patient_id&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">unique</span><span class="p">():</span>
+        <span class="n">patient_data</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;patient_id&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="n">patient_id</span><span class="p">]</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="s1">&#39;timestamp&#39;</span><span class="p">)</span>
+        
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">patient_data</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">continue</span>
+            
+        <span class="n">start_time</span> <span class="o">=</span> <span class="n">patient_data</span><span class="p">[</span><span class="s1">&#39;timestamp&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">min</span><span class="p">()</span>
+        <span class="n">end_time</span> <span class="o">=</span> <span class="n">patient_data</span><span class="p">[</span><span class="s1">&#39;timestamp&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
+        
+        <span class="n">current_window_start</span> <span class="o">=</span> <span class="n">start_time</span>
+        <span class="n">window_id</span> <span class="o">=</span> <span class="mi">0</span>
+        
+        <span class="k">while</span> <span class="n">current_window_start</span> <span class="o">+</span> <span class="n">timedelta</span><span class="p">(</span><span class="n">hours</span><span class="o">=</span><span class="n">window_size_hours</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="n">end_time</span><span class="p">:</span>
+            <span class="n">window_end</span> <span class="o">=</span> <span class="n">current_window_start</span> <span class="o">+</span> <span class="n">timedelta</span><span class="p">(</span><span class="n">hours</span><span class="o">=</span><span class="n">window_size_hours</span><span class="p">)</span>
+            
+            <span class="c1"># Extract data within the window</span>
+            <span class="n">window_data</span> <span class="o">=</span> <span class="n">patient_data</span><span class="p">[</span>
+                <span class="p">(</span><span class="n">patient_data</span><span class="p">[</span><span class="s1">&#39;timestamp&#39;</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="n">current_window_start</span><span class="p">)</span> <span class="o">&amp;</span> 
+                <span class="p">(</span><span class="n">patient_data</span><span class="p">[</span><span class="s1">&#39;timestamp&#39;</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">window_end</span><span class="p">)</span>
+            <span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+            
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">window_data</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="c1"># Calculate window statistics</span>
+                <span class="n">window_stats</span> <span class="o">=</span> <span class="p">{</span>
+                    <span class="s1">&#39;patient_id&#39;</span><span class="p">:</span> <span class="n">patient_id</span><span class="p">,</span>
+                    <span class="s1">&#39;window_id&#39;</span><span class="p">:</span> <span class="n">window_id</span><span class="p">,</span>
+                    <span class="s1">&#39;window_start&#39;</span><span class="p">:</span> <span class="n">current_window_start</span><span class="p">,</span>
+                    <span class="s1">&#39;window_end&#39;</span><span class="p">:</span> <span class="n">window_end</span><span class="p">,</span>
+                    <span class="s1">&#39;n_measurements&#39;</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">window_data</span><span class="p">)</span>
+                <span class="p">}</span>
+                
+                <span class="c1"># Add statistics for each measurement</span>
+                <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">numeric_columns</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">window_data</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+                        <span class="n">window_stats</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">col</span><span class="si">}</span><span class="s1">_mean&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">window_data</span><span class="p">[</span><span class="n">col</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+                        <span class="n">window_stats</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">col</span><span class="si">}</span><span class="s1">_std&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">window_data</span><span class="p">[</span><span class="n">col</span><span class="p">]</span><span class="o">.</span><span class="n">std</span><span class="p">()</span>
+                        <span class="n">window_stats</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">col</span><span class="si">}</span><span class="s1">_min&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">window_data</span><span class="p">[</span><span class="n">col</span><span class="p">]</span><span class="o">.</span><span class="n">min</span><span class="p">()</span>
+                        <span class="n">window_stats</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">col</span><span class="si">}</span><span class="s1">_max&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">window_data</span><span class="p">[</span><span class="n">col</span><span class="p">]</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
+                
+                <span class="n">windows</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">window_stats</span><span class="p">)</span>
+            
+            <span class="c1"># Move to next window</span>
+            <span class="n">current_window_start</span> <span class="o">+=</span> <span class="n">timedelta</span><span class="p">(</span><span class="n">hours</span><span class="o">=</span><span class="n">window_size_hours</span> <span class="o">-</span> <span class="n">overlap_hours</span><span class="p">)</span>
+            <span class="n">window_id</span> <span class="o">+=</span> <span class="mi">1</span>
+    
+    <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">windows</span><span class="p">)</span>
+
+<span class="c1"># Create 24-hour windows with 12-hour overlap</span>
+<span class="n">windowed_data</span> <span class="o">=</span> <span class="n">create_time_windows</span><span class="p">(</span><span class="n">resampled_data</span><span class="p">,</span> <span class="n">window_size_hours</span><span class="o">=</span><span class="mi">24</span><span class="p">,</span> <span class="n">overlap_hours</span><span class="o">=</span><span class="mi">12</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Created </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">windowed_data</span><span class="p">)</span><span class="si">}</span><span class="s2"> windows from </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">resampled_data</span><span class="p">)</span><span class="si">}</span><span class="s2"> data points&quot;</span><span class="p">)</span>
+<span class="n">windowed_data</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Created 171 windows from 353 data points
+</pre></div>
+</div>
+<div class="output text_html"><div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>patient_id</th>
+      <th>window_id</th>
+      <th>window_start</th>
+      <th>window_end</th>
+      <th>n_measurements</th>
+      <th>heart_rate_bpm_mean</th>
+      <th>heart_rate_bpm_std</th>
+      <th>heart_rate_bpm_min</th>
+      <th>heart_rate_bpm_max</th>
+      <th>blood_pressure_systolic_mmHg_mean</th>
+      <th>...</th>
+      <th>blood_pressure_systolic_mmHg_min</th>
+      <th>blood_pressure_systolic_mmHg_max</th>
+      <th>temperature_celsius_mean</th>
+      <th>temperature_celsius_std</th>
+      <th>temperature_celsius_min</th>
+      <th>temperature_celsius_max</th>
+      <th>weight_kg_mean</th>
+      <th>weight_kg_std</th>
+      <th>weight_kg_min</th>
+      <th>weight_kg_max</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>1</td>
+      <td>0</td>
+      <td>2023-01-02 00:00:00</td>
+      <td>2023-01-03 00:00:00</td>
+      <td>4</td>
+      <td>79.556944</td>
+      <td>4.787708</td>
+      <td>76.907115</td>
+      <td>86.731255</td>
+      <td>140.603132</td>
+      <td>...</td>
+      <td>134.862172</td>
+      <td>150.599074</td>
+      <td>36.286000</td>
+      <td>0.341265</td>
+      <td>36.015064</td>
+      <td>36.772931</td>
+      <td>76.327388</td>
+      <td>1.253635</td>
+      <td>75.014613</td>
+      <td>77.874713</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>1</td>
+      <td>1</td>
+      <td>2023-01-02 12:00:00</td>
+      <td>2023-01-03 12:00:00</td>
+      <td>4</td>
+      <td>77.016715</td>
+      <td>0.358882</td>
+      <td>76.599732</td>
+      <td>77.433698</td>
+      <td>133.241338</td>
+      <td>...</td>
+      <td>128.378834</td>
+      <td>138.103841</td>
+      <td>36.127206</td>
+      <td>0.096516</td>
+      <td>36.015064</td>
+      <td>36.239348</td>
+      <td>76.007294</td>
+      <td>0.854364</td>
+      <td>75.014613</td>
+      <td>76.999975</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>1</td>
+      <td>2</td>
+      <td>2023-01-03 00:00:00</td>
+      <td>2023-01-04 00:00:00</td>
+      <td>4</td>
+      <td>77.898201</td>
+      <td>2.606838</td>
+      <td>76.321743</td>
+      <td>81.793607</td>
+      <td>127.100062</td>
+      <td>...</td>
+      <td>123.263747</td>
+      <td>131.620503</td>
+      <td>36.326808</td>
+      <td>0.185264</td>
+      <td>36.164587</td>
+      <td>36.589185</td>
+      <td>77.108309</td>
+      <td>0.582168</td>
+      <td>76.338188</td>
+      <td>77.661763</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>1</td>
+      <td>3</td>
+      <td>2023-01-03 12:00:00</td>
+      <td>2023-01-04 12:00:00</td>
+      <td>4</td>
+      <td>84.529539</td>
+      <td>7.064147</td>
+      <td>76.321743</td>
+      <td>92.737336</td>
+      <td>122.327038</td>
+      <td>...</td>
+      <td>119.516911</td>
+      <td>125.137165</td>
+      <td>36.726723</td>
+      <td>0.355121</td>
+      <td>36.314110</td>
+      <td>37.139337</td>
+      <td>77.319084</td>
+      <td>0.294931</td>
+      <td>76.976405</td>
+      <td>77.661763</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>1</td>
+      <td>4</td>
+      <td>2023-01-04 00:00:00</td>
+      <td>2023-01-05 00:00:00</td>
+      <td>4</td>
+      <td>77.632880</td>
+      <td>17.379427</td>
+      <td>53.448240</td>
+      <td>92.737336</td>
+      <td>120.575109</td>
+      <td>...</td>
+      <td>106.656897</td>
+      <td>134.736301</td>
+      <td>36.972123</td>
+      <td>0.318223</td>
+      <td>36.580203</td>
+      <td>37.304691</td>
+      <td>76.249554</td>
+      <td>0.976735</td>
+      <td>75.352362</td>
+      <td>77.204858</td>
+    </tr>
+  </tbody>
+</table>
+<p>5 rows × 21 columns</p>
+</div></div></div>
+</div>
+<p>Let’s visualize the windowed data to show how statistical features are extracted from each time window.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Visualize windowed statistics</span>
+<span class="n">fig</span><span class="p">,</span> <span class="n">axes</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">15</span><span class="p">,</span> <span class="mi">10</span><span class="p">))</span>
+<span class="n">axes</span> <span class="o">=</span> <span class="n">axes</span><span class="o">.</span><span class="n">ravel</span><span class="p">()</span>
+
+<span class="n">statistics</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;mean&#39;</span><span class="p">,</span> <span class="s1">&#39;std&#39;</span><span class="p">,</span> <span class="s1">&#39;min&#39;</span><span class="p">,</span> <span class="s1">&#39;max&#39;</span><span class="p">]</span>
+<span class="n">measurement</span> <span class="o">=</span> <span class="s1">&#39;heart_rate_bpm&#39;</span>
+
+<span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">stat</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">statistics</span><span class="p">):</span>
+    <span class="n">col_name</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">measurement</span><span class="si">}</span><span class="s1">_</span><span class="si">{</span><span class="n">stat</span><span class="si">}</span><span class="s1">&#39;</span>
+    
+    <span class="k">for</span> <span class="n">patient_id</span> <span class="ow">in</span> <span class="n">windowed_data</span><span class="p">[</span><span class="s1">&#39;patient_id&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">unique</span><span class="p">():</span>
+        <span class="n">patient_windows</span> <span class="o">=</span> <span class="n">windowed_data</span><span class="p">[</span><span class="n">windowed_data</span><span class="p">[</span><span class="s1">&#39;patient_id&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="n">patient_id</span><span class="p">]</span>
+        <span class="n">axes</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">patient_windows</span><span class="p">[</span><span class="s1">&#39;window_id&#39;</span><span class="p">],</span> <span class="n">patient_windows</span><span class="p">[</span><span class="n">col_name</span><span class="p">],</span> 
+                    <span class="s1">&#39;o-&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;Patient </span><span class="si">{</span><span class="n">patient_id</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.7</span><span class="p">)</span>
+    
+    <span class="n">axes</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Heart Rate </span><span class="si">{</span><span class="n">stat</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span><span class="si">}</span><span class="s1"> per Window&#39;</span><span class="p">)</span>
+    <span class="n">axes</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s1">&#39;Window ID&#39;</span><span class="p">)</span>
+    <span class="n">axes</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">stat</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span><span class="si">}</span><span class="s1"> (BPM)&#39;</span><span class="p">)</span>
+    <span class="n">axes</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+    <span class="n">axes</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.3</span><span class="p">)</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="_images/a1931e79b252bd9a77133821cb5c723e3bac152a5b45637f1f4d7694a332dc01.png" src="_images/a1931e79b252bd9a77133821cb5c723e3bac152a5b45637f1f4d7694a332dc01.png" />
+</div>
+</div>
+<p>Now let’s demonstrate how to combine all preprocessing steps into a complete pipeline for processing longitudinal medical data.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Complete preprocessing pipeline</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">preprocess_longitudinal_data</span><span class="p">(</span><span class="n">raw_data</span><span class="p">,</span> <span class="n">normalization_method</span><span class="o">=</span><span class="s1">&#39;zscore&#39;</span><span class="p">,</span> 
+                                <span class="n">resample_freq</span><span class="o">=</span><span class="s1">&#39;6H&#39;</span><span class="p">,</span> <span class="n">window_size_hours</span><span class="o">=</span><span class="mi">24</span><span class="p">,</span> 
+                                <span class="n">overlap_hours</span><span class="o">=</span><span class="mi">12</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Complete preprocessing pipeline for longitudinal medical data</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Step 1: Time alignment...&quot;</span><span class="p">)</span>
+    <span class="n">aligned_data</span><span class="p">,</span> <span class="n">ref_time</span> <span class="o">=</span> <span class="n">align_timestamps</span><span class="p">(</span><span class="n">raw_data</span><span class="p">)</span>
+    
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Step 2: Unit normalization...&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">normalization_method</span> <span class="o">==</span> <span class="s1">&#39;zscore&#39;</span><span class="p">:</span>
+        <span class="n">scaler</span> <span class="o">=</span> <span class="n">StandardScaler</span><span class="p">()</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">scaler</span> <span class="o">=</span> <span class="n">MinMaxScaler</span><span class="p">()</span>
+    
+    <span class="n">normalized_data</span> <span class="o">=</span> <span class="n">aligned_data</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    <span class="n">normalized_data</span><span class="p">[</span><span class="n">numeric_columns</span><span class="p">]</span> <span class="o">=</span> <span class="n">scaler</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">aligned_data</span><span class="p">[</span><span class="n">numeric_columns</span><span class="p">])</span>
+    
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Step 3: Resampling...&quot;</span><span class="p">)</span>
+    <span class="n">resampled_list</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">patient_id</span> <span class="ow">in</span> <span class="n">normalized_data</span><span class="p">[</span><span class="s1">&#39;patient_id&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">unique</span><span class="p">():</span>
+        <span class="n">patient_data</span> <span class="o">=</span> <span class="n">normalized_data</span><span class="p">[</span><span class="n">normalized_data</span><span class="p">[</span><span class="s1">&#39;patient_id&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="n">patient_id</span><span class="p">]</span>
+        <span class="n">resampled_patient</span> <span class="o">=</span> <span class="n">resample_patient_data</span><span class="p">(</span><span class="n">patient_data</span><span class="p">,</span> <span class="n">freq</span><span class="o">=</span><span class="n">resample_freq</span><span class="p">)</span>
+        <span class="n">resampled_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">resampled_patient</span><span class="p">)</span>
+    
+    <span class="n">resampled_data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">resampled_list</span><span class="p">,</span> <span class="n">ignore_index</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Step 4: Windowing...&quot;</span><span class="p">)</span>
+    <span class="n">windowed_data</span> <span class="o">=</span> <span class="n">create_time_windows</span><span class="p">(</span><span class="n">resampled_data</span><span class="p">,</span> <span class="n">window_size_hours</span><span class="p">,</span> <span class="n">overlap_hours</span><span class="p">)</span>
+    
+    <span class="k">return</span> <span class="p">{</span>
+        <span class="s1">&#39;aligned&#39;</span><span class="p">:</span> <span class="n">aligned_data</span><span class="p">,</span>
+        <span class="s1">&#39;normalized&#39;</span><span class="p">:</span> <span class="n">normalized_data</span><span class="p">,</span>
+        <span class="s1">&#39;resampled&#39;</span><span class="p">:</span> <span class="n">resampled_data</span><span class="p">,</span>
+        <span class="s1">&#39;windowed&#39;</span><span class="p">:</span> <span class="n">windowed_data</span><span class="p">,</span>
+        <span class="s1">&#39;scaler&#39;</span><span class="p">:</span> <span class="n">scaler</span><span class="p">,</span>
+        <span class="s1">&#39;reference_time&#39;</span><span class="p">:</span> <span class="n">ref_time</span>
+    <span class="p">}</span>
+
+<span class="c1"># Apply complete pipeline</span>
+<span class="n">processed_data</span> <span class="o">=</span> <span class="n">preprocess_longitudinal_data</span><span class="p">(</span><span class="n">raw_data</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Pipeline completed:&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;- Raw data: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">raw_data</span><span class="p">)</span><span class="si">}</span><span class="s2"> measurements&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;- Resampled data: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">processed_data</span><span class="p">[</span><span class="s1">&#39;resampled&#39;</span><span class="p">])</span><span class="si">}</span><span class="s2"> measurements&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;- Windowed features: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">processed_data</span><span class="p">[</span><span class="s1">&#39;windowed&#39;</span><span class="p">])</span><span class="si">}</span><span class="s2"> windows&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Step 1: Time alignment...
+Step 2: Unit normalization...
+Step 3: Resampling...
+Step 4: Windowing...
+
+Pipeline completed:
+- Raw data: 116 measurements
+- Resampled data: 353 measurements
+- Windowed features: 171 windows
+</pre></div>
+</div>
+</div>
+</div>
+<p>Finally, let’s examine the final processed features that could be used for downstream analysis or machine learning tasks.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Examine the final processed features</span>
+<span class="n">final_features</span> <span class="o">=</span> <span class="n">processed_data</span><span class="p">[</span><span class="s1">&#39;windowed&#39;</span><span class="p">]</span>
+
+<span class="c1"># Select feature columns (exclude metadata)</span>
+<span class="n">feature_columns</span> <span class="o">=</span> <span class="p">[</span><span class="n">col</span> <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">final_features</span><span class="o">.</span><span class="n">columns</span> <span class="k">if</span> 
+                  <span class="n">col</span><span class="o">.</span><span class="n">endswith</span><span class="p">((</span><span class="s1">&#39;_mean&#39;</span><span class="p">,</span> <span class="s1">&#39;_std&#39;</span><span class="p">,</span> <span class="s1">&#39;_min&#39;</span><span class="p">,</span> <span class="s1">&#39;_max&#39;</span><span class="p">))]</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Available features: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">feature_columns</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Feature columns:&quot;</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">feature_columns</span><span class="p">[:</span><span class="mi">8</span><span class="p">]:</span>  <span class="c1"># Show first 8 features</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  - </span><span class="si">{</span><span class="n">col</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  ... and </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">feature_columns</span><span class="p">)</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">8</span><span class="si">}</span><span class="s2"> more&quot;</span><span class="p">)</span>
+
+<span class="c1"># Show feature matrix</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Feature matrix shape:&quot;</span><span class="p">,</span> <span class="n">final_features</span><span class="p">[</span><span class="n">feature_columns</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+<span class="n">final_features</span><span class="p">[[</span><span class="s1">&#39;patient_id&#39;</span><span class="p">,</span> <span class="s1">&#39;window_id&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="n">feature_columns</span><span class="p">[:</span><span class="mi">4</span><span class="p">]]</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Available features: 16
+Feature columns:
+  - heart_rate_bpm_mean
+  - heart_rate_bpm_std
+  - heart_rate_bpm_min
+  - heart_rate_bpm_max
+  - blood_pressure_systolic_mmHg_mean
+  - blood_pressure_systolic_mmHg_std
+  - blood_pressure_systolic_mmHg_min
+  - blood_pressure_systolic_mmHg_max
+  ... and 8 more
+
+Feature matrix shape: (171, 16)
+</pre></div>
+</div>
+<div class="output text_html"><div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>patient_id</th>
+      <th>window_id</th>
+      <th>heart_rate_bpm_mean</th>
+      <th>heart_rate_bpm_std</th>
+      <th>heart_rate_bpm_min</th>
+      <th>heart_rate_bpm_max</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>1</td>
+      <td>0</td>
+      <td>-0.785608</td>
+      <td>0.346351</td>
+      <td>-0.977301</td>
+      <td>-0.266606</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>1</td>
+      <td>1</td>
+      <td>-0.969372</td>
+      <td>0.025962</td>
+      <td>-0.999538</td>
+      <td>-0.939207</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>1</td>
+      <td>2</td>
+      <td>-0.905604</td>
+      <td>0.188583</td>
+      <td>-1.019648</td>
+      <td>-0.623804</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>1</td>
+      <td>3</td>
+      <td>-0.425882</td>
+      <td>0.511032</td>
+      <td>-1.019648</td>
+      <td>0.167884</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>1</td>
+      <td>4</td>
+      <td>-0.924798</td>
+      <td>1.257257</td>
+      <td>-2.674356</td>
+      <td>0.167884</td>
+    </tr>
+  </tbody>
+</table>
+</div></div></div>
+</div>
+</section>
+<section id="summary">
+<h2>Summary<a class="headerlink" href="#summary" title="Link to this heading">#</a></h2>
+<p>In this notebook, we covered four essential preprocessing techniques for longitudinal medical data:</p>
+<ol class="arabic simple">
+<li><p><strong>Unit Normalization</strong>: We demonstrated min-max scaling and z-score standardization to handle measurements with different units and scales</p></li>
+<li><p><strong>Time Alignment</strong>: We aligned timestamps to a common reference point to enable comparison across patients</p></li>
+<li><p><strong>Resampling</strong>: We converted irregular time series to regular intervals using interpolation</p></li>
+<li><p><strong>Windowing</strong>: We created overlapping time windows and extracted statistical features for analysis</p></li>
+</ol>
+<p>These techniques are fundamental for preparing longitudinal medical data for integration, analysis, and machine learning applications.</p>
+</section>
+<section id="exercise">
+<h2>Exercise<a class="headerlink" href="#exercise" title="Link to this heading">#</a></h2>
+<p>Using the techniques learned in this notebook, complete the following tasks:</p>
+<ol class="arabic simple">
+<li><p><strong>Generate new synthetic data</strong>: Create longitudinal data for 5 patients over 60 days with measurements including heart rate, blood pressure, temperature, and glucose levels (mg/dL with values around 100±20).</p></li>
+<li><p><strong>Apply different normalization techniques</strong>: Compare the results of min-max normalization, z-score standardization, and robust scaling (using <code class="docutils literal notranslate"><span class="pre">RobustScaler</span></code> from sklearn) on your data.</p></li>
+<li><p><strong>Experiment with resampling</strong>: Try different resampling frequencies (2H, 12H, 24H) and interpolation methods (‘linear’, ‘cubic’, ‘nearest’). Visualize the differences.</p></li>
+<li><p><strong>Custom windowing</strong>: Create a windowing function that extracts additional features such as slope (trend), area under the curve, and peak detection for each window.</p></li>
+<li><p><strong>Pipeline evaluation</strong>: Create a function that evaluates the quality of your preprocessing pipeline by calculating metrics such as data coverage (percentage of time with data), interpolation error, and feature correlation before and after processing.</p></li>
+</ol>
+<p>Submit your solution showing the preprocessed data characteristics, visualizations comparing different approaches, and your evaluation metrics.</p>
+</section>
+</section>
+
+    <script type="text/x-thebe-config">
+    {
+        requestKernel: true,
+        binderOptions: {
+            repo: "binder-examples/jupyter-stacks-datascience",
+            ref: "master",
+        },
+        codeMirrorConfig: {
+            theme: "abcdef",
+            mode: "python"
+        },
+        kernelOptions: {
+            name: "python3",
+            path: "./."
+        },
+        predefinedOutput: true
+    }
+    </script>
+    <script>kernelName = 'python3'</script>
+
+                </article>
+              
+
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="csv-excel-ndjson-to-parquet-arrow-batch-vs-streaming.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">CSV/Excel/NDJSON → Parquet/Arrow: Batch vs Streaming</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="dask-out-of-core-parallel-conversion-progress-retries-idempotency.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">Out-of-core/Parallel Conversion with Dask: Progress, Retries, and Idempotency</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+  <div class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> Contents
+  </div>
+  <nav class="bd-toc-nav page-toc">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#unit-normalization">1. Unit Normalization</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#time-alignment">2. Time Alignment</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#resampling">3. Resampling</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#windowing">4. Windowing</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#summary">Summary</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#exercise">Exercise</a></li>
+</ul>
+  </nav></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+<p class="component-author">
+By AI Generated Content
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+
+  </div>
+  
+  <div class="footer-item">
+    <p class="last-updated">
+  Last updated on Sep 13, 2025.
+  <br/>
+</p>
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+</div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b"></script>
+<script src="_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+  <footer class="bd-footer">
+  </footer>
+  </body>
+</html>

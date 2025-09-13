@@ -1,0 +1,1082 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="./" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Sidecar Metadata (JSON/YAML) and Data Dictionaries &#8212; Foundations of Medical Data Integration</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="_static/styles/theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="_static/styles/bootstrap.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="_static/styles/pydata-sphinx-theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+
+  
+  <link href="_static/vendor/fontawesome/6.5.2/css/all.min.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.5.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.5.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.5.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="_static/styles/sphinx-book-theme.css?v=eba8b062" />
+    <link rel="stylesheet" type="text/css" href="_static/togglebutton.css?v=13237357" />
+    <link rel="stylesheet" type="text/css" href="_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="_static/mystnb.8ecb98da25f57f5357bf6f572d296f466b2cfe2517ffebfabe82451661e28f02.css" />
+    <link rel="stylesheet" type="text/css" href="_static/sphinx-thebe.css?v=4fa983c6" />
+    <link rel="stylesheet" type="text/css" href="_static/sphinx-design.min.css?v=95c83b7e" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b" />
+<link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
+  <script src="_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+    <script src="_static/documentation_options.js?v=9eb32ce0"></script>
+    <script src="_static/doctools.js?v=9a2dae69"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="_static/copybutton.js?v=f281be69"></script>
+    <script src="_static/scripts/sphinx-book-theme.js?v=887ef09a"></script>
+    <script>let toggleHintShow = 'Click to show';</script>
+    <script>let toggleHintHide = 'Click to hide';</script>
+    <script>let toggleOpenOnPrint = 'true';</script>
+    <script src="_static/togglebutton.js?v=4a39c7ea"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script src="_static/design-tabs.js?v=f930bc37"></script>
+    <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"; const thebe_selector = ".thebe,.cell"; const thebe_selector_input = "pre"; const thebe_selector_output = ".output, .cell_output"</script>
+    <script async="async" src="_static/sphinx-thebe.js?v=c100c467"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"; const thebe_selector = ".thebe,.cell"; const thebe_selector_input = "pre"; const thebe_selector_output = ".output, .cell_output"</script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'sidecar_metadata_data_dictionaries';</script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Local and Cloud Storage with fsspec (s3fs/gcsfs/adlfs), Streaming I/O" href="fsspec_cloud_storage_streaming_io.html" />
+    <link rel="prev" title="Path Handling and Portable I/O with pathlib" href="path_handling_portable_io_pathlib.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+    <meta name="docbuild:last-update" content="Sep 13, 2025"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-primary-sidebar-checkbox"/>
+  <label class="overlay overlay-primary" for="pst-primary-sidebar-checkbox"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-secondary-sidebar-checkbox"/>
+  <label class="overlay overlay-secondary" for="pst-secondary-sidebar-checkbox"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search this book..."
+         aria-label="Search this book..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="intro.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="_static/logo.png" class="logo__image only-light" alt="Foundations of Medical Data Integration - Home"/>
+    <script>document.write(`<img src="_static/logo.png" class="logo__image only-dark" alt="Foundations of Medical Data Integration - Home"/>`);</script>
+  
+  
+</a></div>
+        <div class="sidebar-primary-item">
+
+ <script>
+ document.write(`
+   <button class="btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script></div>
+        <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        <p aria-level="2" class="caption" role="heading"><span class="caption-text">Working with files and folders</span></p>
+<ul class="current nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="files_folders_filesystems.html">Files, Folders, and Filesystems in Medical Data Integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="path_handling_portable_io_pathlib.html">Path Handling and Portable I/O with pathlib</a></li>
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">Sidecar Metadata (JSON/YAML) and Data Dictionaries</a></li>
+<li class="toctree-l1"><a class="reference internal" href="fsspec_cloud_storage_streaming_io.html">Local and Cloud Storage with fsspec (s3fs/gcsfs/adlfs), Streaming I/O</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">File formats</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="integrity_checks_hashing_file_strategies.html">Integrity Checks (Hashing) and Small-to-Large File Strategies</a></li>
+<li class="toctree-l1"><a class="reference internal" href="data_io_csv_ndjson_pandas_polars_dtypes_missing.html">Reading and Writing Medical Data: CSV and NDJSON with Pandas and Polars</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pandera_schemas_validation_coercion_constraints.html">Schemas and Validation with Pandera</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Wrangling data</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="joins-grouping-windowing-duckdb-sql.html">Joins/Merges, Grouping, and Windowing with DuckDB</a></li>
+<li class="toctree-l1"><a class="reference internal" href="export_patterns_subsets_snapshots_reproducible_filters.html">Export Patterns: Subsets, Snapshots, Reproducible Filters</a></li>
+<li class="toctree-l1"><a class="reference internal" href="numpy-xarray-fundamentals-shapes-dtypes-chunking.html">NumPy/xarray Fundamentals: Shapes, Dtypes, and Chunking</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Data conversion</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="csv-excel-ndjson-to-parquet-arrow-batch-vs-streaming.html">CSV/Excel/NDJSON → Parquet/Arrow: Batch vs Streaming</a></li>
+<li class="toctree-l1"><a class="reference internal" href="longitudinal_data_preprocessing.html">Unit Normalization, Time Alignment, Resampling, and Windowing for Longitudinal Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dask-out-of-core-parallel-conversion-progress-retries-idempotency.html">Out-of-core/Parallel Conversion with Dask: Progress, Retries, and Idempotency</a></li>
+</ul>
+
+    </div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><button class="sidebar-toggle primary-toggle btn btn-sm" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</button></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<div class="article-header-buttons">
+
+
+
+
+
+<div class="dropdown dropdown-launch-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Launch interactive content">
+    <i class="fas fa-rocket"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="https://mybinder.org/v2/gh/generated-books/medical-data-integration/main?urlpath=lab/tree/sidecar_metadata_data_dictionaries.ipynb" target="_blank"
+   class="btn btn-sm dropdown-item"
+   title="Launch on Binder"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  
+    <img alt="Binder logo" src="_static/images/logo_binder.svg">
+  </span>
+<span class="btn__text-container">Binder</span>
+</a>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+
+
+<div class="dropdown dropdown-source-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Source repositories">
+    <i class="fab fa-github"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="https://github.com/generated-books/medical-data-integration" target="_blank"
+   class="btn btn-sm btn-source-repository-button dropdown-item"
+   title="Source repository"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fab fa-github"></i>
+  </span>
+<span class="btn__text-container">Repository</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li><a href="https://github.com/generated-books/medical-data-integration/edit/main/sidecar_metadata_data_dictionaries.ipynb" target="_blank"
+   class="btn btn-sm btn-source-edit-button dropdown-item"
+   title="Suggest edit"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-pencil-alt"></i>
+  </span>
+<span class="btn__text-container">Suggest edit</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li><a href="https://github.com/generated-books/medical-data-integration/issues/new?title=Issue%20on%20page%20%2Fsidecar_metadata_data_dictionaries.html&body=Your%20issue%20content%20here." target="_blank"
+   class="btn btn-sm btn-source-issues-button dropdown-item"
+   title="Open an issue"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-lightbulb"></i>
+  </span>
+<span class="btn__text-container">Open issue</span>
+</a>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+
+
+<div class="dropdown dropdown-download-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Download this page">
+    <i class="fas fa-download"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="_sources/sidecar_metadata_data_dictionaries.ipynb" target="_blank"
+   class="btn btn-sm btn-download-source-button dropdown-item"
+   title="Download source file"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file"></i>
+  </span>
+<span class="btn__text-container">.ipynb</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li>
+<button onclick="window.print()"
+  class="btn btn-sm btn-download-pdf-button dropdown-item"
+  title="Print to PDF"
+  data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file-pdf"></i>
+  </span>
+<span class="btn__text-container">.pdf</span>
+</button>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+<button onclick="toggleFullScreen()"
+  class="btn btn-sm btn-fullscreen-button"
+  title="Fullscreen mode"
+  data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-expand"></i>
+  </span>
+
+</button>
+
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"></i>
+  </button>
+`);
+</script>
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm pst-navbar-icon search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+  </button>
+`);
+</script>
+<button class="sidebar-toggle secondary-toggle btn btn-sm" title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="fa-solid fa-list"></span>
+</button>
+</div></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1>Sidecar Metadata (JSON/YAML) and Data Dictionaries</h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+            <div>
+                <h2> Contents </h2>
+            </div>
+            <nav aria-label="Page">
+                <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#what-is-sidecar-metadata">What is Sidecar Metadata?</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#creating-a-json-sidecar-file">Creating a JSON Sidecar File</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#creating-a-yaml-sidecar-file">Creating a YAML Sidecar File</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#data-dictionaries">Data Dictionaries</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#validating-data-against-the-dictionary">Validating Data Against the Dictionary</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#creating-a-complete-metadata-package">Creating a Complete Metadata Package</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#exercise">Exercise</a></li>
+</ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section class="tex2jax_ignore mathjax_ignore" id="sidecar-metadata-json-yaml-and-data-dictionaries">
+<h1>Sidecar Metadata (JSON/YAML) and Data Dictionaries<a class="headerlink" href="#sidecar-metadata-json-yaml-and-data-dictionaries" title="Link to this heading">#</a></h1>
+<p>In medical data integration, metadata plays a crucial role in ensuring data interoperability, reproducibility, and proper interpretation. This notebook explores sidecar metadata files and data dictionaries, which are essential components for documenting and standardizing medical datasets.</p>
+<section id="what-is-sidecar-metadata">
+<h2>What is Sidecar Metadata?<a class="headerlink" href="#what-is-sidecar-metadata" title="Link to this heading">#</a></h2>
+<p>Sidecar metadata refers to separate files that accompany primary data files, containing descriptive information about the data structure, collection parameters, and other relevant details. In medical imaging and research, these are commonly stored as JSON or YAML files.</p>
+<p>Let’s start by importing the necessary libraries for working with JSON and YAML files.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">yaml</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="creating-a-json-sidecar-file">
+<h2>Creating a JSON Sidecar File<a class="headerlink" href="#creating-a-json-sidecar-file" title="Link to this heading">#</a></h2>
+<p>Let’s create a simple JSON sidecar file for a medical imaging dataset following BIDS (Brain Imaging Data Structure) conventions.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Create metadata for an MRI scan</span>
+<span class="n">mri_metadata</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;Modality&quot;</span><span class="p">:</span> <span class="s2">&quot;MR&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;MagneticFieldStrength&quot;</span><span class="p">:</span> <span class="mf">3.0</span><span class="p">,</span>
+    <span class="s2">&quot;Manufacturer&quot;</span><span class="p">:</span> <span class="s2">&quot;Siemens&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;ManufacturersModelName&quot;</span><span class="p">:</span> <span class="s2">&quot;Prisma&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;InstitutionName&quot;</span><span class="p">:</span> <span class="s2">&quot;University Medical Center&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;SequenceName&quot;</span><span class="p">:</span> <span class="s2">&quot;T1_MPRAGE&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;SliceThickness&quot;</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span>
+    <span class="s2">&quot;RepetitionTime&quot;</span><span class="p">:</span> <span class="mf">2.3</span><span class="p">,</span>
+    <span class="s2">&quot;EchoTime&quot;</span><span class="p">:</span> <span class="mf">0.00226</span><span class="p">,</span>
+    <span class="s2">&quot;FlipAngle&quot;</span><span class="p">:</span> <span class="mi">8</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>Now let’s save this metadata as a JSON file and display its contents.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Save as JSON</span>
+<span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s1">&#39;T1w.json&#39;</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+    <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">mri_metadata</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+
+<span class="c1"># Display the JSON content</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;JSON Sidecar Content:&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">mri_metadata</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>JSON Sidecar Content:
+{
+  &quot;Modality&quot;: &quot;MR&quot;,
+  &quot;MagneticFieldStrength&quot;: 3.0,
+  &quot;Manufacturer&quot;: &quot;Siemens&quot;,
+  &quot;ManufacturersModelName&quot;: &quot;Prisma&quot;,
+  &quot;InstitutionName&quot;: &quot;University Medical Center&quot;,
+  &quot;SequenceName&quot;: &quot;T1_MPRAGE&quot;,
+  &quot;SliceThickness&quot;: 1.0,
+  &quot;RepetitionTime&quot;: 2.3,
+  &quot;EchoTime&quot;: 0.00226,
+  &quot;FlipAngle&quot;: 8
+}
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="creating-a-yaml-sidecar-file">
+<h2>Creating a YAML Sidecar File<a class="headerlink" href="#creating-a-yaml-sidecar-file" title="Link to this heading">#</a></h2>
+<p>YAML is another popular format for metadata due to its human-readable structure. Let’s create the same metadata in YAML format.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Save as YAML</span>
+<span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s1">&#39;T1w.yaml&#39;</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+    <span class="n">yaml</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">mri_metadata</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">default_flow_style</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+<span class="c1"># Display the YAML content</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;YAML Sidecar Content:&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">yaml</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">mri_metadata</span><span class="p">,</span> <span class="n">default_flow_style</span><span class="o">=</span><span class="kc">False</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>YAML Sidecar Content:
+EchoTime: 0.00226
+FlipAngle: 8
+InstitutionName: University Medical Center
+MagneticFieldStrength: 3.0
+Manufacturer: Siemens
+ManufacturersModelName: Prisma
+Modality: MR
+RepetitionTime: 2.3
+SequenceName: T1_MPRAGE
+SliceThickness: 1.0
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="data-dictionaries">
+<h2>Data Dictionaries<a class="headerlink" href="#data-dictionaries" title="Link to this heading">#</a></h2>
+<p>A data dictionary provides detailed descriptions of variables in a dataset. Let’s create a data dictionary for a clinical research study.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Create a data dictionary for clinical variables</span>
+<span class="n">data_dictionary</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;variable_name&quot;</span><span class="p">:</span> <span class="s2">&quot;patient_id&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;Unique patient identifier&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;string&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;format&quot;</span><span class="p">:</span> <span class="s2">&quot;PID-XXXXX&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;required&quot;</span><span class="p">:</span> <span class="kc">True</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;variable_name&quot;</span><span class="p">:</span> <span class="s2">&quot;age&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;Patient age at time of scan&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;integer&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;units&quot;</span><span class="p">:</span> <span class="s2">&quot;years&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;min_value&quot;</span><span class="p">:</span> <span class="mi">18</span><span class="p">,</span>
+        <span class="s2">&quot;max_value&quot;</span><span class="p">:</span> <span class="mi">100</span><span class="p">,</span>
+        <span class="s2">&quot;required&quot;</span><span class="p">:</span> <span class="kc">True</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;variable_name&quot;</span><span class="p">:</span> <span class="s2">&quot;diagnosis&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;Primary diagnosis&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;categorical&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;levels&quot;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">&quot;HC&quot;</span><span class="p">:</span> <span class="s2">&quot;Healthy Control&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;MCI&quot;</span><span class="p">:</span> <span class="s2">&quot;Mild Cognitive Impairment&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;AD&quot;</span><span class="p">:</span> <span class="s2">&quot;Alzheimer&#39;s Disease&quot;</span>
+        <span class="p">},</span>
+        <span class="s2">&quot;required&quot;</span><span class="p">:</span> <span class="kc">True</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;variable_name&quot;</span><span class="p">:</span> <span class="s2">&quot;mmse_score&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;Mini-Mental State Examination score&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;integer&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;min_value&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+        <span class="s2">&quot;max_value&quot;</span><span class="p">:</span> <span class="mi">30</span><span class="p">,</span>
+        <span class="s2">&quot;missing_values&quot;</span><span class="p">:</span> <span class="p">[</span><span class="o">-</span><span class="mi">999</span><span class="p">,</span> <span class="s2">&quot;NA&quot;</span><span class="p">],</span>
+        <span class="s2">&quot;required&quot;</span><span class="p">:</span> <span class="kc">False</span>
+    <span class="p">}</span>
+<span class="p">]</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>Let’s convert this data dictionary to a pandas DataFrame for better visualization.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Convert to DataFrame</span>
+<span class="n">dd_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">data_dictionary</span><span class="p">)</span>
+<span class="n">dd_df</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>variable_name</th>
+      <th>description</th>
+      <th>type</th>
+      <th>format</th>
+      <th>required</th>
+      <th>units</th>
+      <th>min_value</th>
+      <th>max_value</th>
+      <th>levels</th>
+      <th>missing_values</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>patient_id</td>
+      <td>Unique patient identifier</td>
+      <td>string</td>
+      <td>PID-XXXXX</td>
+      <td>True</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>age</td>
+      <td>Patient age at time of scan</td>
+      <td>integer</td>
+      <td>NaN</td>
+      <td>True</td>
+      <td>years</td>
+      <td>18.0</td>
+      <td>100.0</td>
+      <td>NaN</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>diagnosis</td>
+      <td>Primary diagnosis</td>
+      <td>categorical</td>
+      <td>NaN</td>
+      <td>True</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>{'HC': 'Healthy Control', 'MCI': 'Mild Cogniti...</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>mmse_score</td>
+      <td>Mini-Mental State Examination score</td>
+      <td>integer</td>
+      <td>NaN</td>
+      <td>False</td>
+      <td>NaN</td>
+      <td>0.0</td>
+      <td>30.0</td>
+      <td>NaN</td>
+      <td>[-999, NA]</td>
+    </tr>
+  </tbody>
+</table>
+</div></div></div>
+</div>
+<p>Save the data dictionary as both JSON and CSV formats for different use cases.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Save as JSON</span>
+<span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s1">&#39;data_dictionary.json&#39;</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+    <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">data_dictionary</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+
+<span class="c1"># Save as CSV</span>
+<span class="n">dd_df</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="s1">&#39;data_dictionary.csv&#39;</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Data dictionary saved as &#39;data_dictionary.json&#39; and &#39;data_dictionary.csv&#39;&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Data dictionary saved as &#39;data_dictionary.json&#39; and &#39;data_dictionary.csv&#39;
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="validating-data-against-the-dictionary">
+<h2>Validating Data Against the Dictionary<a class="headerlink" href="#validating-data-against-the-dictionary" title="Link to this heading">#</a></h2>
+<p>Let’s create a sample dataset and validate it against our data dictionary.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Create sample data</span>
+<span class="n">sample_data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span>
+    <span class="s1">&#39;patient_id&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;PID-00001&#39;</span><span class="p">,</span> <span class="s1">&#39;PID-00002&#39;</span><span class="p">,</span> <span class="s1">&#39;PID-00003&#39;</span><span class="p">],</span>
+    <span class="s1">&#39;age&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mi">65</span><span class="p">,</span> <span class="mi">72</span><span class="p">,</span> <span class="mi">45</span><span class="p">],</span>
+    <span class="s1">&#39;diagnosis&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;HC&#39;</span><span class="p">,</span> <span class="s1">&#39;MCI&#39;</span><span class="p">,</span> <span class="s1">&#39;AD&#39;</span><span class="p">],</span>
+    <span class="s1">&#39;mmse_score&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mi">29</span><span class="p">,</span> <span class="mi">24</span><span class="p">,</span> <span class="o">-</span><span class="mi">999</span><span class="p">]</span>  <span class="c1"># -999 represents missing value</span>
+<span class="p">})</span>
+
+<span class="n">sample_data</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>patient_id</th>
+      <th>age</th>
+      <th>diagnosis</th>
+      <th>mmse_score</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>PID-00001</td>
+      <td>65</td>
+      <td>HC</td>
+      <td>29</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>PID-00002</td>
+      <td>72</td>
+      <td>MCI</td>
+      <td>24</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>PID-00003</td>
+      <td>45</td>
+      <td>AD</td>
+      <td>-999</td>
+    </tr>
+  </tbody>
+</table>
+</div></div></div>
+</div>
+<p>Now let’s create a simple validation function to check if our data conforms to the data dictionary specifications.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">validate_data</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">data_dict</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Validate dataframe against data dictionary&quot;&quot;&quot;</span>
+    <span class="n">validation_results</span> <span class="o">=</span> <span class="p">[]</span>
+    
+    <span class="k">for</span> <span class="n">var_info</span> <span class="ow">in</span> <span class="n">data_dict</span><span class="p">:</span>
+        <span class="n">var_name</span> <span class="o">=</span> <span class="n">var_info</span><span class="p">[</span><span class="s1">&#39;variable_name&#39;</span><span class="p">]</span>
+        
+        <span class="c1"># Check if required variable exists</span>
+        <span class="k">if</span> <span class="n">var_info</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;required&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span> <span class="ow">and</span> <span class="n">var_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+            <span class="n">validation_results</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;❌ Required variable &#39;</span><span class="si">{</span><span class="n">var_name</span><span class="si">}</span><span class="s2">&#39; is missing&quot;</span><span class="p">)</span>
+            <span class="k">continue</span>
+            
+        <span class="k">if</span> <span class="n">var_name</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+            <span class="c1"># Check value ranges for numeric variables</span>
+            <span class="k">if</span> <span class="s1">&#39;min_value&#39;</span> <span class="ow">in</span> <span class="n">var_info</span><span class="p">:</span>
+                <span class="n">valid_data</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">var_name</span><span class="p">]</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">var_info</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;missing_values&#39;</span><span class="p">,</span> <span class="p">[])</span> <span class="ow">or</span> <span class="n">x</span> <span class="o">&gt;=</span> <span class="n">var_info</span><span class="p">[</span><span class="s1">&#39;min_value&#39;</span><span class="p">])</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">valid_data</span><span class="o">.</span><span class="n">all</span><span class="p">():</span>
+                    <span class="n">validation_results</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;⚠️  Variable &#39;</span><span class="si">{</span><span class="n">var_name</span><span class="si">}</span><span class="s2">&#39; has values below minimum (</span><span class="si">{</span><span class="n">var_info</span><span class="p">[</span><span class="s1">&#39;min_value&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">)</span>
+            
+            <span class="c1"># Check categorical levels</span>
+            <span class="k">if</span> <span class="n">var_info</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;categorical&#39;</span> <span class="ow">and</span> <span class="s1">&#39;levels&#39;</span> <span class="ow">in</span> <span class="n">var_info</span><span class="p">:</span>
+                <span class="n">valid_levels</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">var_info</span><span class="p">[</span><span class="s1">&#39;levels&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+                <span class="n">actual_levels</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="n">var_name</span><span class="p">]</span><span class="o">.</span><span class="n">unique</span><span class="p">())</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">actual_levels</span><span class="o">.</span><span class="n">issubset</span><span class="p">(</span><span class="n">valid_levels</span><span class="p">):</span>
+                    <span class="n">validation_results</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;⚠️  Variable &#39;</span><span class="si">{</span><span class="n">var_name</span><span class="si">}</span><span class="s2">&#39; has invalid levels: </span><span class="si">{</span><span class="n">actual_levels</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">valid_levels</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            
+            <span class="n">validation_results</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;✅ Variable &#39;</span><span class="si">{</span><span class="n">var_name</span><span class="si">}</span><span class="s2">&#39; validated successfully&quot;</span><span class="p">)</span>
+    
+    <span class="k">return</span> <span class="n">validation_results</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>Run the validation on our sample data.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Validate the sample data</span>
+<span class="n">results</span> <span class="o">=</span> <span class="n">validate_data</span><span class="p">(</span><span class="n">sample_data</span><span class="p">,</span> <span class="n">data_dictionary</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">result</span> <span class="ow">in</span> <span class="n">results</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>✅ Variable &#39;patient_id&#39; validated successfully
+✅ Variable &#39;age&#39; validated successfully
+✅ Variable &#39;diagnosis&#39; validated successfully
+✅ Variable &#39;mmse_score&#39; validated successfully
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="creating-a-complete-metadata-package">
+<h2>Creating a Complete Metadata Package<a class="headerlink" href="#creating-a-complete-metadata-package" title="Link to this heading">#</a></h2>
+<p>Let’s create a comprehensive metadata package that includes both sidecar metadata and data dictionary information.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Create a complete metadata package</span>
+<span class="n">metadata_package</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;dataset_description&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">&quot;Name&quot;</span><span class="p">:</span> <span class="s2">&quot;Alzheimer&#39;s Disease Neuroimaging Study&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;BIDSVersion&quot;</span><span class="p">:</span> <span class="s2">&quot;1.6.0&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;License&quot;</span><span class="p">:</span> <span class="s2">&quot;CC BY 4.0&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;Authors&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;Dr. Smith&quot;</span><span class="p">,</span> <span class="s2">&quot;Dr. Johnson&quot;</span><span class="p">],</span>
+        <span class="s2">&quot;Acknowledgements&quot;</span><span class="p">:</span> <span class="s2">&quot;Funded by NIH Grant #12345&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;HowToAcknowledge&quot;</span><span class="p">:</span> <span class="s2">&quot;Please cite our paper: Smith et al. (2023)&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;ReferencesAndLinks&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;https://doi.org/10.1234/example&quot;</span><span class="p">]</span>
+    <span class="p">},</span>
+    <span class="s2">&quot;imaging_parameters&quot;</span><span class="p">:</span> <span class="n">mri_metadata</span><span class="p">,</span>
+    <span class="s2">&quot;participant_variables&quot;</span><span class="p">:</span> <span class="n">data_dictionary</span>
+<span class="p">}</span>
+
+<span class="c1"># Save the complete package</span>
+<span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s1">&#39;dataset_metadata.json&#39;</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+    <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">metadata_package</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Complete metadata package created successfully!&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Complete metadata package created successfully!
+</pre></div>
+</div>
+</div>
+</div>
+<p>Display a summary of the metadata package structure.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Display package structure</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Metadata Package Structure:&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;-&quot;</span> <span class="o">*</span> <span class="mi">50</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">metadata_package</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;📁 </span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">metadata_package</span><span class="p">[</span><span class="n">key</span><span class="p">],</span> <span class="nb">dict</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">subkey</span> <span class="ow">in</span> <span class="n">metadata_package</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;   └── </span><span class="si">{</span><span class="n">subkey</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">metadata_package</span><span class="p">[</span><span class="n">key</span><span class="p">],</span> <span class="nb">list</span><span class="p">):</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;   └── </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">metadata_package</span><span class="p">[</span><span class="n">key</span><span class="p">])</span><span class="si">}</span><span class="s2"> items&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Metadata Package Structure:
+--------------------------------------------------
+📁 dataset_description
+   └── Name
+   └── BIDSVersion
+   └── License
+   └── Authors
+   └── Acknowledgements
+   └── HowToAcknowledge
+   └── ReferencesAndLinks
+📁 imaging_parameters
+   └── Modality
+   └── MagneticFieldStrength
+   └── Manufacturer
+   └── ManufacturersModelName
+   └── InstitutionName
+   └── SequenceName
+   └── SliceThickness
+   └── RepetitionTime
+   └── EchoTime
+   └── FlipAngle
+📁 participant_variables
+   └── 4 items
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="exercise">
+<h2>Exercise<a class="headerlink" href="#exercise" title="Link to this heading">#</a></h2>
+<p>Create a sidecar metadata file and data dictionary for a hypothetical COVID-19 patient monitoring dataset that includes:</p>
+<ol class="arabic simple">
+<li><p><strong>Sidecar metadata</strong> (save as both JSON and YAML):</p>
+<ul class="simple">
+<li><p>Study name: “COVID-19 Longitudinal Monitoring”</p></li>
+<li><p>Data collection period: “2020-03-01 to 2021-12-31”</p></li>
+<li><p>Institution: Your choice</p></li>
+<li><p>Ethics approval number: “ETH-2020-001”</p></li>
+</ul>
+</li>
+<li><p><strong>Data dictionary</strong> with at least 5 variables including:</p>
+<ul class="simple">
+<li><p>Patient ID (string, required)</p></li>
+<li><p>Temperature (numeric, range 35-42°C)</p></li>
+<li><p>Oxygen saturation (numeric, range 0-100%)</p></li>
+<li><p>COVID test result (categorical: positive/negative/pending)</p></li>
+<li><p>At least one more clinical variable of your choice</p></li>
+</ul>
+</li>
+<li><p>Create sample data for 5 patients and validate it against your data dictionary</p></li>
+<li><p>Combine everything into a single metadata package and save it as ‘covid_metadata_package.json’</p></li>
+</ol>
+<p>Bonus: Create a function that automatically generates a human-readable report from your metadata package.</p>
+</section>
+</section>
+
+    <script type="text/x-thebe-config">
+    {
+        requestKernel: true,
+        binderOptions: {
+            repo: "binder-examples/jupyter-stacks-datascience",
+            ref: "master",
+        },
+        codeMirrorConfig: {
+            theme: "abcdef",
+            mode: "python"
+        },
+        kernelOptions: {
+            name: "python3",
+            path: "./."
+        },
+        predefinedOutput: true
+    }
+    </script>
+    <script>kernelName = 'python3'</script>
+
+                </article>
+              
+
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="path_handling_portable_io_pathlib.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">Path Handling and Portable I/O with pathlib</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="fsspec_cloud_storage_streaming_io.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">Local and Cloud Storage with fsspec (s3fs/gcsfs/adlfs), Streaming I/O</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+  <div class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> Contents
+  </div>
+  <nav class="bd-toc-nav page-toc">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#what-is-sidecar-metadata">What is Sidecar Metadata?</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#creating-a-json-sidecar-file">Creating a JSON Sidecar File</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#creating-a-yaml-sidecar-file">Creating a YAML Sidecar File</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#data-dictionaries">Data Dictionaries</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#validating-data-against-the-dictionary">Validating Data Against the Dictionary</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#creating-a-complete-metadata-package">Creating a Complete Metadata Package</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#exercise">Exercise</a></li>
+</ul>
+  </nav></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+<p class="component-author">
+By AI Generated Content
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+
+  </div>
+  
+  <div class="footer-item">
+    <p class="last-updated">
+  Last updated on Sep 13, 2025.
+  <br/>
+</p>
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+</div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b"></script>
+<script src="_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+  <footer class="bd-footer">
+  </footer>
+  </body>
+</html>

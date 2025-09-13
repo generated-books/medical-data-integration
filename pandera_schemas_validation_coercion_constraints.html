@@ -1,0 +1,1282 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="./" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Schemas and Validation with Pandera &#8212; Foundations of Medical Data Integration</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="_static/styles/theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="_static/styles/bootstrap.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="_static/styles/pydata-sphinx-theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+
+  
+  <link href="_static/vendor/fontawesome/6.5.2/css/all.min.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.5.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.5.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.5.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="_static/styles/sphinx-book-theme.css?v=eba8b062" />
+    <link rel="stylesheet" type="text/css" href="_static/togglebutton.css?v=13237357" />
+    <link rel="stylesheet" type="text/css" href="_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="_static/mystnb.8ecb98da25f57f5357bf6f572d296f466b2cfe2517ffebfabe82451661e28f02.css" />
+    <link rel="stylesheet" type="text/css" href="_static/sphinx-thebe.css?v=4fa983c6" />
+    <link rel="stylesheet" type="text/css" href="_static/sphinx-design.min.css?v=95c83b7e" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b" />
+<link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
+  <script src="_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+    <script src="_static/documentation_options.js?v=9eb32ce0"></script>
+    <script src="_static/doctools.js?v=9a2dae69"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="_static/copybutton.js?v=f281be69"></script>
+    <script src="_static/scripts/sphinx-book-theme.js?v=887ef09a"></script>
+    <script>let toggleHintShow = 'Click to show';</script>
+    <script>let toggleHintHide = 'Click to hide';</script>
+    <script>let toggleOpenOnPrint = 'true';</script>
+    <script src="_static/togglebutton.js?v=4a39c7ea"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script src="_static/design-tabs.js?v=f930bc37"></script>
+    <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"; const thebe_selector = ".thebe,.cell"; const thebe_selector_input = "pre"; const thebe_selector_output = ".output, .cell_output"</script>
+    <script async="async" src="_static/sphinx-thebe.js?v=c100c467"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"; const thebe_selector = ".thebe,.cell"; const thebe_selector_input = "pre"; const thebe_selector_output = ".output, .cell_output"</script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'pandera_schemas_validation_coercion_constraints';</script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Joins/Merges, Grouping, and Windowing with DuckDB" href="joins-grouping-windowing-duckdb-sql.html" />
+    <link rel="prev" title="Reading and Writing Medical Data: CSV and NDJSON with Pandas and Polars" href="data_io_csv_ndjson_pandas_polars_dtypes_missing.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+    <meta name="docbuild:last-update" content="Sep 13, 2025"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-primary-sidebar-checkbox"/>
+  <label class="overlay overlay-primary" for="pst-primary-sidebar-checkbox"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-secondary-sidebar-checkbox"/>
+  <label class="overlay overlay-secondary" for="pst-secondary-sidebar-checkbox"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search this book..."
+         aria-label="Search this book..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="intro.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="_static/logo.png" class="logo__image only-light" alt="Foundations of Medical Data Integration - Home"/>
+    <script>document.write(`<img src="_static/logo.png" class="logo__image only-dark" alt="Foundations of Medical Data Integration - Home"/>`);</script>
+  
+  
+</a></div>
+        <div class="sidebar-primary-item">
+
+ <script>
+ document.write(`
+   <button class="btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script></div>
+        <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        <p aria-level="2" class="caption" role="heading"><span class="caption-text">Working with files and folders</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="files_folders_filesystems.html">Files, Folders, and Filesystems in Medical Data Integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="path_handling_portable_io_pathlib.html">Path Handling and Portable I/O with pathlib</a></li>
+<li class="toctree-l1"><a class="reference internal" href="sidecar_metadata_data_dictionaries.html">Sidecar Metadata (JSON/YAML) and Data Dictionaries</a></li>
+<li class="toctree-l1"><a class="reference internal" href="fsspec_cloud_storage_streaming_io.html">Local and Cloud Storage with fsspec (s3fs/gcsfs/adlfs), Streaming I/O</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">File formats</span></p>
+<ul class="current nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="integrity_checks_hashing_file_strategies.html">Integrity Checks (Hashing) and Small-to-Large File Strategies</a></li>
+<li class="toctree-l1"><a class="reference internal" href="data_io_csv_ndjson_pandas_polars_dtypes_missing.html">Reading and Writing Medical Data: CSV and NDJSON with Pandas and Polars</a></li>
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">Schemas and Validation with Pandera</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Wrangling data</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="joins-grouping-windowing-duckdb-sql.html">Joins/Merges, Grouping, and Windowing with DuckDB</a></li>
+<li class="toctree-l1"><a class="reference internal" href="export_patterns_subsets_snapshots_reproducible_filters.html">Export Patterns: Subsets, Snapshots, Reproducible Filters</a></li>
+<li class="toctree-l1"><a class="reference internal" href="numpy-xarray-fundamentals-shapes-dtypes-chunking.html">NumPy/xarray Fundamentals: Shapes, Dtypes, and Chunking</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Data conversion</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="csv-excel-ndjson-to-parquet-arrow-batch-vs-streaming.html">CSV/Excel/NDJSON → Parquet/Arrow: Batch vs Streaming</a></li>
+<li class="toctree-l1"><a class="reference internal" href="longitudinal_data_preprocessing.html">Unit Normalization, Time Alignment, Resampling, and Windowing for Longitudinal Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dask-out-of-core-parallel-conversion-progress-retries-idempotency.html">Out-of-core/Parallel Conversion with Dask: Progress, Retries, and Idempotency</a></li>
+</ul>
+
+    </div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><button class="sidebar-toggle primary-toggle btn btn-sm" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</button></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<div class="article-header-buttons">
+
+
+
+
+
+<div class="dropdown dropdown-launch-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Launch interactive content">
+    <i class="fas fa-rocket"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="https://mybinder.org/v2/gh/generated-books/medical-data-integration/main?urlpath=lab/tree/pandera_schemas_validation_coercion_constraints.ipynb" target="_blank"
+   class="btn btn-sm dropdown-item"
+   title="Launch on Binder"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  
+    <img alt="Binder logo" src="_static/images/logo_binder.svg">
+  </span>
+<span class="btn__text-container">Binder</span>
+</a>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+
+
+<div class="dropdown dropdown-source-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Source repositories">
+    <i class="fab fa-github"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="https://github.com/generated-books/medical-data-integration" target="_blank"
+   class="btn btn-sm btn-source-repository-button dropdown-item"
+   title="Source repository"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fab fa-github"></i>
+  </span>
+<span class="btn__text-container">Repository</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li><a href="https://github.com/generated-books/medical-data-integration/edit/main/pandera_schemas_validation_coercion_constraints.ipynb" target="_blank"
+   class="btn btn-sm btn-source-edit-button dropdown-item"
+   title="Suggest edit"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-pencil-alt"></i>
+  </span>
+<span class="btn__text-container">Suggest edit</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li><a href="https://github.com/generated-books/medical-data-integration/issues/new?title=Issue%20on%20page%20%2Fpandera_schemas_validation_coercion_constraints.html&body=Your%20issue%20content%20here." target="_blank"
+   class="btn btn-sm btn-source-issues-button dropdown-item"
+   title="Open an issue"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-lightbulb"></i>
+  </span>
+<span class="btn__text-container">Open issue</span>
+</a>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+
+
+<div class="dropdown dropdown-download-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Download this page">
+    <i class="fas fa-download"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="_sources/pandera_schemas_validation_coercion_constraints.ipynb" target="_blank"
+   class="btn btn-sm btn-download-source-button dropdown-item"
+   title="Download source file"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file"></i>
+  </span>
+<span class="btn__text-container">.ipynb</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li>
+<button onclick="window.print()"
+  class="btn btn-sm btn-download-pdf-button dropdown-item"
+  title="Print to PDF"
+  data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file-pdf"></i>
+  </span>
+<span class="btn__text-container">.pdf</span>
+</button>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+<button onclick="toggleFullScreen()"
+  class="btn btn-sm btn-fullscreen-button"
+  title="Fullscreen mode"
+  data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-expand"></i>
+  </span>
+
+</button>
+
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"></i>
+  </button>
+`);
+</script>
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm pst-navbar-icon search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+  </button>
+`);
+</script>
+<button class="sidebar-toggle secondary-toggle btn btn-sm" title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="fa-solid fa-list"></span>
+</button>
+</div></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1>Schemas and Validation with Pandera</h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+            <div>
+                <h2> Contents </h2>
+            </div>
+            <nav aria-label="Page">
+                <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#exercise">Exercise</a></li>
+</ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section class="tex2jax_ignore mathjax_ignore" id="schemas-and-validation-with-pandera">
+<h1>Schemas and Validation with Pandera<a class="headerlink" href="#schemas-and-validation-with-pandera" title="Link to this heading">#</a></h1>
+<p>In medical data integration, ensuring data quality and consistency is critical for patient safety and regulatory compliance. Pandera is a powerful Python library that provides statistical data testing and schema validation for pandas DataFrames. This notebook will demonstrate how to define schemas, validate data, apply coercion, and set constraints for medical datasets.</p>
+<p>First, let’s import the necessary libraries and create a sample medical dataset that we’ll use throughout this notebook.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandera.pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pa</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pandera</span><span class="w"> </span><span class="kn">import</span> <span class="n">Column</span><span class="p">,</span> <span class="n">DataFrameSchema</span><span class="p">,</span> <span class="n">Check</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">datetime</span><span class="w"> </span><span class="kn">import</span> <span class="n">datetime</span>
+
+<span class="c1"># Create sample medical data</span>
+<span class="n">medical_data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span>
+    <span class="s1">&#39;patient_id&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;P001&#39;</span><span class="p">,</span> <span class="s1">&#39;P002&#39;</span><span class="p">,</span> <span class="s1">&#39;P003&#39;</span><span class="p">,</span> <span class="s1">&#39;P004&#39;</span><span class="p">,</span> <span class="s1">&#39;P005&#39;</span><span class="p">],</span>
+    <span class="s1">&#39;age&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mi">45</span><span class="p">,</span> <span class="mi">67</span><span class="p">,</span> <span class="mi">23</span><span class="p">,</span> <span class="mi">89</span><span class="p">,</span> <span class="mi">34</span><span class="p">],</span>
+    <span class="s1">&#39;systolic_bp&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mi">120</span><span class="p">,</span> <span class="mi">140</span><span class="p">,</span> <span class="mi">110</span><span class="p">,</span> <span class="mi">160</span><span class="p">,</span> <span class="mi">115</span><span class="p">],</span>
+    <span class="s1">&#39;diastolic_bp&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mi">80</span><span class="p">,</span> <span class="mi">90</span><span class="p">,</span> <span class="mi">70</span><span class="p">,</span> <span class="mi">95</span><span class="p">,</span> <span class="mi">75</span><span class="p">],</span>
+    <span class="s1">&#39;heart_rate&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mi">72</span><span class="p">,</span> <span class="mi">68</span><span class="p">,</span> <span class="mi">85</span><span class="p">,</span> <span class="mi">62</span><span class="p">,</span> <span class="mi">78</span><span class="p">],</span>
+    <span class="s1">&#39;temperature&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mf">36.5</span><span class="p">,</span> <span class="mf">37.2</span><span class="p">,</span> <span class="mf">36.8</span><span class="p">,</span> <span class="mf">38.1</span><span class="p">,</span> <span class="mf">36.7</span><span class="p">],</span>
+    <span class="s1">&#39;admission_date&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;2024-01-15&#39;</span><span class="p">,</span> <span class="s1">&#39;2024-01-16&#39;</span><span class="p">,</span> <span class="s1">&#39;2024-01-17&#39;</span><span class="p">,</span> <span class="s1">&#39;2024-01-18&#39;</span><span class="p">,</span> <span class="s1">&#39;2024-01-19&#39;</span><span class="p">],</span>
+    <span class="s1">&#39;diagnosis_code&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;I10&#39;</span><span class="p">,</span> <span class="s1">&#39;E11.9&#39;</span><span class="p">,</span> <span class="s1">&#39;J44.1&#39;</span><span class="p">,</span> <span class="s1">&#39;N18.6&#39;</span><span class="p">,</span> <span class="s1">&#39;M79.3&#39;</span><span class="p">]</span>
+<span class="p">})</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="n">medical_data</span><span class="o">.</span><span class="n">dtypes</span><span class="p">)</span>
+<span class="n">medical_data</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>patient_id         object
+age                 int64
+systolic_bp         int64
+diastolic_bp        int64
+heart_rate          int64
+temperature       float64
+admission_date     object
+diagnosis_code     object
+dtype: object
+</pre></div>
+</div>
+<div class="output text_html"><div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>patient_id</th>
+      <th>age</th>
+      <th>systolic_bp</th>
+      <th>diastolic_bp</th>
+      <th>heart_rate</th>
+      <th>temperature</th>
+      <th>admission_date</th>
+      <th>diagnosis_code</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>P001</td>
+      <td>45</td>
+      <td>120</td>
+      <td>80</td>
+      <td>72</td>
+      <td>36.5</td>
+      <td>2024-01-15</td>
+      <td>I10</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>P002</td>
+      <td>67</td>
+      <td>140</td>
+      <td>90</td>
+      <td>68</td>
+      <td>37.2</td>
+      <td>2024-01-16</td>
+      <td>E11.9</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>P003</td>
+      <td>23</td>
+      <td>110</td>
+      <td>70</td>
+      <td>85</td>
+      <td>36.8</td>
+      <td>2024-01-17</td>
+      <td>J44.1</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>P004</td>
+      <td>89</td>
+      <td>160</td>
+      <td>95</td>
+      <td>62</td>
+      <td>38.1</td>
+      <td>2024-01-18</td>
+      <td>N18.6</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>P005</td>
+      <td>34</td>
+      <td>115</td>
+      <td>75</td>
+      <td>78</td>
+      <td>36.7</td>
+      <td>2024-01-19</td>
+      <td>M79.3</td>
+    </tr>
+  </tbody>
+</table>
+</div></div></div>
+</div>
+<p>Now let’s define a basic schema for our medical data using Pandera. This schema will specify the expected data types for each column.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Define a basic schema</span>
+<span class="n">basic_schema</span> <span class="o">=</span> <span class="n">DataFrameSchema</span><span class="p">({</span>
+    <span class="s1">&#39;patient_id&#39;</span><span class="p">:</span> <span class="n">Column</span><span class="p">(</span><span class="nb">str</span><span class="p">),</span>
+    <span class="s1">&#39;age&#39;</span><span class="p">:</span> <span class="n">Column</span><span class="p">(</span><span class="nb">int</span><span class="p">),</span>
+    <span class="s1">&#39;systolic_bp&#39;</span><span class="p">:</span> <span class="n">Column</span><span class="p">(</span><span class="nb">int</span><span class="p">),</span>
+    <span class="s1">&#39;diastolic_bp&#39;</span><span class="p">:</span> <span class="n">Column</span><span class="p">(</span><span class="nb">int</span><span class="p">),</span>
+    <span class="s1">&#39;heart_rate&#39;</span><span class="p">:</span> <span class="n">Column</span><span class="p">(</span><span class="nb">int</span><span class="p">),</span>
+    <span class="s1">&#39;temperature&#39;</span><span class="p">:</span> <span class="n">Column</span><span class="p">(</span><span class="nb">float</span><span class="p">),</span>
+    <span class="s1">&#39;admission_date&#39;</span><span class="p">:</span> <span class="n">Column</span><span class="p">(</span><span class="nb">str</span><span class="p">),</span>
+    <span class="s1">&#39;diagnosis_code&#39;</span><span class="p">:</span> <span class="n">Column</span><span class="p">(</span><span class="nb">str</span><span class="p">)</span>
+<span class="p">})</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Basic schema defined successfully&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">basic_schema</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Basic schema defined successfully
+&lt;Schema DataFrameSchema(
+    columns={
+        &#39;patient_id&#39;: &lt;Schema Column(name=patient_id, type=DataType(str))&gt;
+        &#39;age&#39;: &lt;Schema Column(name=age, type=DataType(int64))&gt;
+        &#39;systolic_bp&#39;: &lt;Schema Column(name=systolic_bp, type=DataType(int64))&gt;
+        &#39;diastolic_bp&#39;: &lt;Schema Column(name=diastolic_bp, type=DataType(int64))&gt;
+        &#39;heart_rate&#39;: &lt;Schema Column(name=heart_rate, type=DataType(int64))&gt;
+        &#39;temperature&#39;: &lt;Schema Column(name=temperature, type=DataType(float64))&gt;
+        &#39;admission_date&#39;: &lt;Schema Column(name=admission_date, type=DataType(str))&gt;
+        &#39;diagnosis_code&#39;: &lt;Schema Column(name=diagnosis_code, type=DataType(str))&gt;
+    },
+    checks=[],
+    parsers=[],
+    coerce=False,
+    dtype=None,
+    index=None,
+    strict=False,
+    name=None,
+    ordered=False,
+    unique_column_names=False,
+    metadata=None, 
+    add_missing_columns=False
+)&gt;
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>/opt/hostedtoolcache/Python/3.11.13/x64/lib/python3.11/site-packages/pandera/_pandas_deprecated.py:149: FutureWarning: Importing pandas-specific classes and functions from the
+top-level pandera module will be **removed in a future version of pandera**.
+If you&#39;re using pandera to validate pandas objects, we highly recommend updating
+your import:
+
+```
+# old import
+import pandera as pa
+
+# new import
+import pandera.pandas as pa
+```
+
+If you&#39;re using pandera to validate objects from other compatible libraries
+like pyspark or polars, see the supported libraries section of the documentation
+for more information on how to import pandera:
+
+https://pandera.readthedocs.io/en/stable/supported_libraries.html
+
+To disable this warning, set the environment variable:
+
+```
+export DISABLE_PANDERA_IMPORT_WARNING=True
+```
+
+  warnings.warn(_future_warning, FutureWarning)
+</pre></div>
+</div>
+</div>
+</div>
+<p>Let’s validate our medical data against the basic schema to ensure it conforms to the expected structure.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Validate the data against the schema</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">validated_data</span> <span class="o">=</span> <span class="n">basic_schema</span><span class="o">.</span><span class="n">validate</span><span class="p">(</span><span class="n">medical_data</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Data validation successful!&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Validated </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">validated_data</span><span class="p">)</span><span class="si">}</span><span class="s2"> rows&quot;</span><span class="p">)</span>
+<span class="k">except</span> <span class="n">pa</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">SchemaError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Validation error: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Data validation successful!
+Validated 5 rows
+</pre></div>
+</div>
+</div>
+</div>
+<p>Now let’s enhance our schema with medical constraints to ensure data quality. We’ll add range checks for vital signs and other medical parameters.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Define schema with medical constraints</span>
+<span class="n">medical_schema</span> <span class="o">=</span> <span class="n">DataFrameSchema</span><span class="p">({</span>
+    <span class="s1">&#39;patient_id&#39;</span><span class="p">:</span> <span class="n">Column</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">checks</span><span class="o">=</span><span class="p">[</span>
+        <span class="n">Check</span><span class="o">.</span><span class="n">str_matches</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;^P\d</span><span class="si">{3}</span><span class="s1">$&#39;</span><span class="p">)</span>  <span class="c1"># Pattern: P followed by 3 digits</span>
+    <span class="p">]),</span>
+    <span class="s1">&#39;age&#39;</span><span class="p">:</span> <span class="n">Column</span><span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="n">checks</span><span class="o">=</span><span class="p">[</span>
+        <span class="n">Check</span><span class="o">.</span><span class="n">greater_than_or_equal_to</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span>
+        <span class="n">Check</span><span class="o">.</span><span class="n">less_than_or_equal_to</span><span class="p">(</span><span class="mi">120</span><span class="p">)</span>
+    <span class="p">]),</span>
+    <span class="s1">&#39;systolic_bp&#39;</span><span class="p">:</span> <span class="n">Column</span><span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="n">checks</span><span class="o">=</span><span class="p">[</span>
+        <span class="n">Check</span><span class="o">.</span><span class="n">in_range</span><span class="p">(</span><span class="mi">70</span><span class="p">,</span> <span class="mi">250</span><span class="p">)</span>  <span class="c1"># Reasonable range for systolic BP</span>
+    <span class="p">]),</span>
+    <span class="s1">&#39;diastolic_bp&#39;</span><span class="p">:</span> <span class="n">Column</span><span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="n">checks</span><span class="o">=</span><span class="p">[</span>
+        <span class="n">Check</span><span class="o">.</span><span class="n">in_range</span><span class="p">(</span><span class="mi">40</span><span class="p">,</span> <span class="mi">150</span><span class="p">)</span>  <span class="c1"># Reasonable range for diastolic BP</span>
+    <span class="p">]),</span>
+    <span class="s1">&#39;heart_rate&#39;</span><span class="p">:</span> <span class="n">Column</span><span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="n">checks</span><span class="o">=</span><span class="p">[</span>
+        <span class="n">Check</span><span class="o">.</span><span class="n">in_range</span><span class="p">(</span><span class="mi">30</span><span class="p">,</span> <span class="mi">200</span><span class="p">)</span>  <span class="c1"># Reasonable range for heart rate</span>
+    <span class="p">]),</span>
+    <span class="s1">&#39;temperature&#39;</span><span class="p">:</span> <span class="n">Column</span><span class="p">(</span><span class="nb">float</span><span class="p">,</span> <span class="n">checks</span><span class="o">=</span><span class="p">[</span>
+        <span class="n">Check</span><span class="o">.</span><span class="n">in_range</span><span class="p">(</span><span class="mf">30.0</span><span class="p">,</span> <span class="mf">45.0</span><span class="p">)</span>  <span class="c1"># Body temperature in Celsius</span>
+    <span class="p">]),</span>
+    <span class="s1">&#39;admission_date&#39;</span><span class="p">:</span> <span class="n">Column</span><span class="p">(</span><span class="nb">str</span><span class="p">),</span>
+    <span class="s1">&#39;diagnosis_code&#39;</span><span class="p">:</span> <span class="n">Column</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">checks</span><span class="o">=</span><span class="p">[</span>
+        <span class="n">Check</span><span class="o">.</span><span class="n">str_length</span><span class="p">(</span><span class="n">min_value</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">max_value</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>  <span class="c1"># ICD-10 code length</span>
+    <span class="p">])</span>
+<span class="p">})</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Enhanced medical schema with constraints defined&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Enhanced medical schema with constraints defined
+</pre></div>
+</div>
+</div>
+</div>
+<p>Let’s validate our data against the enhanced schema to see if all medical constraints are satisfied.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Validate against enhanced schema</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">validated_medical_data</span> <span class="o">=</span> <span class="n">medical_schema</span><span class="o">.</span><span class="n">validate</span><span class="p">(</span><span class="n">medical_data</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Medical data validation successful!&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;All constraints satisfied&quot;</span><span class="p">)</span>
+<span class="k">except</span> <span class="n">pa</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">SchemaError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Validation error: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Medical data validation successful!
+All constraints satisfied
+</pre></div>
+</div>
+</div>
+</div>
+<p>Now let’s demonstrate data coercion by creating a dataset with mixed data types and showing how Pandera can automatically convert them to the expected types.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Create data with mixed types that need coercion</span>
+<span class="n">messy_data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span>
+    <span class="s1">&#39;patient_id&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;P006&#39;</span><span class="p">,</span> <span class="s1">&#39;P007&#39;</span><span class="p">,</span> <span class="s1">&#39;P008&#39;</span><span class="p">],</span>
+    <span class="s1">&#39;age&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;55&#39;</span><span class="p">,</span> <span class="s1">&#39;42&#39;</span><span class="p">,</span> <span class="s1">&#39;71&#39;</span><span class="p">],</span>  <span class="c1"># String instead of int</span>
+    <span class="s1">&#39;systolic_bp&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mf">130.0</span><span class="p">,</span> <span class="mf">125.5</span><span class="p">,</span> <span class="mf">145.2</span><span class="p">],</span>  <span class="c1"># Float instead of int</span>
+    <span class="s1">&#39;diastolic_bp&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;85&#39;</span><span class="p">,</span> <span class="s1">&#39;82&#39;</span><span class="p">,</span> <span class="s1">&#39;92&#39;</span><span class="p">],</span>  <span class="c1"># String instead of int</span>
+    <span class="s1">&#39;heart_rate&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mi">75</span><span class="p">,</span> <span class="mi">80</span><span class="p">,</span> <span class="mi">68</span><span class="p">],</span>
+    <span class="s1">&#39;temperature&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;37.1&#39;</span><span class="p">,</span> <span class="s1">&#39;36.9&#39;</span><span class="p">,</span> <span class="s1">&#39;37.5&#39;</span><span class="p">],</span>  <span class="c1"># String instead of float</span>
+    <span class="s1">&#39;admission_date&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;2024-01-20&#39;</span><span class="p">,</span> <span class="s1">&#39;2024-01-21&#39;</span><span class="p">,</span> <span class="s1">&#39;2024-01-22&#39;</span><span class="p">],</span>
+    <span class="s1">&#39;diagnosis_code&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;M25.5&#39;</span><span class="p">,</span> <span class="s1">&#39;K59.0&#39;</span><span class="p">,</span> <span class="s1">&#39;F32.9&#39;</span><span class="p">]</span>
+<span class="p">})</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Original data types:&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">messy_data</span><span class="o">.</span><span class="n">dtypes</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Data:&quot;</span><span class="p">)</span>
+<span class="n">messy_data</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Original data types:
+patient_id         object
+age                object
+systolic_bp       float64
+diastolic_bp       object
+heart_rate          int64
+temperature        object
+admission_date     object
+diagnosis_code     object
+dtype: object
+
+Data:
+</pre></div>
+</div>
+<div class="output text_html"><div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>patient_id</th>
+      <th>age</th>
+      <th>systolic_bp</th>
+      <th>diastolic_bp</th>
+      <th>heart_rate</th>
+      <th>temperature</th>
+      <th>admission_date</th>
+      <th>diagnosis_code</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>P006</td>
+      <td>55</td>
+      <td>130.0</td>
+      <td>85</td>
+      <td>75</td>
+      <td>37.1</td>
+      <td>2024-01-20</td>
+      <td>M25.5</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>P007</td>
+      <td>42</td>
+      <td>125.5</td>
+      <td>82</td>
+      <td>80</td>
+      <td>36.9</td>
+      <td>2024-01-21</td>
+      <td>K59.0</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>P008</td>
+      <td>71</td>
+      <td>145.2</td>
+      <td>92</td>
+      <td>68</td>
+      <td>37.5</td>
+      <td>2024-01-22</td>
+      <td>F32.9</td>
+    </tr>
+  </tbody>
+</table>
+</div></div></div>
+</div>
+<p>We’ll create a schema with coercion enabled to automatically convert the data types to the expected format.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Schema with coercion</span>
+<span class="n">coercion_schema</span> <span class="o">=</span> <span class="n">DataFrameSchema</span><span class="p">({</span>
+    <span class="s1">&#39;patient_id&#39;</span><span class="p">:</span> <span class="n">Column</span><span class="p">(</span><span class="nb">str</span><span class="p">),</span>
+    <span class="s1">&#39;age&#39;</span><span class="p">:</span> <span class="n">Column</span><span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="n">coerce</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>  <span class="c1"># Coerce string to int</span>
+    <span class="s1">&#39;systolic_bp&#39;</span><span class="p">:</span> <span class="n">Column</span><span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="n">coerce</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>  <span class="c1"># Coerce float to int</span>
+    <span class="s1">&#39;diastolic_bp&#39;</span><span class="p">:</span> <span class="n">Column</span><span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="n">coerce</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>  <span class="c1"># Coerce string to int</span>
+    <span class="s1">&#39;heart_rate&#39;</span><span class="p">:</span> <span class="n">Column</span><span class="p">(</span><span class="nb">int</span><span class="p">),</span>
+    <span class="s1">&#39;temperature&#39;</span><span class="p">:</span> <span class="n">Column</span><span class="p">(</span><span class="nb">float</span><span class="p">,</span> <span class="n">coerce</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>  <span class="c1"># Coerce string to float</span>
+    <span class="s1">&#39;admission_date&#39;</span><span class="p">:</span> <span class="n">Column</span><span class="p">(</span><span class="nb">str</span><span class="p">),</span>
+    <span class="s1">&#39;diagnosis_code&#39;</span><span class="p">:</span> <span class="n">Column</span><span class="p">(</span><span class="nb">str</span><span class="p">)</span>
+<span class="p">})</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Coercion schema defined&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Coercion schema defined
+</pre></div>
+</div>
+</div>
+</div>
+<p>Let’s apply the coercion schema to our messy data and observe how the data types are automatically converted.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Apply coercion</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">coerced_data</span> <span class="o">=</span> <span class="n">coercion_schema</span><span class="o">.</span><span class="n">validate</span><span class="p">(</span><span class="n">messy_data</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Data coercion successful!&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Coerced data types:&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">coerced_data</span><span class="o">.</span><span class="n">dtypes</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Coerced data:&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">coerced_data</span><span class="p">)</span>
+<span class="k">except</span> <span class="n">pa</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">SchemaError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Coercion error: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Data coercion successful!
+
+Coerced data types:
+patient_id         object
+age                 int64
+systolic_bp         int64
+diastolic_bp        int64
+heart_rate          int64
+temperature       float64
+admission_date     object
+diagnosis_code     object
+dtype: object
+
+Coerced data:
+  patient_id  age  systolic_bp  diastolic_bp  heart_rate  temperature  \
+0       P006   55          130            85          75         37.1   
+1       P007   42          125            82          80         36.9   
+2       P008   71          145            92          68         37.5   
+
+  admission_date diagnosis_code  
+0     2024-01-20          M25.5  
+1     2024-01-21          K59.0  
+2     2024-01-22          F32.9  
+</pre></div>
+</div>
+</div>
+</div>
+<p>Let’s create a comprehensive schema that combines coercion with medical constraints and custom validation functions for more complex business rules.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Define custom validation functions</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">check_bp_relationship</span><span class="p">(</span><span class="n">df</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Ensure systolic BP is always higher than diastolic BP&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">df</span><span class="p">[</span><span class="s1">&#39;systolic_bp&#39;</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">df</span><span class="p">[</span><span class="s1">&#39;diastolic_bp&#39;</span><span class="p">]</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">check_age_heart_rate</span><span class="p">(</span><span class="n">df</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Basic check: very high heart rates should be flagged for elderly patients&quot;&quot;&quot;</span>
+    <span class="n">elderly</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="s1">&#39;age&#39;</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">80</span>
+    <span class="n">high_hr</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="s1">&#39;heart_rate&#39;</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">100</span>
+    <span class="k">return</span> <span class="o">~</span><span class="p">(</span><span class="n">elderly</span> <span class="o">&amp;</span> <span class="n">high_hr</span><span class="p">)</span>  <span class="c1"># Flag if elderly AND high heart rate</span>
+
+<span class="c1"># Comprehensive schema</span>
+<span class="n">comprehensive_schema</span> <span class="o">=</span> <span class="n">DataFrameSchema</span><span class="p">({</span>
+    <span class="s1">&#39;patient_id&#39;</span><span class="p">:</span> <span class="n">Column</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">checks</span><span class="o">=</span><span class="p">[</span><span class="n">Check</span><span class="o">.</span><span class="n">str_matches</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;^P\d</span><span class="si">{3}</span><span class="s1">$&#39;</span><span class="p">)]),</span>
+    <span class="s1">&#39;age&#39;</span><span class="p">:</span> <span class="n">Column</span><span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="n">checks</span><span class="o">=</span><span class="p">[</span><span class="n">Check</span><span class="o">.</span><span class="n">in_range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">120</span><span class="p">)],</span> <span class="n">coerce</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
+    <span class="s1">&#39;systolic_bp&#39;</span><span class="p">:</span> <span class="n">Column</span><span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="n">checks</span><span class="o">=</span><span class="p">[</span><span class="n">Check</span><span class="o">.</span><span class="n">in_range</span><span class="p">(</span><span class="mi">70</span><span class="p">,</span> <span class="mi">250</span><span class="p">)],</span> <span class="n">coerce</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
+    <span class="s1">&#39;diastolic_bp&#39;</span><span class="p">:</span> <span class="n">Column</span><span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="n">checks</span><span class="o">=</span><span class="p">[</span><span class="n">Check</span><span class="o">.</span><span class="n">in_range</span><span class="p">(</span><span class="mi">40</span><span class="p">,</span> <span class="mi">150</span><span class="p">)],</span> <span class="n">coerce</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
+    <span class="s1">&#39;heart_rate&#39;</span><span class="p">:</span> <span class="n">Column</span><span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="n">checks</span><span class="o">=</span><span class="p">[</span><span class="n">Check</span><span class="o">.</span><span class="n">in_range</span><span class="p">(</span><span class="mi">30</span><span class="p">,</span> <span class="mi">200</span><span class="p">)]),</span>
+    <span class="s1">&#39;temperature&#39;</span><span class="p">:</span> <span class="n">Column</span><span class="p">(</span><span class="nb">float</span><span class="p">,</span> <span class="n">checks</span><span class="o">=</span><span class="p">[</span><span class="n">Check</span><span class="o">.</span><span class="n">in_range</span><span class="p">(</span><span class="mf">30.0</span><span class="p">,</span> <span class="mf">45.0</span><span class="p">)],</span> <span class="n">coerce</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
+    <span class="s1">&#39;admission_date&#39;</span><span class="p">:</span> <span class="n">Column</span><span class="p">(</span><span class="nb">str</span><span class="p">),</span>
+    <span class="s1">&#39;diagnosis_code&#39;</span><span class="p">:</span> <span class="n">Column</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">checks</span><span class="o">=</span><span class="p">[</span><span class="n">Check</span><span class="o">.</span><span class="n">str_length</span><span class="p">(</span><span class="n">min_value</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">max_value</span><span class="o">=</span><span class="mi">10</span><span class="p">)])</span>
+<span class="p">},</span> <span class="n">checks</span><span class="o">=</span><span class="p">[</span>
+    <span class="n">Check</span><span class="p">(</span><span class="n">check_bp_relationship</span><span class="p">,</span> <span class="n">element_wise</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> 
+          <span class="n">error</span><span class="o">=</span><span class="s2">&quot;Systolic BP must be higher than diastolic BP&quot;</span><span class="p">),</span>
+    <span class="n">Check</span><span class="p">(</span><span class="n">check_age_heart_rate</span><span class="p">,</span> <span class="n">element_wise</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+          <span class="n">error</span><span class="o">=</span><span class="s2">&quot;High heart rate in elderly patients needs review&quot;</span><span class="p">)</span>
+<span class="p">])</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Comprehensive schema with custom validations defined&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Comprehensive schema with custom validations defined
+</pre></div>
+</div>
+</div>
+</div>
+<p>Let’s test our comprehensive schema with the original data to see all validation features in action.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Test comprehensive validation</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">final_validated_data</span> <span class="o">=</span> <span class="n">comprehensive_schema</span><span class="o">.</span><span class="n">validate</span><span class="p">(</span><span class="n">medical_data</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Comprehensive validation successful!&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Validated </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">final_validated_data</span><span class="p">)</span><span class="si">}</span><span class="s2"> rows with all constraints&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Final validated data:&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">final_validated_data</span><span class="p">)</span>
+<span class="k">except</span> <span class="n">pa</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">SchemaError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Comprehensive validation error: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Comprehensive validation successful!
+Validated 5 rows with all constraints
+
+Final validated data:
+  patient_id  age  systolic_bp  diastolic_bp  heart_rate  temperature  \
+0       P001   45          120            80          72         36.5   
+1       P002   67          140            90          68         37.2   
+2       P003   23          110            70          85         36.8   
+3       P004   89          160            95          62         38.1   
+4       P005   34          115            75          78         36.7   
+
+  admission_date diagnosis_code  
+0     2024-01-15            I10  
+1     2024-01-16          E11.9  
+2     2024-01-17          J44.1  
+3     2024-01-18          N18.6  
+4     2024-01-19          M79.3  
+</pre></div>
+</div>
+</div>
+</div>
+<p>Now let’s intentionally create invalid data to demonstrate how Pandera catches validation errors.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Create invalid data to test error handling</span>
+<span class="n">invalid_data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span>
+    <span class="s1">&#39;patient_id&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;P009&#39;</span><span class="p">,</span> <span class="s1">&#39;INVALID&#39;</span><span class="p">,</span> <span class="s1">&#39;P011&#39;</span><span class="p">],</span>  <span class="c1"># Invalid patient ID format</span>
+    <span class="s1">&#39;age&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mi">45</span><span class="p">,</span> <span class="mi">150</span><span class="p">,</span> <span class="o">-</span><span class="mi">5</span><span class="p">],</span>  <span class="c1"># Invalid ages</span>
+    <span class="s1">&#39;systolic_bp&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mi">120</span><span class="p">,</span> <span class="mi">90</span><span class="p">,</span> <span class="mi">140</span><span class="p">],</span>  <span class="c1"># Note: second row has systolic &lt; diastolic</span>
+    <span class="s1">&#39;diastolic_bp&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mi">80</span><span class="p">,</span> <span class="mi">95</span><span class="p">,</span> <span class="mi">85</span><span class="p">],</span>   <span class="c1"># This will trigger BP relationship error</span>
+    <span class="s1">&#39;heart_rate&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mi">72</span><span class="p">,</span> <span class="mi">150</span><span class="p">,</span> <span class="mi">68</span><span class="p">],</span>    <span class="c1"># High heart rate with high age</span>
+    <span class="s1">&#39;temperature&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mf">36.5</span><span class="p">,</span> <span class="mf">50.0</span><span class="p">,</span> <span class="mf">36.8</span><span class="p">],</span>  <span class="c1"># Invalid temperature</span>
+    <span class="s1">&#39;admission_date&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;2024-01-25&#39;</span><span class="p">,</span> <span class="s1">&#39;2024-01-26&#39;</span><span class="p">,</span> <span class="s1">&#39;2024-01-27&#39;</span><span class="p">],</span>
+    <span class="s1">&#39;diagnosis_code&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;I10&#39;</span><span class="p">,</span> <span class="s1">&#39;AB&#39;</span><span class="p">,</span> <span class="s1">&#39;J44.1&#39;</span><span class="p">]</span>  <span class="c1"># Invalid diagnosis code length</span>
+<span class="p">})</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Invalid test data created:&quot;</span><span class="p">)</span>
+<span class="n">invalid_data</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Invalid test data created:
+</pre></div>
+</div>
+<div class="output text_html"><div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>patient_id</th>
+      <th>age</th>
+      <th>systolic_bp</th>
+      <th>diastolic_bp</th>
+      <th>heart_rate</th>
+      <th>temperature</th>
+      <th>admission_date</th>
+      <th>diagnosis_code</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>P009</td>
+      <td>45</td>
+      <td>120</td>
+      <td>80</td>
+      <td>72</td>
+      <td>36.5</td>
+      <td>2024-01-25</td>
+      <td>I10</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>INVALID</td>
+      <td>150</td>
+      <td>90</td>
+      <td>95</td>
+      <td>150</td>
+      <td>50.0</td>
+      <td>2024-01-26</td>
+      <td>AB</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>P011</td>
+      <td>-5</td>
+      <td>140</td>
+      <td>85</td>
+      <td>68</td>
+      <td>36.8</td>
+      <td>2024-01-27</td>
+      <td>J44.1</td>
+    </tr>
+  </tbody>
+</table>
+</div></div></div>
+</div>
+<p>Let’s validate the invalid data and observe how Pandera provides detailed error messages for each constraint violation.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Test validation with invalid data</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">comprehensive_schema</span><span class="o">.</span><span class="n">validate</span><span class="p">(</span><span class="n">invalid_data</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Validation passed (unexpected!)&quot;</span><span class="p">)</span>
+<span class="k">except</span> <span class="n">pa</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">SchemaError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Expected validation errors found:&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error summary: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Detailed error information:&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Failed checks: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">e</span><span class="o">.</span><span class="n">failure_cases</span><span class="p">)</span><span class="si">}</span><span class="s2"> cases&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">e</span><span class="o">.</span><span class="n">failure_cases</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Expected validation errors found:
+Error summary: Column &#39;patient_id&#39; failed element-wise validator number 0: str_matches(&#39;^P\d{3}$&#39;) failure cases: INVALID
+
+Detailed error information:
+Failed checks: 1 cases
+   index failure_case
+0      1      INVALID
+</pre></div>
+</div>
+</div>
+</div>
+<p>Finally, let’s demonstrate how to use Pandera decorators for function-based validation, which is useful for data processing pipelines.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Function-based validation using decorators</span>
+<span class="nd">@pa</span><span class="o">.</span><span class="n">check_input</span><span class="p">(</span><span class="n">comprehensive_schema</span><span class="p">)</span>
+<span class="nd">@pa</span><span class="o">.</span><span class="n">check_output</span><span class="p">(</span><span class="n">comprehensive_schema</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">process_medical_data</span><span class="p">(</span><span class="n">df</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Process medical data with automatic input/output validation&quot;&quot;&quot;</span>
+    <span class="c1"># Add a calculated field: pulse pressure</span>
+    <span class="n">processed_df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    <span class="n">processed_df</span><span class="p">[</span><span class="s1">&#39;pulse_pressure&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">processed_df</span><span class="p">[</span><span class="s1">&#39;systolic_bp&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="n">processed_df</span><span class="p">[</span><span class="s1">&#39;diastolic_bp&#39;</span><span class="p">]</span>
+    
+    <span class="c1"># Remove the calculated field for output validation</span>
+    <span class="k">return</span> <span class="n">processed_df</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="s1">&#39;pulse_pressure&#39;</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+<span class="c1"># Test the decorated function</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">processed_result</span> <span class="o">=</span> <span class="n">process_medical_data</span><span class="p">(</span><span class="n">medical_data</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Function-based validation successful!&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Processed </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">processed_result</span><span class="p">)</span><span class="si">}</span><span class="s2"> rows&quot;</span><span class="p">)</span>
+<span class="k">except</span> <span class="n">pa</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">SchemaError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Function validation error: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Function-based validation successful!
+Processed 5 rows
+</pre></div>
+</div>
+</div>
+</div>
+<section id="exercise">
+<h2>Exercise<a class="headerlink" href="#exercise" title="Link to this heading">#</a></h2>
+<p>Create your own medical data validation schema for a patient laboratory results dataset. Your schema should include:</p>
+<ol class="arabic simple">
+<li><p><strong>Patient Information</strong>: patient_id (format: LAB followed by 4 digits), age (0-120), gender (M/F)</p></li>
+<li><p><strong>Lab Values</strong>:</p>
+<ul class="simple">
+<li><p>glucose (mg/dL): normal range 70-200</p></li>
+<li><p>cholesterol (mg/dL): range 100-400</p></li>
+<li><p>hemoglobin (g/dL): range 8.0-20.0</p></li>
+<li><p>white_blood_cell_count (cells/μL): range 3000-12000</p></li>
+</ul>
+</li>
+<li><p><strong>Test Information</strong>: test_date (string), lab_technician_id (string)</p></li>
+</ol>
+<p><strong>Tasks:</strong></p>
+<ol class="arabic simple">
+<li><p>Define a comprehensive schema with appropriate data types, coercion, and range constraints</p></li>
+<li><p>Add a custom validation function to ensure hemoglobin levels are appropriate for gender (males: 13.5-17.5 g/dL, females: 12.0-15.5 g/dL)</p></li>
+<li><p>Create sample data with both valid and invalid entries</p></li>
+<li><p>Test your schema and fix any validation errors</p></li>
+<li><p>Create a function decorated with your schema that calculates and adds a ‘risk_score’ based on how many values are outside normal ranges</p></li>
+</ol>
+<p>This exercise will help you practice creating domain-specific validation rules for medical laboratory data, which is crucial for ensuring data quality in clinical decision-making systems.</p>
+</section>
+</section>
+
+    <script type="text/x-thebe-config">
+    {
+        requestKernel: true,
+        binderOptions: {
+            repo: "binder-examples/jupyter-stacks-datascience",
+            ref: "master",
+        },
+        codeMirrorConfig: {
+            theme: "abcdef",
+            mode: "python"
+        },
+        kernelOptions: {
+            name: "python3",
+            path: "./."
+        },
+        predefinedOutput: true
+    }
+    </script>
+    <script>kernelName = 'python3'</script>
+
+                </article>
+              
+
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="data_io_csv_ndjson_pandas_polars_dtypes_missing.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">Reading and Writing Medical Data: CSV and NDJSON with Pandas and Polars</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="joins-grouping-windowing-duckdb-sql.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">Joins/Merges, Grouping, and Windowing with DuckDB</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+  <div class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> Contents
+  </div>
+  <nav class="bd-toc-nav page-toc">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#exercise">Exercise</a></li>
+</ul>
+  </nav></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+<p class="component-author">
+By AI Generated Content
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+
+  </div>
+  
+  <div class="footer-item">
+    <p class="last-updated">
+  Last updated on Sep 13, 2025.
+  <br/>
+</p>
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+</div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b"></script>
+<script src="_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+  <footer class="bd-footer">
+  </footer>
+  </body>
+</html>

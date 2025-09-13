@@ -1,0 +1,2462 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="./" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>In-notebook SQL Analytics and Joins with DuckDB/SQLite &#8212; Foundations of Medical Data Integration</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="_static/styles/theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="_static/styles/bootstrap.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="_static/styles/pydata-sphinx-theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+
+  
+  <link href="_static/vendor/fontawesome/6.5.2/css/all.min.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.5.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.5.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.5.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="_static/styles/sphinx-book-theme.css?v=eba8b062" />
+    <link rel="stylesheet" type="text/css" href="_static/togglebutton.css?v=13237357" />
+    <link rel="stylesheet" type="text/css" href="_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="_static/mystnb.8ecb98da25f57f5357bf6f572d296f466b2cfe2517ffebfabe82451661e28f02.css" />
+    <link rel="stylesheet" type="text/css" href="_static/sphinx-thebe.css?v=4fa983c6" />
+    <link rel="stylesheet" type="text/css" href="_static/sphinx-design.min.css?v=95c83b7e" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b" />
+<link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
+  <script src="_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+    <script src="_static/documentation_options.js?v=9eb32ce0"></script>
+    <script src="_static/doctools.js?v=9a2dae69"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="_static/copybutton.js?v=f281be69"></script>
+    <script src="_static/scripts/sphinx-book-theme.js?v=887ef09a"></script>
+    <script>let toggleHintShow = 'Click to show';</script>
+    <script>let toggleHintHide = 'Click to hide';</script>
+    <script>let toggleOpenOnPrint = 'true';</script>
+    <script src="_static/togglebutton.js?v=4a39c7ea"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script src="_static/design-tabs.js?v=f930bc37"></script>
+    <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"; const thebe_selector = ".thebe,.cell"; const thebe_selector_input = "pre"; const thebe_selector_output = ".output, .cell_output"</script>
+    <script async="async" src="_static/sphinx-thebe.js?v=c100c467"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"; const thebe_selector = ".thebe,.cell"; const thebe_selector_input = "pre"; const thebe_selector_output = ".output, .cell_output"</script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'sql-analytics-joins-duckdb-sqlite';</script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+    <meta name="docbuild:last-update" content="Sep 13, 2025"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-primary-sidebar-checkbox"/>
+  <label class="overlay overlay-primary" for="pst-primary-sidebar-checkbox"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-secondary-sidebar-checkbox"/>
+  <label class="overlay overlay-secondary" for="pst-secondary-sidebar-checkbox"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search this book..."
+         aria-label="Search this book..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+        
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="intro.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="_static/logo.png" class="logo__image only-light" alt="Foundations of Medical Data Integration - Home"/>
+    <script>document.write(`<img src="_static/logo.png" class="logo__image only-dark" alt="Foundations of Medical Data Integration - Home"/>`);</script>
+  
+  
+</a></div>
+        <div class="sidebar-primary-item">
+
+ <script>
+ document.write(`
+   <button class="btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script></div>
+        <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        <p aria-level="2" class="caption" role="heading"><span class="caption-text">Working with files and folders</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="files_folders_filesystems.html">Files, Folders, and Filesystems in Medical Data Integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="path_handling_portable_io_pathlib.html">Path Handling and Portable I/O with pathlib</a></li>
+<li class="toctree-l1"><a class="reference internal" href="sidecar_metadata_data_dictionaries.html">Sidecar Metadata (JSON/YAML) and Data Dictionaries</a></li>
+<li class="toctree-l1"><a class="reference internal" href="fsspec_cloud_storage_streaming_io.html">Local and Cloud Storage with fsspec (s3fs/gcsfs/adlfs), Streaming I/O</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">File formats</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="integrity_checks_hashing_file_strategies.html">Integrity Checks (Hashing) and Small-to-Large File Strategies</a></li>
+<li class="toctree-l1"><a class="reference internal" href="data_io_csv_ndjson_pandas_polars_dtypes_missing.html">Reading and Writing Medical Data: CSV and NDJSON with Pandas and Polars</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pandera_schemas_validation_coercion_constraints.html">Schemas and Validation with Pandera</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Wrangling data</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="joins-grouping-windowing-duckdb-sql.html">Joins/Merges, Grouping, and Windowing with DuckDB</a></li>
+<li class="toctree-l1"><a class="reference internal" href="export_patterns_subsets_snapshots_reproducible_filters.html">Export Patterns: Subsets, Snapshots, Reproducible Filters</a></li>
+<li class="toctree-l1"><a class="reference internal" href="numpy-xarray-fundamentals-shapes-dtypes-chunking.html">NumPy/xarray Fundamentals: Shapes, Dtypes, and Chunking</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Data conversion</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="csv-excel-ndjson-to-parquet-arrow-batch-vs-streaming.html">CSV/Excel/NDJSON → Parquet/Arrow: Batch vs Streaming</a></li>
+<li class="toctree-l1"><a class="reference internal" href="longitudinal_data_preprocessing.html">Unit Normalization, Time Alignment, Resampling, and Windowing for Longitudinal Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dask-out-of-core-parallel-conversion-progress-retries-idempotency.html">Out-of-core/Parallel Conversion with Dask: Progress, Retries, and Idempotency</a></li>
+</ul>
+
+    </div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><button class="sidebar-toggle primary-toggle btn btn-sm" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</button></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<div class="article-header-buttons">
+
+
+
+
+
+<div class="dropdown dropdown-launch-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Launch interactive content">
+    <i class="fas fa-rocket"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="https://mybinder.org/v2/gh/generated-books/medical-data-integration/main?urlpath=lab/tree/sql-analytics-joins-duckdb-sqlite.ipynb" target="_blank"
+   class="btn btn-sm dropdown-item"
+   title="Launch on Binder"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  
+    <img alt="Binder logo" src="_static/images/logo_binder.svg">
+  </span>
+<span class="btn__text-container">Binder</span>
+</a>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+
+
+<div class="dropdown dropdown-source-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Source repositories">
+    <i class="fab fa-github"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="https://github.com/generated-books/medical-data-integration" target="_blank"
+   class="btn btn-sm btn-source-repository-button dropdown-item"
+   title="Source repository"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fab fa-github"></i>
+  </span>
+<span class="btn__text-container">Repository</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li><a href="https://github.com/generated-books/medical-data-integration/edit/main/sql-analytics-joins-duckdb-sqlite.ipynb" target="_blank"
+   class="btn btn-sm btn-source-edit-button dropdown-item"
+   title="Suggest edit"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-pencil-alt"></i>
+  </span>
+<span class="btn__text-container">Suggest edit</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li><a href="https://github.com/generated-books/medical-data-integration/issues/new?title=Issue%20on%20page%20%2Fsql-analytics-joins-duckdb-sqlite.html&body=Your%20issue%20content%20here." target="_blank"
+   class="btn btn-sm btn-source-issues-button dropdown-item"
+   title="Open an issue"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-lightbulb"></i>
+  </span>
+<span class="btn__text-container">Open issue</span>
+</a>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+
+
+<div class="dropdown dropdown-download-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Download this page">
+    <i class="fas fa-download"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="_sources/sql-analytics-joins-duckdb-sqlite.ipynb" target="_blank"
+   class="btn btn-sm btn-download-source-button dropdown-item"
+   title="Download source file"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file"></i>
+  </span>
+<span class="btn__text-container">.ipynb</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li>
+<button onclick="window.print()"
+  class="btn btn-sm btn-download-pdf-button dropdown-item"
+  title="Print to PDF"
+  data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file-pdf"></i>
+  </span>
+<span class="btn__text-container">.pdf</span>
+</button>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+<button onclick="toggleFullScreen()"
+  class="btn btn-sm btn-fullscreen-button"
+  title="Fullscreen mode"
+  data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-expand"></i>
+  </span>
+
+</button>
+
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"></i>
+  </button>
+`);
+</script>
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm pst-navbar-icon search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+  </button>
+`);
+</script>
+<button class="sidebar-toggle secondary-toggle btn btn-sm" title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="fa-solid fa-list"></span>
+</button>
+</div></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1>In-notebook SQL Analytics and Joins with DuckDB/SQLite</h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+            <div>
+                <h2> Contents </h2>
+            </div>
+            <nav aria-label="Page">
+                <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#working-with-duckdb">Working with DuckDB</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#working-with-sqlite">Working with SQLite</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#visualization-of-query-results">Visualization of Query Results</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#key-takeaways">Key Takeaways</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#exercise">Exercise</a></li>
+</ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section class="tex2jax_ignore mathjax_ignore" id="in-notebook-sql-analytics-and-joins-with-duckdb-sqlite">
+<h1>In-notebook SQL Analytics and Joins with DuckDB/SQLite<a class="headerlink" href="#in-notebook-sql-analytics-and-joins-with-duckdb-sqlite" title="Link to this heading">#</a></h1>
+<p>In medical data integration, we often need to combine data from multiple sources such as patient records, laboratory results, and imaging data. SQL databases provide powerful tools for joining and analyzing these datasets efficiently. This notebook demonstrates how to use DuckDB and SQLite directly within Jupyter notebooks for medical data analytics.</p>
+<p>First, let’s install and import the necessary libraries for working with DuckDB and SQLite in our notebook environment.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">!</span>pip<span class="w"> </span>install<span class="w"> </span>duckdb<span class="w"> </span>sqlite3<span class="w"> </span>pandas<span class="w"> </span>numpy<span class="w"> </span>matplotlib<span class="w"> </span>seaborn
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Requirement already satisfied: duckdb in /opt/hostedtoolcache/Python/3.11.13/x64/lib/python3.11/site-packages (1.3.2)
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><span class=" -Color -Color-Red">ERROR: Could not find a version that satisfies the requirement sqlite3 (from versions: none)</span>
+<span class=" -Color -Color-Red">ERROR: No matching distribution found for sqlite3</span>
+
+</pre></div>
+</div>
+</div>
+</div>
+<p>Now we’ll import the required libraries for our analysis.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">duckdb</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">sqlite3</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">seaborn</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sns</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">datetime</span><span class="w"> </span><span class="kn">import</span> <span class="n">datetime</span><span class="p">,</span> <span class="n">timedelta</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>Let’s create sample medical datasets that represent common scenarios in healthcare data integration. We’ll create patient demographics, laboratory results, and medication records.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Create sample patient demographics</span>
+<span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="mi">42</span><span class="p">)</span>
+<span class="n">n_patients</span> <span class="o">=</span> <span class="mi">1000</span>
+
+<span class="n">patients_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span>
+    <span class="s1">&#39;patient_id&#39;</span><span class="p">:</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">n_patients</span> <span class="o">+</span> <span class="mi">1</span><span class="p">),</span>
+    <span class="s1">&#39;age&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">18</span><span class="p">,</span> <span class="mi">90</span><span class="p">,</span> <span class="n">n_patients</span><span class="p">),</span>
+    <span class="s1">&#39;gender&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">([</span><span class="s1">&#39;M&#39;</span><span class="p">,</span> <span class="s1">&#39;F&#39;</span><span class="p">],</span> <span class="n">n_patients</span><span class="p">),</span>
+    <span class="s1">&#39;admission_date&#39;</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">date_range</span><span class="p">(</span><span class="s1">&#39;2023-01-01&#39;</span><span class="p">,</span> <span class="n">periods</span><span class="o">=</span><span class="n">n_patients</span><span class="p">,</span> <span class="n">freq</span><span class="o">=</span><span class="s1">&#39;6H&#39;</span><span class="p">),</span>
+    <span class="s1">&#39;diagnosis_code&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">([</span><span class="s1">&#39;I25.9&#39;</span><span class="p">,</span> <span class="s1">&#39;E11.9&#39;</span><span class="p">,</span> <span class="s1">&#39;J44.1&#39;</span><span class="p">,</span> <span class="s1">&#39;N18.6&#39;</span><span class="p">],</span> <span class="n">n_patients</span><span class="p">)</span>
+<span class="p">})</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Sample patient data:&quot;</span><span class="p">)</span>
+<span class="n">patients_df</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Sample patient data:
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>/tmp/ipykernel_2606/2988652979.py:9: FutureWarning: &#39;H&#39; is deprecated and will be removed in a future version, please use &#39;h&#39; instead.
+  &#39;admission_date&#39;: pd.date_range(&#39;2023-01-01&#39;, periods=n_patients, freq=&#39;6H&#39;),
+</pre></div>
+</div>
+<div class="output text_html"><div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>patient_id</th>
+      <th>age</th>
+      <th>gender</th>
+      <th>admission_date</th>
+      <th>diagnosis_code</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>1</td>
+      <td>69</td>
+      <td>M</td>
+      <td>2023-01-01 00:00:00</td>
+      <td>E11.9</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>2</td>
+      <td>32</td>
+      <td>M</td>
+      <td>2023-01-01 06:00:00</td>
+      <td>N18.6</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>3</td>
+      <td>89</td>
+      <td>F</td>
+      <td>2023-01-01 12:00:00</td>
+      <td>J44.1</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>4</td>
+      <td>78</td>
+      <td>M</td>
+      <td>2023-01-01 18:00:00</td>
+      <td>I25.9</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>5</td>
+      <td>38</td>
+      <td>M</td>
+      <td>2023-01-02 00:00:00</td>
+      <td>N18.6</td>
+    </tr>
+  </tbody>
+</table>
+</div></div></div>
+</div>
+<p>Next, we’ll generate laboratory results data with multiple test results per patient to simulate real clinical scenarios.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Create sample laboratory results</span>
+<span class="n">lab_tests</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;glucose&#39;</span><span class="p">,</span> <span class="s1">&#39;creatinine&#39;</span><span class="p">,</span> <span class="s1">&#39;hemoglobin&#39;</span><span class="p">,</span> <span class="s1">&#39;cholesterol&#39;</span><span class="p">]</span>
+<span class="n">lab_data</span> <span class="o">=</span> <span class="p">[]</span>
+
+<span class="k">for</span> <span class="n">patient_id</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">n_patients</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+    <span class="c1"># Each patient has 1-5 lab tests</span>
+    <span class="n">n_tests</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">6</span><span class="p">)</span>
+    <span class="n">selected_tests</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">lab_tests</span><span class="p">,</span> <span class="n">n_tests</span><span class="p">,</span> <span class="n">replace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    
+    <span class="k">for</span> <span class="n">test</span> <span class="ow">in</span> <span class="n">selected_tests</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">test</span> <span class="o">==</span> <span class="s1">&#39;glucose&#39;</span><span class="p">:</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mi">100</span><span class="p">,</span> <span class="mi">20</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">test</span> <span class="o">==</span> <span class="s1">&#39;creatinine&#39;</span><span class="p">:</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mf">1.2</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">test</span> <span class="o">==</span> <span class="s1">&#39;hemoglobin&#39;</span><span class="p">:</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mf">13.5</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>  <span class="c1"># cholesterol</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mi">200</span><span class="p">,</span> <span class="mi">40</span><span class="p">)</span>
+        
+        <span class="n">lab_data</span><span class="o">.</span><span class="n">append</span><span class="p">({</span>
+            <span class="s1">&#39;patient_id&#39;</span><span class="p">:</span> <span class="n">patient_id</span><span class="p">,</span>
+            <span class="s1">&#39;test_name&#39;</span><span class="p">:</span> <span class="n">test</span><span class="p">,</span>
+            <span class="s1">&#39;test_value&#39;</span><span class="p">:</span> <span class="nb">round</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span>
+            <span class="s1">&#39;test_date&#39;</span><span class="p">:</span> <span class="n">patients_df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">patient_id</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;admission_date&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="n">timedelta</span><span class="p">(</span><span class="n">days</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">7</span><span class="p">))</span>
+        <span class="p">})</span>
+
+<span class="n">lab_results_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">lab_data</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Generated </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">lab_results_df</span><span class="p">)</span><span class="si">}</span><span class="s2"> lab results&quot;</span><span class="p">)</span>
+<span class="n">lab_results_df</span><span class="o">.</span><span class="n">head</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Generated 2986 lab results
+</pre></div>
+</div>
+<div class="output text_html"><div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>patient_id</th>
+      <th>test_name</th>
+      <th>test_value</th>
+      <th>test_date</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>1</td>
+      <td>cholesterol</td>
+      <td>165.65</td>
+      <td>2023-01-07 00:00:00</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>2</td>
+      <td>creatinine</td>
+      <td>1.27</td>
+      <td>2023-01-05 06:00:00</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>2</td>
+      <td>hemoglobin</td>
+      <td>13.22</td>
+      <td>2023-01-01 06:00:00</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>2</td>
+      <td>cholesterol</td>
+      <td>151.03</td>
+      <td>2023-01-04 06:00:00</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>2</td>
+      <td>hemoglobin</td>
+      <td>13.08</td>
+      <td>2023-01-02 06:00:00</td>
+    </tr>
+    <tr>
+      <th>5</th>
+      <td>2</td>
+      <td>glucose</td>
+      <td>82.99</td>
+      <td>2023-01-02 06:00:00</td>
+    </tr>
+    <tr>
+      <th>6</th>
+      <td>3</td>
+      <td>glucose</td>
+      <td>114.40</td>
+      <td>2023-01-03 12:00:00</td>
+    </tr>
+    <tr>
+      <th>7</th>
+      <td>3</td>
+      <td>creatinine</td>
+      <td>1.63</td>
+      <td>2023-01-02 12:00:00</td>
+    </tr>
+    <tr>
+      <th>8</th>
+      <td>3</td>
+      <td>glucose</td>
+      <td>123.93</td>
+      <td>2023-01-04 12:00:00</td>
+    </tr>
+    <tr>
+      <th>9</th>
+      <td>4</td>
+      <td>creatinine</td>
+      <td>1.02</td>
+      <td>2023-01-06 18:00:00</td>
+    </tr>
+  </tbody>
+</table>
+</div></div></div>
+</div>
+<p>Now let’s create a medications dataset that we can later join with our patient and lab data.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Create sample medication data</span>
+<span class="n">medications</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;metformin&#39;</span><span class="p">,</span> <span class="s1">&#39;lisinopril&#39;</span><span class="p">,</span> <span class="s1">&#39;atorvastatin&#39;</span><span class="p">,</span> <span class="s1">&#39;metoprolol&#39;</span><span class="p">,</span> <span class="s1">&#39;furosemide&#39;</span><span class="p">]</span>
+<span class="n">med_data</span> <span class="o">=</span> <span class="p">[]</span>
+
+<span class="k">for</span> <span class="n">patient_id</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">n_patients</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+    <span class="c1"># Each patient has 0-3 medications</span>
+    <span class="n">n_meds</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">n_meds</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">selected_meds</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">medications</span><span class="p">,</span> <span class="n">n_meds</span><span class="p">,</span> <span class="n">replace</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        
+        <span class="k">for</span> <span class="n">med</span> <span class="ow">in</span> <span class="n">selected_meds</span><span class="p">:</span>
+            <span class="n">med_data</span><span class="o">.</span><span class="n">append</span><span class="p">({</span>
+                <span class="s1">&#39;patient_id&#39;</span><span class="p">:</span> <span class="n">patient_id</span><span class="p">,</span>
+                <span class="s1">&#39;medication_name&#39;</span><span class="p">:</span> <span class="n">med</span><span class="p">,</span>
+                <span class="s1">&#39;dosage_mg&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">([</span><span class="mi">25</span><span class="p">,</span> <span class="mi">50</span><span class="p">,</span> <span class="mi">100</span><span class="p">,</span> <span class="mi">200</span><span class="p">]),</span>
+                <span class="s1">&#39;start_date&#39;</span><span class="p">:</span> <span class="n">patients_df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">patient_id</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;admission_date&#39;</span><span class="p">]</span>
+            <span class="p">})</span>
+
+<span class="n">medications_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">med_data</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Generated </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">medications_df</span><span class="p">)</span><span class="si">}</span><span class="s2"> medication records&quot;</span><span class="p">)</span>
+<span class="n">medications_df</span><span class="o">.</span><span class="n">head</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Generated 1514 medication records
+</pre></div>
+</div>
+<div class="output text_html"><div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>patient_id</th>
+      <th>medication_name</th>
+      <th>dosage_mg</th>
+      <th>start_date</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>1</td>
+      <td>metformin</td>
+      <td>200</td>
+      <td>2023-01-01 00:00:00</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>1</td>
+      <td>lisinopril</td>
+      <td>50</td>
+      <td>2023-01-01 00:00:00</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>1</td>
+      <td>metoprolol</td>
+      <td>25</td>
+      <td>2023-01-01 00:00:00</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>2</td>
+      <td>metoprolol</td>
+      <td>25</td>
+      <td>2023-01-01 06:00:00</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>4</td>
+      <td>metformin</td>
+      <td>50</td>
+      <td>2023-01-01 18:00:00</td>
+    </tr>
+    <tr>
+      <th>5</th>
+      <td>4</td>
+      <td>metoprolol</td>
+      <td>200</td>
+      <td>2023-01-01 18:00:00</td>
+    </tr>
+    <tr>
+      <th>6</th>
+      <td>5</td>
+      <td>lisinopril</td>
+      <td>200</td>
+      <td>2023-01-02 00:00:00</td>
+    </tr>
+    <tr>
+      <th>7</th>
+      <td>5</td>
+      <td>furosemide</td>
+      <td>100</td>
+      <td>2023-01-02 00:00:00</td>
+    </tr>
+    <tr>
+      <th>8</th>
+      <td>5</td>
+      <td>metformin</td>
+      <td>50</td>
+      <td>2023-01-02 00:00:00</td>
+    </tr>
+    <tr>
+      <th>9</th>
+      <td>6</td>
+      <td>metoprolol</td>
+      <td>25</td>
+      <td>2023-01-02 06:00:00</td>
+    </tr>
+  </tbody>
+</table>
+</div></div></div>
+</div>
+<section id="working-with-duckdb">
+<h2>Working with DuckDB<a class="headerlink" href="#working-with-duckdb" title="Link to this heading">#</a></h2>
+<p>DuckDB is an excellent choice for analytical workloads and can work directly with pandas DataFrames. Let’s establish a connection and load our data.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Create DuckDB connection</span>
+<span class="n">conn_duck</span> <span class="o">=</span> <span class="n">duckdb</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="s1">&#39;:memory:&#39;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;DuckDB connection established&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;DuckDB version: </span><span class="si">{</span><span class="n">conn_duck</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s1">&#39;SELECT version()&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">fetchone</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>DuckDB connection established
+DuckDB version: v1.3.2
+</pre></div>
+</div>
+</div>
+</div>
+<p>We’ll register our pandas DataFrames as tables in DuckDB, making them available for SQL queries.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Register pandas DataFrames as DuckDB tables</span>
+<span class="n">conn_duck</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="s1">&#39;patients&#39;</span><span class="p">,</span> <span class="n">patients_df</span><span class="p">)</span>
+<span class="n">conn_duck</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="s1">&#39;lab_results&#39;</span><span class="p">,</span> <span class="n">lab_results_df</span><span class="p">)</span>
+<span class="n">conn_duck</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="s1">&#39;medications&#39;</span><span class="p">,</span> <span class="n">medications_df</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Tables registered in DuckDB:&quot;</span><span class="p">)</span>
+<span class="n">tables</span> <span class="o">=</span> <span class="n">conn_duck</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s2">&quot;SHOW TABLES&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">fetchall</span><span class="p">()</span>
+<span class="k">for</span> <span class="n">table</span> <span class="ow">in</span> <span class="n">tables</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;- </span><span class="si">{</span><span class="n">table</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Tables registered in DuckDB:
+- lab_results
+- medications
+- patients
+</pre></div>
+</div>
+</div>
+</div>
+<p>Let’s perform a basic query to understand our patient demographics using SQL aggregation functions.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Basic demographic analysis</span>
+<span class="n">demographic_query</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">SELECT </span>
+<span class="s2">    gender,</span>
+<span class="s2">    COUNT(*) as patient_count,</span>
+<span class="s2">    ROUND(AVG(age), 1) as avg_age,</span>
+<span class="s2">    MIN(age) as min_age,</span>
+<span class="s2">    MAX(age) as max_age</span>
+<span class="s2">FROM patients </span>
+<span class="s2">GROUP BY gender</span>
+<span class="s2">ORDER BY gender</span>
+<span class="s2">&quot;&quot;&quot;</span>
+
+<span class="n">demographics_result</span> <span class="o">=</span> <span class="n">conn_duck</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">demographic_query</span><span class="p">)</span><span class="o">.</span><span class="n">df</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Patient Demographics:&quot;</span><span class="p">)</span>
+<span class="n">demographics_result</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Patient Demographics:
+</pre></div>
+</div>
+<div class="output text_html"><div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>gender</th>
+      <th>patient_count</th>
+      <th>avg_age</th>
+      <th>min_age</th>
+      <th>max_age</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>F</td>
+      <td>497</td>
+      <td>54.0</td>
+      <td>18</td>
+      <td>89</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>M</td>
+      <td>503</td>
+      <td>51.8</td>
+      <td>18</td>
+      <td>89</td>
+    </tr>
+  </tbody>
+</table>
+</div></div></div>
+</div>
+<p>Now let’s perform an inner join to combine patient data with their laboratory results, which is a common operation in medical data analysis.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Inner join: patients with lab results</span>
+<span class="n">join_query</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">SELECT </span>
+<span class="s2">    p.patient_id,</span>
+<span class="s2">    p.age,</span>
+<span class="s2">    p.gender,</span>
+<span class="s2">    p.diagnosis_code,</span>
+<span class="s2">    l.test_name,</span>
+<span class="s2">    l.test_value,</span>
+<span class="s2">    l.test_date</span>
+<span class="s2">FROM patients p</span>
+<span class="s2">INNER JOIN lab_results l ON p.patient_id = l.patient_id</span>
+<span class="s2">WHERE p.age &gt; 65</span>
+<span class="s2">ORDER BY p.patient_id, l.test_name</span>
+<span class="s2">LIMIT 20</span>
+<span class="s2">&quot;&quot;&quot;</span>
+
+<span class="n">elderly_labs</span> <span class="o">=</span> <span class="n">conn_duck</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">join_query</span><span class="p">)</span><span class="o">.</span><span class="n">df</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Lab results for elderly patients (age &gt; 65):&quot;</span><span class="p">)</span>
+<span class="n">elderly_labs</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Lab results for elderly patients (age &gt; 65):
+</pre></div>
+</div>
+<div class="output text_html"><div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>patient_id</th>
+      <th>age</th>
+      <th>gender</th>
+      <th>diagnosis_code</th>
+      <th>test_name</th>
+      <th>test_value</th>
+      <th>test_date</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>1</td>
+      <td>69</td>
+      <td>M</td>
+      <td>E11.9</td>
+      <td>cholesterol</td>
+      <td>165.65</td>
+      <td>2023-01-07 00:00:00</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>3</td>
+      <td>89</td>
+      <td>F</td>
+      <td>J44.1</td>
+      <td>creatinine</td>
+      <td>1.63</td>
+      <td>2023-01-02 12:00:00</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>3</td>
+      <td>89</td>
+      <td>F</td>
+      <td>J44.1</td>
+      <td>glucose</td>
+      <td>114.40</td>
+      <td>2023-01-03 12:00:00</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>3</td>
+      <td>89</td>
+      <td>F</td>
+      <td>J44.1</td>
+      <td>glucose</td>
+      <td>123.93</td>
+      <td>2023-01-04 12:00:00</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>4</td>
+      <td>78</td>
+      <td>M</td>
+      <td>I25.9</td>
+      <td>creatinine</td>
+      <td>1.02</td>
+      <td>2023-01-06 18:00:00</td>
+    </tr>
+    <tr>
+      <th>5</th>
+      <td>4</td>
+      <td>78</td>
+      <td>M</td>
+      <td>I25.9</td>
+      <td>creatinine</td>
+      <td>1.45</td>
+      <td>2023-01-04 18:00:00</td>
+    </tr>
+    <tr>
+      <th>6</th>
+      <td>4</td>
+      <td>78</td>
+      <td>M</td>
+      <td>I25.9</td>
+      <td>creatinine</td>
+      <td>1.44</td>
+      <td>2023-01-03 18:00:00</td>
+    </tr>
+    <tr>
+      <th>7</th>
+      <td>4</td>
+      <td>78</td>
+      <td>M</td>
+      <td>I25.9</td>
+      <td>creatinine</td>
+      <td>1.39</td>
+      <td>2023-01-06 18:00:00</td>
+    </tr>
+    <tr>
+      <th>8</th>
+      <td>9</td>
+      <td>70</td>
+      <td>M</td>
+      <td>I25.9</td>
+      <td>cholesterol</td>
+      <td>203.54</td>
+      <td>2023-01-07 00:00:00</td>
+    </tr>
+    <tr>
+      <th>9</th>
+      <td>9</td>
+      <td>70</td>
+      <td>M</td>
+      <td>I25.9</td>
+      <td>creatinine</td>
+      <td>1.03</td>
+      <td>2023-01-04 00:00:00</td>
+    </tr>
+    <tr>
+      <th>10</th>
+      <td>9</td>
+      <td>70</td>
+      <td>M</td>
+      <td>I25.9</td>
+      <td>creatinine</td>
+      <td>1.64</td>
+      <td>2023-01-06 00:00:00</td>
+    </tr>
+    <tr>
+      <th>11</th>
+      <td>9</td>
+      <td>70</td>
+      <td>M</td>
+      <td>I25.9</td>
+      <td>creatinine</td>
+      <td>1.31</td>
+      <td>2023-01-03 00:00:00</td>
+    </tr>
+    <tr>
+      <th>12</th>
+      <td>9</td>
+      <td>70</td>
+      <td>M</td>
+      <td>I25.9</td>
+      <td>glucose</td>
+      <td>88.35</td>
+      <td>2023-01-06 00:00:00</td>
+    </tr>
+    <tr>
+      <th>13</th>
+      <td>14</td>
+      <td>81</td>
+      <td>F</td>
+      <td>E11.9</td>
+      <td>cholesterol</td>
+      <td>236.54</td>
+      <td>2023-01-05 06:00:00</td>
+    </tr>
+    <tr>
+      <th>14</th>
+      <td>14</td>
+      <td>81</td>
+      <td>F</td>
+      <td>E11.9</td>
+      <td>creatinine</td>
+      <td>0.96</td>
+      <td>2023-01-04 06:00:00</td>
+    </tr>
+    <tr>
+      <th>15</th>
+      <td>14</td>
+      <td>81</td>
+      <td>F</td>
+      <td>E11.9</td>
+      <td>hemoglobin</td>
+      <td>13.09</td>
+      <td>2023-01-05 06:00:00</td>
+    </tr>
+    <tr>
+      <th>16</th>
+      <td>15</td>
+      <td>77</td>
+      <td>M</td>
+      <td>J44.1</td>
+      <td>cholesterol</td>
+      <td>246.39</td>
+      <td>2023-01-09 12:00:00</td>
+    </tr>
+    <tr>
+      <th>17</th>
+      <td>15</td>
+      <td>77</td>
+      <td>M</td>
+      <td>J44.1</td>
+      <td>cholesterol</td>
+      <td>235.36</td>
+      <td>2023-01-09 12:00:00</td>
+    </tr>
+    <tr>
+      <th>18</th>
+      <td>15</td>
+      <td>77</td>
+      <td>M</td>
+      <td>J44.1</td>
+      <td>creatinine</td>
+      <td>0.47</td>
+      <td>2023-01-10 12:00:00</td>
+    </tr>
+    <tr>
+      <th>19</th>
+      <td>15</td>
+      <td>77</td>
+      <td>M</td>
+      <td>J44.1</td>
+      <td>glucose</td>
+      <td>101.75</td>
+      <td>2023-01-10 12:00:00</td>
+    </tr>
+  </tbody>
+</table>
+</div></div></div>
+</div>
+<p>Let’s perform a more complex analysis using a left join to find patients who may be missing certain lab tests, which is crucial for identifying gaps in care.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Left join to find patients with specific diagnosis but missing glucose tests</span>
+<span class="n">missing_tests_query</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">SELECT </span>
+<span class="s2">    p.patient_id,</span>
+<span class="s2">    p.diagnosis_code,</span>
+<span class="s2">    p.age,</span>
+<span class="s2">    CASE WHEN l.test_name IS NULL THEN &#39;Missing glucose test&#39; </span>
+<span class="s2">         ELSE &#39;Has glucose test&#39; END as glucose_status</span>
+<span class="s2">FROM patients p</span>
+<span class="s2">LEFT JOIN (</span>
+<span class="s2">    SELECT DISTINCT patient_id, test_name </span>
+<span class="s2">    FROM lab_results </span>
+<span class="s2">    WHERE test_name = &#39;glucose&#39;</span>
+<span class="s2">) l ON p.patient_id = l.patient_id</span>
+<span class="s2">WHERE p.diagnosis_code = &#39;E11.9&#39;  -- Diabetes diagnosis</span>
+<span class="s2">ORDER BY glucose_status, p.patient_id</span>
+<span class="s2">LIMIT 15</span>
+<span class="s2">&quot;&quot;&quot;</span>
+
+<span class="n">diabetes_glucose_check</span> <span class="o">=</span> <span class="n">conn_duck</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">missing_tests_query</span><span class="p">)</span><span class="o">.</span><span class="n">df</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Diabetes patients and their glucose test status:&quot;</span><span class="p">)</span>
+<span class="n">diabetes_glucose_check</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Diabetes patients and their glucose test status:
+</pre></div>
+</div>
+<div class="output text_html"><div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>patient_id</th>
+      <th>diagnosis_code</th>
+      <th>age</th>
+      <th>glucose_status</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>6</td>
+      <td>E11.9</td>
+      <td>41</td>
+      <td>Has glucose test</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>29</td>
+      <td>E11.9</td>
+      <td>68</td>
+      <td>Has glucose test</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>31</td>
+      <td>E11.9</td>
+      <td>81</td>
+      <td>Has glucose test</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>32</td>
+      <td>E11.9</td>
+      <td>20</td>
+      <td>Has glucose test</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>34</td>
+      <td>E11.9</td>
+      <td>24</td>
+      <td>Has glucose test</td>
+    </tr>
+    <tr>
+      <th>5</th>
+      <td>67</td>
+      <td>E11.9</td>
+      <td>79</td>
+      <td>Has glucose test</td>
+    </tr>
+    <tr>
+      <th>6</th>
+      <td>72</td>
+      <td>E11.9</td>
+      <td>77</td>
+      <td>Has glucose test</td>
+    </tr>
+    <tr>
+      <th>7</th>
+      <td>73</td>
+      <td>E11.9</td>
+      <td>58</td>
+      <td>Has glucose test</td>
+    </tr>
+    <tr>
+      <th>8</th>
+      <td>74</td>
+      <td>E11.9</td>
+      <td>46</td>
+      <td>Has glucose test</td>
+    </tr>
+    <tr>
+      <th>9</th>
+      <td>79</td>
+      <td>E11.9</td>
+      <td>26</td>
+      <td>Has glucose test</td>
+    </tr>
+    <tr>
+      <th>10</th>
+      <td>92</td>
+      <td>E11.9</td>
+      <td>89</td>
+      <td>Has glucose test</td>
+    </tr>
+    <tr>
+      <th>11</th>
+      <td>94</td>
+      <td>E11.9</td>
+      <td>51</td>
+      <td>Has glucose test</td>
+    </tr>
+    <tr>
+      <th>12</th>
+      <td>102</td>
+      <td>E11.9</td>
+      <td>82</td>
+      <td>Has glucose test</td>
+    </tr>
+    <tr>
+      <th>13</th>
+      <td>112</td>
+      <td>E11.9</td>
+      <td>68</td>
+      <td>Has glucose test</td>
+    </tr>
+    <tr>
+      <th>14</th>
+      <td>115</td>
+      <td>E11.9</td>
+      <td>21</td>
+      <td>Has glucose test</td>
+    </tr>
+  </tbody>
+</table>
+</div></div></div>
+</div>
+<p>Now let’s perform a three-way join to get a comprehensive view of patients, their lab results, and medications.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Three-way join for comprehensive patient view</span>
+<span class="n">comprehensive_query</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">SELECT </span>
+<span class="s2">    p.patient_id,</span>
+<span class="s2">    p.age,</span>
+<span class="s2">    p.diagnosis_code,</span>
+<span class="s2">    l.test_name,</span>
+<span class="s2">    l.test_value,</span>
+<span class="s2">    m.medication_name,</span>
+<span class="s2">    m.dosage_mg</span>
+<span class="s2">FROM patients p</span>
+<span class="s2">LEFT JOIN lab_results l ON p.patient_id = l.patient_id</span>
+<span class="s2">LEFT JOIN medications m ON p.patient_id = m.patient_id</span>
+<span class="s2">WHERE p.patient_id &lt;= 10</span>
+<span class="s2">ORDER BY p.patient_id, l.test_name, m.medication_name</span>
+<span class="s2">&quot;&quot;&quot;</span>
+
+<span class="n">comprehensive_view</span> <span class="o">=</span> <span class="n">conn_duck</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">comprehensive_query</span><span class="p">)</span><span class="o">.</span><span class="n">df</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Comprehensive patient view (first 10 patients):&quot;</span><span class="p">)</span>
+<span class="n">comprehensive_view</span><span class="o">.</span><span class="n">head</span><span class="p">(</span><span class="mi">20</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Comprehensive patient view (first 10 patients):
+</pre></div>
+</div>
+<div class="output text_html"><div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>patient_id</th>
+      <th>age</th>
+      <th>diagnosis_code</th>
+      <th>test_name</th>
+      <th>test_value</th>
+      <th>medication_name</th>
+      <th>dosage_mg</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>1</td>
+      <td>69</td>
+      <td>E11.9</td>
+      <td>cholesterol</td>
+      <td>165.65</td>
+      <td>lisinopril</td>
+      <td>50</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>1</td>
+      <td>69</td>
+      <td>E11.9</td>
+      <td>cholesterol</td>
+      <td>165.65</td>
+      <td>metformin</td>
+      <td>200</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>1</td>
+      <td>69</td>
+      <td>E11.9</td>
+      <td>cholesterol</td>
+      <td>165.65</td>
+      <td>metoprolol</td>
+      <td>25</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>2</td>
+      <td>32</td>
+      <td>N18.6</td>
+      <td>cholesterol</td>
+      <td>151.03</td>
+      <td>metoprolol</td>
+      <td>25</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>2</td>
+      <td>32</td>
+      <td>N18.6</td>
+      <td>creatinine</td>
+      <td>1.27</td>
+      <td>metoprolol</td>
+      <td>25</td>
+    </tr>
+    <tr>
+      <th>5</th>
+      <td>2</td>
+      <td>32</td>
+      <td>N18.6</td>
+      <td>glucose</td>
+      <td>82.99</td>
+      <td>metoprolol</td>
+      <td>25</td>
+    </tr>
+    <tr>
+      <th>6</th>
+      <td>2</td>
+      <td>32</td>
+      <td>N18.6</td>
+      <td>hemoglobin</td>
+      <td>13.22</td>
+      <td>metoprolol</td>
+      <td>25</td>
+    </tr>
+    <tr>
+      <th>7</th>
+      <td>2</td>
+      <td>32</td>
+      <td>N18.6</td>
+      <td>hemoglobin</td>
+      <td>13.08</td>
+      <td>metoprolol</td>
+      <td>25</td>
+    </tr>
+    <tr>
+      <th>8</th>
+      <td>3</td>
+      <td>89</td>
+      <td>J44.1</td>
+      <td>creatinine</td>
+      <td>1.63</td>
+      <td>None</td>
+      <td>&lt;NA&gt;</td>
+    </tr>
+    <tr>
+      <th>9</th>
+      <td>3</td>
+      <td>89</td>
+      <td>J44.1</td>
+      <td>glucose</td>
+      <td>123.93</td>
+      <td>None</td>
+      <td>&lt;NA&gt;</td>
+    </tr>
+    <tr>
+      <th>10</th>
+      <td>3</td>
+      <td>89</td>
+      <td>J44.1</td>
+      <td>glucose</td>
+      <td>114.40</td>
+      <td>None</td>
+      <td>&lt;NA&gt;</td>
+    </tr>
+    <tr>
+      <th>11</th>
+      <td>4</td>
+      <td>78</td>
+      <td>I25.9</td>
+      <td>creatinine</td>
+      <td>1.02</td>
+      <td>metformin</td>
+      <td>50</td>
+    </tr>
+    <tr>
+      <th>12</th>
+      <td>4</td>
+      <td>78</td>
+      <td>I25.9</td>
+      <td>creatinine</td>
+      <td>1.45</td>
+      <td>metformin</td>
+      <td>50</td>
+    </tr>
+    <tr>
+      <th>13</th>
+      <td>4</td>
+      <td>78</td>
+      <td>I25.9</td>
+      <td>creatinine</td>
+      <td>1.44</td>
+      <td>metformin</td>
+      <td>50</td>
+    </tr>
+    <tr>
+      <th>14</th>
+      <td>4</td>
+      <td>78</td>
+      <td>I25.9</td>
+      <td>creatinine</td>
+      <td>1.39</td>
+      <td>metformin</td>
+      <td>50</td>
+    </tr>
+    <tr>
+      <th>15</th>
+      <td>4</td>
+      <td>78</td>
+      <td>I25.9</td>
+      <td>creatinine</td>
+      <td>1.02</td>
+      <td>metoprolol</td>
+      <td>200</td>
+    </tr>
+    <tr>
+      <th>16</th>
+      <td>4</td>
+      <td>78</td>
+      <td>I25.9</td>
+      <td>creatinine</td>
+      <td>1.45</td>
+      <td>metoprolol</td>
+      <td>200</td>
+    </tr>
+    <tr>
+      <th>17</th>
+      <td>4</td>
+      <td>78</td>
+      <td>I25.9</td>
+      <td>creatinine</td>
+      <td>1.44</td>
+      <td>metoprolol</td>
+      <td>200</td>
+    </tr>
+    <tr>
+      <th>18</th>
+      <td>4</td>
+      <td>78</td>
+      <td>I25.9</td>
+      <td>creatinine</td>
+      <td>1.39</td>
+      <td>metoprolol</td>
+      <td>200</td>
+    </tr>
+    <tr>
+      <th>19</th>
+      <td>5</td>
+      <td>38</td>
+      <td>N18.6</td>
+      <td>cholesterol</td>
+      <td>184.01</td>
+      <td>furosemide</td>
+      <td>100</td>
+    </tr>
+  </tbody>
+</table>
+</div></div></div>
+</div>
+<p>Let’s calculate some clinical metrics using window functions to analyze glucose trends over time for diabetic patients.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Window functions for glucose trend analysis</span>
+<span class="n">glucose_trend_query</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">SELECT </span>
+<span class="s2">    p.patient_id,</span>
+<span class="s2">    p.diagnosis_code,</span>
+<span class="s2">    l.test_value as glucose_level,</span>
+<span class="s2">    l.test_date,</span>
+<span class="s2">    AVG(l.test_value) OVER (PARTITION BY p.patient_id) as avg_glucose,</span>
+<span class="s2">    ROW_NUMBER() OVER (PARTITION BY p.patient_id ORDER BY l.test_date) as test_sequence,</span>
+<span class="s2">    CASE </span>
+<span class="s2">        WHEN l.test_value &gt; 140 THEN &#39;High&#39;</span>
+<span class="s2">        WHEN l.test_value &lt; 70 THEN &#39;Low&#39;</span>
+<span class="s2">        ELSE &#39;Normal&#39;</span>
+<span class="s2">    END as glucose_category</span>
+<span class="s2">FROM patients p</span>
+<span class="s2">INNER JOIN lab_results l ON p.patient_id = l.patient_id</span>
+<span class="s2">WHERE l.test_name = &#39;glucose&#39; AND p.diagnosis_code = &#39;E11.9&#39;</span>
+<span class="s2">ORDER BY p.patient_id, l.test_date</span>
+<span class="s2">LIMIT 20</span>
+<span class="s2">&quot;&quot;&quot;</span>
+
+<span class="n">glucose_trends</span> <span class="o">=</span> <span class="n">conn_duck</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">glucose_trend_query</span><span class="p">)</span><span class="o">.</span><span class="n">df</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Glucose trends for diabetic patients:&quot;</span><span class="p">)</span>
+<span class="n">glucose_trends</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Glucose trends for diabetic patients:
+</pre></div>
+</div>
+<div class="output text_html"><div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>patient_id</th>
+      <th>diagnosis_code</th>
+      <th>glucose_level</th>
+      <th>test_date</th>
+      <th>avg_glucose</th>
+      <th>test_sequence</th>
+      <th>glucose_category</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>6</td>
+      <td>E11.9</td>
+      <td>133.62</td>
+      <td>2023-01-06 06:00:00</td>
+      <td>133.620</td>
+      <td>1</td>
+      <td>Normal</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>29</td>
+      <td>E11.9</td>
+      <td>73.44</td>
+      <td>2023-01-09 00:00:00</td>
+      <td>73.440</td>
+      <td>1</td>
+      <td>Normal</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>31</td>
+      <td>E11.9</td>
+      <td>108.59</td>
+      <td>2023-01-10 12:00:00</td>
+      <td>108.590</td>
+      <td>1</td>
+      <td>Normal</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>32</td>
+      <td>E11.9</td>
+      <td>107.65</td>
+      <td>2023-01-09 18:00:00</td>
+      <td>92.610</td>
+      <td>1</td>
+      <td>Normal</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>32</td>
+      <td>E11.9</td>
+      <td>77.57</td>
+      <td>2023-01-14 18:00:00</td>
+      <td>92.610</td>
+      <td>2</td>
+      <td>Normal</td>
+    </tr>
+    <tr>
+      <th>5</th>
+      <td>34</td>
+      <td>E11.9</td>
+      <td>86.45</td>
+      <td>2023-01-09 06:00:00</td>
+      <td>86.450</td>
+      <td>1</td>
+      <td>Normal</td>
+    </tr>
+    <tr>
+      <th>6</th>
+      <td>67</td>
+      <td>E11.9</td>
+      <td>96.85</td>
+      <td>2023-01-19 12:00:00</td>
+      <td>96.850</td>
+      <td>1</td>
+      <td>Normal</td>
+    </tr>
+    <tr>
+      <th>7</th>
+      <td>72</td>
+      <td>E11.9</td>
+      <td>89.83</td>
+      <td>2023-01-22 18:00:00</td>
+      <td>89.830</td>
+      <td>1</td>
+      <td>Normal</td>
+    </tr>
+    <tr>
+      <th>8</th>
+      <td>73</td>
+      <td>E11.9</td>
+      <td>105.84</td>
+      <td>2023-01-19 00:00:00</td>
+      <td>111.915</td>
+      <td>1</td>
+      <td>Normal</td>
+    </tr>
+    <tr>
+      <th>9</th>
+      <td>73</td>
+      <td>E11.9</td>
+      <td>117.99</td>
+      <td>2023-01-20 00:00:00</td>
+      <td>111.915</td>
+      <td>2</td>
+      <td>Normal</td>
+    </tr>
+    <tr>
+      <th>10</th>
+      <td>74</td>
+      <td>E11.9</td>
+      <td>105.32</td>
+      <td>2023-01-22 06:00:00</td>
+      <td>99.790</td>
+      <td>1</td>
+      <td>Normal</td>
+    </tr>
+    <tr>
+      <th>11</th>
+      <td>74</td>
+      <td>E11.9</td>
+      <td>94.26</td>
+      <td>2023-01-25 06:00:00</td>
+      <td>99.790</td>
+      <td>2</td>
+      <td>Normal</td>
+    </tr>
+    <tr>
+      <th>12</th>
+      <td>79</td>
+      <td>E11.9</td>
+      <td>56.01</td>
+      <td>2023-01-26 12:00:00</td>
+      <td>56.010</td>
+      <td>1</td>
+      <td>Low</td>
+    </tr>
+    <tr>
+      <th>13</th>
+      <td>92</td>
+      <td>E11.9</td>
+      <td>99.49</td>
+      <td>2023-01-28 18:00:00</td>
+      <td>99.490</td>
+      <td>1</td>
+      <td>Normal</td>
+    </tr>
+    <tr>
+      <th>14</th>
+      <td>94</td>
+      <td>E11.9</td>
+      <td>84.45</td>
+      <td>2023-01-24 06:00:00</td>
+      <td>100.970</td>
+      <td>1</td>
+      <td>Normal</td>
+    </tr>
+    <tr>
+      <th>15</th>
+      <td>94</td>
+      <td>E11.9</td>
+      <td>117.49</td>
+      <td>2023-01-25 06:00:00</td>
+      <td>100.970</td>
+      <td>2</td>
+      <td>Normal</td>
+    </tr>
+    <tr>
+      <th>16</th>
+      <td>102</td>
+      <td>E11.9</td>
+      <td>81.48</td>
+      <td>2023-01-27 06:00:00</td>
+      <td>91.755</td>
+      <td>1</td>
+      <td>Normal</td>
+    </tr>
+    <tr>
+      <th>17</th>
+      <td>102</td>
+      <td>E11.9</td>
+      <td>102.03</td>
+      <td>2023-01-31 06:00:00</td>
+      <td>91.755</td>
+      <td>2</td>
+      <td>Normal</td>
+    </tr>
+    <tr>
+      <th>18</th>
+      <td>112</td>
+      <td>E11.9</td>
+      <td>78.22</td>
+      <td>2023-01-29 18:00:00</td>
+      <td>78.220</td>
+      <td>1</td>
+      <td>Normal</td>
+    </tr>
+    <tr>
+      <th>19</th>
+      <td>115</td>
+      <td>E11.9</td>
+      <td>83.62</td>
+      <td>2023-01-31 12:00:00</td>
+      <td>68.055</td>
+      <td>1</td>
+      <td>Normal</td>
+    </tr>
+  </tbody>
+</table>
+</div></div></div>
+</div>
+</section>
+<section id="working-with-sqlite">
+<h2>Working with SQLite<a class="headerlink" href="#working-with-sqlite" title="Link to this heading">#</a></h2>
+<p>Now let’s demonstrate similar operations using SQLite, which is another popular embedded database option.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Create SQLite connection and tables</span>
+<span class="n">conn_sqlite</span> <span class="o">=</span> <span class="n">sqlite3</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="s1">&#39;:memory:&#39;</span><span class="p">)</span>
+
+<span class="c1"># Load DataFrames into SQLite</span>
+<span class="n">patients_df</span><span class="o">.</span><span class="n">to_sql</span><span class="p">(</span><span class="s1">&#39;patients&#39;</span><span class="p">,</span> <span class="n">conn_sqlite</span><span class="p">,</span> <span class="n">if_exists</span><span class="o">=</span><span class="s1">&#39;replace&#39;</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="n">lab_results_df</span><span class="o">.</span><span class="n">to_sql</span><span class="p">(</span><span class="s1">&#39;lab_results&#39;</span><span class="p">,</span> <span class="n">conn_sqlite</span><span class="p">,</span> <span class="n">if_exists</span><span class="o">=</span><span class="s1">&#39;replace&#39;</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="n">medications_df</span><span class="o">.</span><span class="n">to_sql</span><span class="p">(</span><span class="s1">&#39;medications&#39;</span><span class="p">,</span> <span class="n">conn_sqlite</span><span class="p">,</span> <span class="n">if_exists</span><span class="o">=</span><span class="s1">&#39;replace&#39;</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Data loaded into SQLite&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;SQLite version: </span><span class="si">{</span><span class="n">sqlite3</span><span class="o">.</span><span class="n">sqlite_version</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Data loaded into SQLite
+SQLite version: 3.45.1
+</pre></div>
+</div>
+</div>
+</div>
+<p>Let’s perform a similar join operation in SQLite to identify medication patterns by diagnosis.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Medication patterns by diagnosis in SQLite</span>
+<span class="n">med_pattern_query</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">SELECT </span>
+<span class="s2">    p.diagnosis_code,</span>
+<span class="s2">    m.medication_name,</span>
+<span class="s2">    COUNT(*) as prescription_count,</span>
+<span class="s2">    ROUND(AVG(m.dosage_mg), 1) as avg_dosage</span>
+<span class="s2">FROM patients p</span>
+<span class="s2">INNER JOIN medications m ON p.patient_id = m.patient_id</span>
+<span class="s2">GROUP BY p.diagnosis_code, m.medication_name</span>
+<span class="s2">HAVING COUNT(*) &gt;= 5</span>
+<span class="s2">ORDER BY p.diagnosis_code, prescription_count DESC</span>
+<span class="s2">&quot;&quot;&quot;</span>
+
+<span class="n">med_patterns</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_sql_query</span><span class="p">(</span><span class="n">med_pattern_query</span><span class="p">,</span> <span class="n">conn_sqlite</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Medication patterns by diagnosis (SQLite):&quot;</span><span class="p">)</span>
+<span class="n">med_patterns</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Medication patterns by diagnosis (SQLite):
+</pre></div>
+</div>
+<div class="output text_html"><div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>diagnosis_code</th>
+      <th>medication_name</th>
+      <th>prescription_count</th>
+      <th>avg_dosage</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>E11.9</td>
+      <td>metformin</td>
+      <td>85</td>
+      <td>88.2</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>E11.9</td>
+      <td>atorvastatin</td>
+      <td>78</td>
+      <td>102.9</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>E11.9</td>
+      <td>furosemide</td>
+      <td>77</td>
+      <td>99.0</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>E11.9</td>
+      <td>metoprolol</td>
+      <td>76</td>
+      <td>93.4</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>E11.9</td>
+      <td>lisinopril</td>
+      <td>75</td>
+      <td>103.7</td>
+    </tr>
+    <tr>
+      <th>5</th>
+      <td>I25.9</td>
+      <td>metformin</td>
+      <td>83</td>
+      <td>94.9</td>
+    </tr>
+    <tr>
+      <th>6</th>
+      <td>I25.9</td>
+      <td>atorvastatin</td>
+      <td>81</td>
+      <td>92.0</td>
+    </tr>
+    <tr>
+      <th>7</th>
+      <td>I25.9</td>
+      <td>metoprolol</td>
+      <td>78</td>
+      <td>105.8</td>
+    </tr>
+    <tr>
+      <th>8</th>
+      <td>I25.9</td>
+      <td>furosemide</td>
+      <td>77</td>
+      <td>85.7</td>
+    </tr>
+    <tr>
+      <th>9</th>
+      <td>I25.9</td>
+      <td>lisinopril</td>
+      <td>75</td>
+      <td>96.3</td>
+    </tr>
+    <tr>
+      <th>10</th>
+      <td>J44.1</td>
+      <td>metoprolol</td>
+      <td>70</td>
+      <td>102.9</td>
+    </tr>
+    <tr>
+      <th>11</th>
+      <td>J44.1</td>
+      <td>furosemide</td>
+      <td>65</td>
+      <td>83.8</td>
+    </tr>
+    <tr>
+      <th>12</th>
+      <td>J44.1</td>
+      <td>lisinopril</td>
+      <td>62</td>
+      <td>98.0</td>
+    </tr>
+    <tr>
+      <th>13</th>
+      <td>J44.1</td>
+      <td>atorvastatin</td>
+      <td>62</td>
+      <td>99.6</td>
+    </tr>
+    <tr>
+      <th>14</th>
+      <td>J44.1</td>
+      <td>metformin</td>
+      <td>61</td>
+      <td>94.7</td>
+    </tr>
+    <tr>
+      <th>15</th>
+      <td>N18.6</td>
+      <td>metformin</td>
+      <td>85</td>
+      <td>87.1</td>
+    </tr>
+    <tr>
+      <th>16</th>
+      <td>N18.6</td>
+      <td>atorvastatin</td>
+      <td>84</td>
+      <td>95.2</td>
+    </tr>
+    <tr>
+      <th>17</th>
+      <td>N18.6</td>
+      <td>lisinopril</td>
+      <td>82</td>
+      <td>98.8</td>
+    </tr>
+    <tr>
+      <th>18</th>
+      <td>N18.6</td>
+      <td>furosemide</td>
+      <td>82</td>
+      <td>88.4</td>
+    </tr>
+    <tr>
+      <th>19</th>
+      <td>N18.6</td>
+      <td>metoprolol</td>
+      <td>76</td>
+      <td>99.7</td>
+    </tr>
+  </tbody>
+</table>
+</div></div></div>
+</div>
+<p>Let’s create a summary report using SQLite that combines multiple metrics for clinical dashboard purposes.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Clinical summary report using SQLite</span>
+<span class="n">summary_query</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">SELECT </span>
+<span class="s2">    p.diagnosis_code,</span>
+<span class="s2">    COUNT(DISTINCT p.patient_id) as total_patients,</span>
+<span class="s2">    ROUND(AVG(p.age), 1) as avg_age,</span>
+<span class="s2">    COUNT(DISTINCT l.patient_id) as patients_with_labs,</span>
+<span class="s2">    COUNT(DISTINCT m.patient_id) as patients_with_meds,</span>
+<span class="s2">    ROUND(</span>
+<span class="s2">        100.0 * COUNT(DISTINCT l.patient_id) / COUNT(DISTINCT p.patient_id), 1</span>
+<span class="s2">    ) as lab_coverage_pct</span>
+<span class="s2">FROM patients p</span>
+<span class="s2">LEFT JOIN lab_results l ON p.patient_id = l.patient_id</span>
+<span class="s2">LEFT JOIN medications m ON p.patient_id = m.patient_id</span>
+<span class="s2">GROUP BY p.diagnosis_code</span>
+<span class="s2">ORDER BY total_patients DESC</span>
+<span class="s2">&quot;&quot;&quot;</span>
+
+<span class="n">clinical_summary</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_sql_query</span><span class="p">(</span><span class="n">summary_query</span><span class="p">,</span> <span class="n">conn_sqlite</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Clinical Summary Report:&quot;</span><span class="p">)</span>
+<span class="n">clinical_summary</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Clinical Summary Report:
+</pre></div>
+</div>
+<div class="output text_html"><div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>diagnosis_code</th>
+      <th>total_patients</th>
+      <th>avg_age</th>
+      <th>patients_with_labs</th>
+      <th>patients_with_meds</th>
+      <th>lab_coverage_pct</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>I25.9</td>
+      <td>264</td>
+      <td>50.9</td>
+      <td>264</td>
+      <td>200</td>
+      <td>100.0</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>N18.6</td>
+      <td>255</td>
+      <td>56.2</td>
+      <td>255</td>
+      <td>194</td>
+      <td>100.0</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>E11.9</td>
+      <td>255</td>
+      <td>49.7</td>
+      <td>255</td>
+      <td>195</td>
+      <td>100.0</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>J44.1</td>
+      <td>226</td>
+      <td>55.0</td>
+      <td>226</td>
+      <td>153</td>
+      <td>100.0</td>
+    </tr>
+  </tbody>
+</table>
+</div></div></div>
+</div>
+</section>
+<section id="visualization-of-query-results">
+<h2>Visualization of Query Results<a class="headerlink" href="#visualization-of-query-results" title="Link to this heading">#</a></h2>
+<p>Let’s create some visualizations based on our SQL query results to demonstrate how database analytics integrate with data visualization.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Create visualizations</span>
+<span class="n">fig</span><span class="p">,</span> <span class="p">((</span><span class="n">ax1</span><span class="p">,</span> <span class="n">ax2</span><span class="p">),</span> <span class="p">(</span><span class="n">ax3</span><span class="p">,</span> <span class="n">ax4</span><span class="p">))</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">15</span><span class="p">,</span> <span class="mi">10</span><span class="p">))</span>
+
+<span class="c1"># 1. Patient count by diagnosis</span>
+<span class="n">ax1</span><span class="o">.</span><span class="n">bar</span><span class="p">(</span><span class="n">clinical_summary</span><span class="p">[</span><span class="s1">&#39;diagnosis_code&#39;</span><span class="p">],</span> <span class="n">clinical_summary</span><span class="p">[</span><span class="s1">&#39;total_patients&#39;</span><span class="p">])</span>
+<span class="n">ax1</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s1">&#39;Patient Count by Diagnosis&#39;</span><span class="p">)</span>
+<span class="n">ax1</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s1">&#39;Diagnosis Code&#39;</span><span class="p">)</span>
+<span class="n">ax1</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s1">&#39;Number of Patients&#39;</span><span class="p">)</span>
+<span class="n">ax1</span><span class="o">.</span><span class="n">tick_params</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="n">rotation</span><span class="o">=</span><span class="mi">45</span><span class="p">)</span>
+
+<span class="c1"># 2. Lab coverage by diagnosis</span>
+<span class="n">ax2</span><span class="o">.</span><span class="n">bar</span><span class="p">(</span><span class="n">clinical_summary</span><span class="p">[</span><span class="s1">&#39;diagnosis_code&#39;</span><span class="p">],</span> <span class="n">clinical_summary</span><span class="p">[</span><span class="s1">&#39;lab_coverage_pct&#39;</span><span class="p">],</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;green&#39;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.7</span><span class="p">)</span>
+<span class="n">ax2</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s1">&#39;Lab Test Coverage by Diagnosis&#39;</span><span class="p">)</span>
+<span class="n">ax2</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s1">&#39;Diagnosis Code&#39;</span><span class="p">)</span>
+<span class="n">ax2</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s1">&#39;Coverage Percentage&#39;</span><span class="p">)</span>
+<span class="n">ax2</span><span class="o">.</span><span class="n">tick_params</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="n">rotation</span><span class="o">=</span><span class="mi">45</span><span class="p">)</span>
+
+<span class="c1"># 3. Age distribution by gender</span>
+<span class="n">gender_age</span> <span class="o">=</span> <span class="n">conn_duck</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">SELECT gender, age FROM patients</span>
+<span class="s2">&quot;&quot;&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">df</span><span class="p">()</span>
+
+<span class="k">for</span> <span class="n">gender</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;M&#39;</span><span class="p">,</span> <span class="s1">&#39;F&#39;</span><span class="p">]:</span>
+    <span class="n">ages</span> <span class="o">=</span> <span class="n">gender_age</span><span class="p">[</span><span class="n">gender_age</span><span class="p">[</span><span class="s1">&#39;gender&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="n">gender</span><span class="p">][</span><span class="s1">&#39;age&#39;</span><span class="p">]</span>
+    <span class="n">ax3</span><span class="o">.</span><span class="n">hist</span><span class="p">(</span><span class="n">ages</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.6</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;Gender </span><span class="si">{</span><span class="n">gender</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">bins</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
+<span class="n">ax3</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s1">&#39;Age Distribution by Gender&#39;</span><span class="p">)</span>
+<span class="n">ax3</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s1">&#39;Age&#39;</span><span class="p">)</span>
+<span class="n">ax3</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s1">&#39;Frequency&#39;</span><span class="p">)</span>
+<span class="n">ax3</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+
+<span class="c1"># 4. Glucose levels distribution</span>
+<span class="n">glucose_data</span> <span class="o">=</span> <span class="n">conn_duck</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">SELECT test_value FROM lab_results WHERE test_name = &#39;glucose&#39;</span>
+<span class="s2">&quot;&quot;&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">df</span><span class="p">()</span>
+
+<span class="n">ax4</span><span class="o">.</span><span class="n">hist</span><span class="p">(</span><span class="n">glucose_data</span><span class="p">[</span><span class="s1">&#39;test_value&#39;</span><span class="p">],</span> <span class="n">bins</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.7</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;orange&#39;</span><span class="p">)</span>
+<span class="n">ax4</span><span class="o">.</span><span class="n">axvline</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;red&#39;</span><span class="p">,</span> <span class="n">linestyle</span><span class="o">=</span><span class="s1">&#39;--&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;Normal level&#39;</span><span class="p">)</span>
+<span class="n">ax4</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s1">&#39;Glucose Levels Distribution&#39;</span><span class="p">)</span>
+<span class="n">ax4</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s1">&#39;Glucose Level (mg/dL)&#39;</span><span class="p">)</span>
+<span class="n">ax4</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s1">&#39;Frequency&#39;</span><span class="p">)</span>
+<span class="n">ax4</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="_images/589769b3925631ae28bbe9f4f60ccdabe2509a4a27ee9789f65e0c6cce1aa389.png" src="_images/589769b3925631ae28bbe9f4f60ccdabe2509a4a27ee9789f65e0c6cce1aa389.png" />
+</div>
+</div>
+<p>Finally, let’s clean up our database connections to free up resources.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Close database connections</span>
+<span class="n">conn_duck</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+<span class="n">conn_sqlite</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Database connections closed successfully&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Database connections closed successfully
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="key-takeaways">
+<h2>Key Takeaways<a class="headerlink" href="#key-takeaways" title="Link to this heading">#</a></h2>
+<ol class="arabic simple">
+<li><p><strong>DuckDB</strong> excels at analytical queries and works seamlessly with pandas DataFrames</p></li>
+<li><p><strong>SQLite</strong> is excellent for persistent storage and standard SQL operations</p></li>
+<li><p><strong>Joins</strong> are essential for integrating medical data from multiple sources</p></li>
+<li><p><strong>Window functions</strong> help analyze trends and patterns in clinical data</p></li>
+<li><p><strong>Left joins</strong> are crucial for identifying missing data or gaps in care</p></li>
+<li><p>SQL results can be easily visualized using standard Python plotting libraries</p></li>
+</ol>
+</section>
+<section id="exercise">
+<h2>Exercise<a class="headerlink" href="#exercise" title="Link to this heading">#</a></h2>
+<p><strong>Clinical Data Integration Challenge</strong></p>
+<p>Using the techniques learned in this notebook, complete the following tasks:</p>
+<ol class="arabic simple">
+<li><p><strong>Create a new dataset</strong> for “vital signs” with patient_id, measurement_type (blood_pressure, heart_rate, temperature), measurement_value, and measurement_date</p></li>
+<li><p><strong>Write SQL queries</strong> to:</p>
+<ul class="simple">
+<li><p>Find patients who have both high glucose levels (&gt;140) AND are taking metformin</p></li>
+<li><p>Identify patients with heart disease diagnosis (I25.9) who are missing cholesterol tests</p></li>
+<li><p>Calculate the average number of different medication types per diagnosis</p></li>
+</ul>
+</li>
+<li><p><strong>Perform a four-way join</strong> between patients, lab_results, medications, and your new vital_signs table to create a comprehensive patient health summary</p></li>
+<li><p><strong>Create visualizations</strong> showing:</p>
+<ul class="simple">
+<li><p>The relationship between age and number of medications</p></li>
+<li><p>Distribution of lab test completion rates by diagnosis</p></li>
+</ul>
+</li>
+<li><p><strong>Compare performance</strong> between DuckDB and SQLite for your most complex query and discuss which would be better for different use cases in medical data integration</p></li>
+</ol>
+<p>Document your findings and explain how these SQL techniques would be valuable in real-world medical data integration scenarios.</p>
+</section>
+</section>
+
+    <script type="text/x-thebe-config">
+    {
+        requestKernel: true,
+        binderOptions: {
+            repo: "binder-examples/jupyter-stacks-datascience",
+            ref: "master",
+        },
+        codeMirrorConfig: {
+            theme: "abcdef",
+            mode: "python"
+        },
+        kernelOptions: {
+            name: "python3",
+            path: "./."
+        },
+        predefinedOutput: true
+    }
+    </script>
+    <script>kernelName = 'python3'</script>
+
+                </article>
+              
+
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+  <div class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> Contents
+  </div>
+  <nav class="bd-toc-nav page-toc">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#working-with-duckdb">Working with DuckDB</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#working-with-sqlite">Working with SQLite</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#visualization-of-query-results">Visualization of Query Results</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#key-takeaways">Key Takeaways</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#exercise">Exercise</a></li>
+</ul>
+  </nav></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+<p class="component-author">
+By AI Generated Content
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+
+  </div>
+  
+  <div class="footer-item">
+    <p class="last-updated">
+  Last updated on Sep 13, 2025.
+  <br/>
+</p>
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+</div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b"></script>
+<script src="_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+  <footer class="bd-footer">
+  </footer>
+  </body>
+</html>
