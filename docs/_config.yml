@@ -1,4 +1,3 @@
-```yaml
 # Book settings
 title: Foundations of Medical Data Integration
 author: AI Generated Content
@@ -50,4 +49,3 @@ sphinx:
   config:
     html_show_copyright: false
     html_last_updated_fmt: "%b %d, %Y"
-```
