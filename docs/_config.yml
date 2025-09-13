@@ -1,7 +1,7 @@
 # Book settings
 title: Foundations of Medical Data Integration
 author: AI Generated Content
-logo: ../icon.png
+logo: logo.png
 copyright: "2025"
 
 # Force re-execution of notebooks on each build
